@@ -8,7 +8,7 @@ use typst_as_lib::TypstEngine;
 use typst_as_lib::typst_kit_options::TypstKitFontOptions;
 use uuid::Uuid;
 
-use crate::db::RiggingStore;
+use crate::store::RiggingStore;
 use crate::domain::{MatAnalysis, Pick, Project, SavedMat, SavedSpreader, SlingLayer};
 use crate::format::{format_lbs, format_num};
 use crate::layers::calculate_pick;

@@ -2,7 +2,7 @@
 //!
 //! Formatters live in `bth_rigging::format`. Must not be imported by the lib.
 
-use bth_rigging::db::RiggingStore;
+use bth_rigging::store::RiggingStore;
 
 #[derive(Clone)]
 pub struct AppCtx {

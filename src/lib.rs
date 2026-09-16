@@ -4,10 +4,10 @@
 //! Roadmap: Step 0 foundation; Steps 1–7 land under `rig`, `crane`, and `checks`.
 
 pub mod catalog;
-pub mod db;
 pub mod domain;
 pub mod format;
 pub mod hardware;
 pub mod layers;
 pub mod mats;
 pub mod print;
+pub mod store;

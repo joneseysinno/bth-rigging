@@ -8,7 +8,7 @@ use dioxus::prelude::*;
 use uuid::Uuid;
 
 use app_state::AppCtx;
-use bth_rigging::db::RiggingStore;
+use bth_rigging::store::RiggingStore;
 use pages::{Home, MatEditor, PickEditor, ProjectPage};
 
 const TAILWIND: Asset = asset!("/assets/tailwind.css");
