@@ -1,25 +1,14 @@
 #![allow(non_snake_case)]
 
 mod app_state;
-mod calc;
-mod catalog;
-mod db;
 mod diagram;
-mod geometry;
-mod hardware;
-mod mat_calc;
-mod models;
 mod pages;
-mod print;
-
-#[cfg(test)]
-mod golden_tests;
 
 use dioxus::prelude::*;
 use uuid::Uuid;
 
 use app_state::AppCtx;
-use db::RiggingStore;
+use bth_rigging::db::RiggingStore;
 use pages::{Home, MatEditor, PickEditor, ProjectPage};
 
 const TAILWIND: Asset = asset!("/assets/tailwind.css");

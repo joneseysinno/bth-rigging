@@ -4,9 +4,10 @@ use dioxus::prelude::*;
 use uuid::Uuid;
 
 use crate::Route;
-use crate::app_state::{AppCtx, format_lbs};
-use crate::models::{MatAnalysis, Pick, Project};
-use crate::print::{calc_package_filename, render_project_calc_package};
+use crate::app_state::AppCtx;
+use bth_rigging::format::format_lbs;
+use bth_rigging::models::{MatAnalysis, Pick, Project};
+use bth_rigging::print::{calc_package_filename, render_project_calc_package};
 
 #[component]
 pub fn ProjectPage(id: Uuid) -> Element {

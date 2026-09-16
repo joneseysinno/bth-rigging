@@ -1,9 +1,6 @@
 //! Golden snapshots for stored-layer JSON and calc-package DTOs.
 //!
 //! Run with `UPDATE_GOLDEN=1` to regenerate fixtures after an intentional change.
-//!
-//! Included as a unit-test module from `main.rs` until the lib+bin split (0.3);
-//! then this file becomes a standalone integration test under `tests/`.
 
 use std::fs;
 use std::path::PathBuf;
@@ -11,8 +8,10 @@ use std::path::PathBuf;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::models::{Hitch, MatAnalysis, Pick, Project, SavedMat, SavedSpreader, SlingLayer};
-use crate::print::{CalcPackage, assemble_calc_package};
+use bth_rigging::models::{
+    Hitch, MatAnalysis, Pick, Project, SavedMat, SavedSpreader, SlingLayer,
+};
+use bth_rigging::print::{CalcPackage, assemble_calc_package};
 
 fn fixtures_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures")

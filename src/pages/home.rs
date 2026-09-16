@@ -3,8 +3,9 @@
 use dioxus::prelude::*;
 
 use crate::Route;
-use crate::app_state::{AppCtx, format_updated};
-use crate::models::Project;
+use crate::app_state::AppCtx;
+use bth_rigging::format::format_updated;
+use bth_rigging::models::Project;
 
 #[component]
 pub fn Home() -> Element {
