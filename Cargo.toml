@@ -1,7 +1,8 @@
 [package]
 name = "bth-rigging"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
+rust-version = "1.85"
 description = "Round-sling tension calculator for pick planning (WSTDA-RS-1)"
 
 [dependencies]
