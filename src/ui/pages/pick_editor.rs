@@ -8,7 +8,7 @@ use crate::ui::components::{DiagramLayer, RiggingDiagram};
 use bth_rigging::catalog::{POLYESTER_ROUNDSLINGS, SHACKLES};
 use bth_rigging::domain::{Hitch, Pick, Project, SavedSpreader, SlingLayer};
 use bth_rigging::format::{format_lbs, format_num};
-use bth_rigging::layers::{calculate_pick, resolve_geometry, LayerGeometry};
+use bth_rigging::layers::{LayerGeometry, calculate_pick, resolve_geometry};
 
 #[derive(Clone, PartialEq)]
 struct LayerDraft {

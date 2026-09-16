@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use crate::catalog::{POLYESTER_ROUNDSLINGS, RoundSlingRating, SHACKLES};
 use crate::domain::Project;
 
-use super::spaces::{UNASSIGNED_NAME, SPACE_CATALOG, SPACE_HARDWARE};
+use super::spaces::{SPACE_CATALOG, SPACE_HARDWARE, UNASSIGNED_NAME};
 use super::{DbError, RiggingStore};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

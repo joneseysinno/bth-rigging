@@ -9,7 +9,7 @@ use uuid::Uuid;
 
 use crate::store::RiggingStore;
 
-use super::calc_package::{assemble_from_store, CalcPackage, PrintError};
+use super::calc_package::{CalcPackage, PrintError, assemble_from_store};
 
 const TEMPLATE: &str = include_str!("../../assets/calc-package.typ");
 

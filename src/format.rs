@@ -24,11 +24,7 @@ pub fn format_lbs(v: f64) -> String {
         out.push(ch);
     }
     let digits: String = out.chars().rev().collect();
-    if n < 0 {
-        format!("-{digits}")
-    } else {
-        digits
-    }
+    if n < 0 { format!("-{digits}") } else { digits }
 }
 
 pub fn format_updated(ms: u64) -> String {

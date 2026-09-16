@@ -8,9 +8,9 @@ mod keys;
 mod mat_analyses;
 mod picks;
 mod projects;
+pub mod rig;
 mod seed;
 mod spaces;
-pub mod rig;
 
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
@@ -178,4 +178,3 @@ mod tests {
         let _ = std::fs::remove_dir_all(&dir);
     }
 }
-

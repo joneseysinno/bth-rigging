@@ -4,4 +4,4 @@
 
 pub mod bearing;
 
-pub use bearing::{calculate_mat_bearing, MatBearingInput, MatBearingResult};
+pub use bearing::{MatBearingInput, MatBearingResult, calculate_mat_bearing};

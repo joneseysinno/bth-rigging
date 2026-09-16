@@ -7,7 +7,7 @@ use dioxus::prelude::*;
 use bth_rigging::catalog::find_by_size;
 use bth_rigging::domain::SlingLayer;
 use bth_rigging::format::format_lbs;
-use bth_rigging::layers::{split_slings, LayerGeometry};
+use bth_rigging::layers::{LayerGeometry, split_slings};
 
 /// Approximate CSS stroke color for a WSTDA cover color name.
 fn sling_stroke_color(wstda_color: &str) -> &'static str {
@@ -451,4 +451,3 @@ pub fn RiggingDiagram(
         }
     }
 }
-

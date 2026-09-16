@@ -10,5 +10,5 @@ pub mod spreader;
 
 pub use mat::{MatAnalysis, SavedMat};
 pub use pick::{Hitch, Pick, SlingLayer};
-pub use project::{now_millis, Project};
+pub use project::{Project, now_millis};
 pub use spreader::SavedSpreader;

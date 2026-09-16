@@ -8,11 +8,11 @@ pub mod geometry;
 pub mod split;
 
 pub use calc::{
-    apex_shackle_count, calculate_layer, calculate_pick, layer_rigging_weight, leg_count,
-    tension_factor, HardwareCheck, LayerTension, PickResult, RiggingWeight, SpreaderInfo,
+    HardwareCheck, LayerTension, PickResult, RiggingWeight, SpreaderInfo, apex_shackle_count,
+    calculate_layer, calculate_pick, layer_rigging_weight, leg_count, tension_factor,
 };
 pub use geometry::{
-    endpoints_below_count, governing_angle, layer_spreader_span, resolve_geometry,
-    rigging_height_ft, LayerGeometry, PlanPoint, SpacingSource, UNEQUAL_DROP_TOL_IN,
+    LayerGeometry, PlanPoint, SpacingSource, UNEQUAL_DROP_TOL_IN, endpoints_below_count,
+    governing_angle, layer_spreader_span, resolve_geometry, rigging_height_ft,
 };
 pub use split::split_slings;
