@@ -15,8 +15,7 @@ use serde::{Deserialize, Serialize};
 use thiserror::Error;
 use uuid::Uuid;
 
-use crate::catalog::{POLYESTER_ROUNDSLINGS, RoundSlingRating};
-use crate::hardware::SHACKLES;
+use crate::catalog::{POLYESTER_ROUNDSLINGS, RoundSlingRating, SHACKLES};
 use crate::domain::{MatAnalysis, Pick, Project, SavedMat, SavedSpreader, SlingLayer};
 
 const KIND_USER_SPREADER: &str = "user_spreader";

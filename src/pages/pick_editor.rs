@@ -10,7 +10,7 @@ use bth_rigging::calc::calculate_pick;
 use bth_rigging::catalog::POLYESTER_ROUNDSLINGS;
 use bth_rigging::format::{format_lbs, format_num};
 use bth_rigging::geometry::{LayerGeometry, resolve_geometry};
-use bth_rigging::hardware::SHACKLES;
+use bth_rigging::catalog::SHACKLES;
 use bth_rigging::domain::{Hitch, Pick, Project, SavedSpreader, SlingLayer};
 
 #[derive(Clone, PartialEq)]

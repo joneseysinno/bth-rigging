@@ -11,7 +11,7 @@ use crate::catalog::{RoundSlingRating, find_by_size};
 use crate::geometry::{
     LayerGeometry, endpoints_below_count, governing_angle, resolve_geometry, rigging_height_ft,
 };
-use crate::hardware::find_shackle;
+use crate::catalog::find_shackle;
 use crate::domain::{Hitch, SavedSpreader, SlingLayer};
 
 /// Pass/fail check for one hardware component.
