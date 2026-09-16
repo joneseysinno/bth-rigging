@@ -8,7 +8,7 @@ use std::path::PathBuf;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use bth_rigging::models::{
+use bth_rigging::domain::{
     Hitch, MatAnalysis, Pick, Project, SavedMat, SavedSpreader, SlingLayer,
 };
 use bth_rigging::print::{CalcPackage, assemble_calc_package};

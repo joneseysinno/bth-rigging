@@ -12,7 +12,7 @@ use crate::geometry::{
     LayerGeometry, endpoints_below_count, governing_angle, resolve_geometry, rigging_height_ft,
 };
 use crate::hardware::find_shackle;
-use crate::models::{Hitch, SavedSpreader, SlingLayer};
+use crate::domain::{Hitch, SavedSpreader, SlingLayer};
 
 /// Pass/fail check for one hardware component.
 #[derive(Debug, Clone)]

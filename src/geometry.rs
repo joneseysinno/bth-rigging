@@ -21,7 +21,7 @@ use std::collections::HashMap;
 use uuid::Uuid;
 
 use crate::hardware::split_slings;
-use crate::models::{SavedSpreader, SlingLayer};
+use crate::domain::{SavedSpreader, SlingLayer};
 
 /// Leg drops on one layer that differ by more than this (in) are flagged.
 pub const UNEQUAL_DROP_TOL_IN: f64 = 1.0;
@@ -350,7 +350,7 @@ pub fn rigging_height_ft(geoms: &[LayerGeometry]) -> Option<f64> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::models::Hitch;
+    use crate::domain::Hitch;
 
     fn layer(count: u32, length: f64) -> SlingLayer {
         SlingLayer {

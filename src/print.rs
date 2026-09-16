@@ -12,7 +12,7 @@ use crate::calc::calculate_pick;
 use crate::db::RiggingStore;
 use crate::format::{format_lbs, format_num};
 use crate::mat_calc::{MatBearingInput, calculate_mat_bearing};
-use crate::models::{MatAnalysis, Pick, Project, SavedMat, SavedSpreader, SlingLayer};
+use crate::domain::{MatAnalysis, Pick, Project, SavedMat, SavedSpreader, SlingLayer};
 
 const TEMPLATE: &str = include_str!("../assets/calc-package.typ");
 
@@ -532,7 +532,7 @@ fn assemble_mat_sheet(analysis: &MatAnalysis, mat: Option<&SavedMat>) -> MatShee
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::models::{Hitch, MatAnalysis, Pick, Project, SavedMat, SlingLayer};
+    use crate::domain::{Hitch, MatAnalysis, Pick, Project, SavedMat, SlingLayer};
 
     fn sample_layer(pick_id: Uuid, index: u32) -> SlingLayer {
         SlingLayer {

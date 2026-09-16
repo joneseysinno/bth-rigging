@@ -4,7 +4,7 @@
 //! “Effective Bearing Length of Crane Mats” (2010).
 //! Full bending/shear MST quadratics are out of scope for this slice.
 
-use crate::models::SavedMat;
+use crate::domain::SavedMat;
 
 /// Result of a Duerr soil-based effective-length check.
 #[derive(Debug, Clone)]

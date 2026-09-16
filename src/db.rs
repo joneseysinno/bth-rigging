@@ -17,7 +17,7 @@ use uuid::Uuid;
 
 use crate::catalog::{POLYESTER_ROUNDSLINGS, RoundSlingRating};
 use crate::hardware::SHACKLES;
-use crate::models::{MatAnalysis, Pick, Project, SavedMat, SavedSpreader, SlingLayer};
+use crate::domain::{MatAnalysis, Pick, Project, SavedMat, SavedSpreader, SlingLayer};
 
 const KIND_USER_SPREADER: &str = "user_spreader";
 const KIND_USER_MAT: &str = "user_mat";
@@ -581,7 +581,7 @@ fn mat_analysis_point(id: Uuid) -> DimensionVector {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::models::Hitch;
+    use crate::domain::Hitch;
     use std::time::{SystemTime, UNIX_EPOCH};
 
     #[test]

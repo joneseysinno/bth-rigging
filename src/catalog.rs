@@ -5,7 +5,7 @@
 
 use serde::Serialize;
 
-use crate::models::Hitch;
+use crate::domain::Hitch;
 
 /// One catalog entry for a polyester roundsling size.
 #[derive(Debug, Clone, PartialEq, Serialize)]

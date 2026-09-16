@@ -11,7 +11,7 @@ use bth_rigging::catalog::POLYESTER_ROUNDSLINGS;
 use bth_rigging::format::{format_lbs, format_num};
 use bth_rigging::geometry::{LayerGeometry, resolve_geometry};
 use bth_rigging::hardware::SHACKLES;
-use bth_rigging::models::{Hitch, Pick, Project, SavedSpreader, SlingLayer};
+use bth_rigging::domain::{Hitch, Pick, Project, SavedSpreader, SlingLayer};
 
 #[derive(Clone, PartialEq)]
 struct LayerDraft {

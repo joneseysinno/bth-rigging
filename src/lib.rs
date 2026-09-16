@@ -10,5 +10,5 @@ pub mod format;
 pub mod geometry;
 pub mod hardware;
 pub mod mat_calc;
-pub mod models;
+pub mod domain;
 pub mod print;

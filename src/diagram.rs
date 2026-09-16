@@ -6,7 +6,7 @@ use bth_rigging::catalog::find_by_size;
 use bth_rigging::format::format_lbs;
 use bth_rigging::geometry::LayerGeometry;
 use bth_rigging::hardware::{sling_stroke_color, split_slings};
-use bth_rigging::models::SlingLayer;
+use bth_rigging::domain::SlingLayer;
 
 /// Layer data needed to draw the schematic.
 #[derive(Clone, PartialEq)]
