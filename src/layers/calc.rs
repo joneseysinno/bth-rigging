@@ -7,12 +7,11 @@ use std::collections::HashMap;
 
 use uuid::Uuid;
 
-use crate::catalog::{RoundSlingRating, find_by_size};
-use crate::geometry::{
+use crate::catalog::{RoundSlingRating, find_by_size, find_shackle};
+use crate::domain::{Hitch, SavedSpreader, SlingLayer};
+use crate::layers::geometry::{
     LayerGeometry, endpoints_below_count, governing_angle, resolve_geometry, rigging_height_ft,
 };
-use crate::catalog::find_shackle;
-use crate::domain::{Hitch, SavedSpreader, SlingLayer};
 
 /// Pass/fail check for one hardware component.
 #[derive(Debug, Clone)]

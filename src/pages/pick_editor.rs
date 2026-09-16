@@ -6,12 +6,10 @@ use uuid::Uuid;
 use crate::Route;
 use crate::app_state::AppCtx;
 use crate::diagram::{DiagramLayer, RiggingDiagram};
-use bth_rigging::calc::calculate_pick;
-use bth_rigging::catalog::POLYESTER_ROUNDSLINGS;
-use bth_rigging::format::{format_lbs, format_num};
-use bth_rigging::geometry::{LayerGeometry, resolve_geometry};
-use bth_rigging::catalog::SHACKLES;
+use bth_rigging::catalog::{POLYESTER_ROUNDSLINGS, SHACKLES};
 use bth_rigging::domain::{Hitch, Pick, Project, SavedSpreader, SlingLayer};
+use bth_rigging::format::{format_lbs, format_num};
+use bth_rigging::layers::{calculate_pick, resolve_geometry, LayerGeometry};
 
 #[derive(Clone, PartialEq)]
 struct LayerDraft {

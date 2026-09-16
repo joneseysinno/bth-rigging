@@ -20,8 +20,8 @@ use std::collections::HashMap;
 
 use uuid::Uuid;
 
-use crate::hardware::split_slings;
 use crate::domain::{SavedSpreader, SlingLayer};
+use crate::layers::split::split_slings;
 
 /// Leg drops on one layer that differ by more than this (in) are flagged.
 pub const UNEQUAL_DROP_TOL_IN: f64 = 1.0;
