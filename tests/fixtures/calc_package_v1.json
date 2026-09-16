@@ -1,0 +1,237 @@
+{
+  "project": "Golden Project",
+  "printed_at": "",
+  "picks": [
+    {
+      "name": "Single manual",
+      "payload": "10,000 lb",
+      "rigging_weight": "20 lb",
+      "rigging_height": null,
+      "hook_load": "10,020 lb",
+      "warn": null,
+      "rows": [
+        {
+          "layer": "L1",
+          "config": "RS-5 · Vertical · 60° · 2 sling(s) × 10 ft",
+          "geometry": [
+            "Manual angle — Enter pick-point spacing to calculate the angle."
+          ],
+          "rigging": [
+            "+20 lb",
+            "Slings: 20.0 lb"
+          ],
+          "carried": "10,020 lb",
+          "top": "top 10,020 lb",
+          "tension": "5,785 lb",
+          "sling_wll": "13,200 lb",
+          "util": "44%",
+          "hardware": [],
+          "status": "OK",
+          "status_kind": "ok",
+          "is_spreader": false
+        }
+      ]
+    },
+    {
+      "name": "Two-layer spreader",
+      "payload": "20,000 lb",
+      "rigging_weight": "249 lb",
+      "rigging_height": "≈ 20.91 ft (excl. shackle / bar depth)",
+      "hook_load": "20,249 lb",
+      "warn": null,
+      "rows": [
+        {
+          "layer": "L1",
+          "config": "RS-7 · Vertical · 65.4° calc · 2 sling(s) × 12 ft",
+          "geometry": [
+            "Bar span 10 ft",
+            "Reach 5 ft · drop 10.91 ft"
+          ],
+          "rigging": [
+            "+229 lb",
+            "Slings: 28.6 lb",
+            "Spreader: 200 lb"
+          ],
+          "carried": "20,249 lb",
+          "top": "top 20,249 lb",
+          "tension": "11,137 lb",
+          "sling_wll": "21,200 lb",
+          "util": "53%",
+          "hardware": [
+            "Spreader (Test Bar · 40000 lb WLL · 200 lb bar · 10 ft): 10,010 / 40,000 lb (OK)"
+          ],
+          "status": "OK",
+          "status_kind": "ok",
+          "is_spreader": false
+        },
+        {
+          "layer": "↳ bar",
+          "config": "Test Bar · 40000 lb WLL · 200 lb bar · 10 ft",
+          "geometry": [
+            "Span as rigged 10 ft"
+          ],
+          "rigging": [
+            "(in layer)"
+          ],
+          "carried": "20,020 lb under",
+          "top": "",
+          "tension": "self 200 lb",
+          "sling_wll": "40,000 lb WLL",
+          "util": "—",
+          "hardware": [
+            "End rxn: 10,010 / 40,000 lb (OK)"
+          ],
+          "status": "OK",
+          "status_kind": "ok",
+          "is_spreader": true
+        },
+        {
+          "layer": "L2",
+          "config": "RS-5 · Vertical · 90.0° calc · 2 sling(s) × 10 ft",
+          "geometry": [
+            "Picks @ 10 ft",
+            "Reach 0 ft · drop 10 ft"
+          ],
+          "rigging": [
+            "+20 lb",
+            "Slings: 20.0 lb"
+          ],
+          "carried": "20,020 lb",
+          "top": "top 20,020 lb",
+          "tension": "10,010 lb",
+          "sling_wll": "13,200 lb",
+          "util": "76%",
+          "hardware": [],
+          "status": "OK",
+          "status_kind": "ok",
+          "is_spreader": false
+        }
+      ]
+    },
+    {
+      "name": "Impossible geom",
+      "payload": "5,000 lb",
+      "rigging_weight": "20 lb",
+      "rigging_height": null,
+      "hook_load": "5,020 lb",
+      "warn": null,
+      "rows": [
+        {
+          "layer": "L1",
+          "config": "RS-5 · Vertical · —° · 2 sling(s) × 10 ft",
+          "geometry": [
+            "Picks @ 30 ft",
+            "Sling length 10.00 ft is too short for a 15.00 ft horizontal reach."
+          ],
+          "rigging": [
+            "+20 lb",
+            "Slings: 20.0 lb"
+          ],
+          "carried": "5,020 lb",
+          "top": "top 5,020 lb",
+          "tension": "— lb",
+          "sling_wll": "13,200 lb",
+          "util": "—",
+          "hardware": [],
+          "status": "GEOM",
+          "status_kind": "over",
+          "is_spreader": false
+        }
+      ]
+    }
+  ],
+  "mats": [
+    {
+      "name": "Outrigger NE",
+      "outrigger": "50,000 lb",
+      "allowable": "3,000 psf",
+      "warn": null,
+      "rows": [
+        {
+          "label": "Mat",
+          "value": "Acme M8 · 8×4 ft × 6 in · 1200 lb · allow 100000 lb",
+          "status": null,
+          "status_kind": null
+        },
+        {
+          "label": "Thickness",
+          "value": "6 in",
+          "status": null,
+          "status_kind": null
+        },
+        {
+          "label": "Mat weight W",
+          "value": "1,200 lb",
+          "status": null,
+          "status_kind": null
+        },
+        {
+          "label": "Mfr. allowable P",
+          "value": "100,000 lb",
+          "status": null,
+          "status_kind": null
+        },
+        {
+          "label": "Pad C × width",
+          "value": "24 × 24 in (2 × 2 ft)",
+          "status": null,
+          "status_kind": null
+        },
+        {
+          "label": "Areqd",
+          "value": "17.07 ft²",
+          "status": null,
+          "status_kind": null
+        },
+        {
+          "label": "Lreqd",
+          "value": "4.27 ft",
+          "status": null,
+          "status_kind": null
+        },
+        {
+          "label": "Leff × B",
+          "value": "4.27 × 4 ft = 17.07 ft²",
+          "status": null,
+          "status_kind": null
+        },
+        {
+          "label": "Lc (cantilever)",
+          "value": "1.13 ft each side",
+          "status": null,
+          "status_kind": null
+        },
+        {
+          "label": "Total load P+W",
+          "value": "51,200 lb",
+          "status": null,
+          "status_kind": null
+        },
+        {
+          "label": "q (crane only)",
+          "value": "2,930 psf",
+          "status": null,
+          "status_kind": null
+        },
+        {
+          "label": "qt vs qa",
+          "value": "3,000 / 3,000 psf",
+          "status": null,
+          "status_kind": null
+        },
+        {
+          "label": "Soil utilization",
+          "value": "100%",
+          "status": "OK",
+          "status_kind": "ok"
+        },
+        {
+          "label": "Mat capacity usage",
+          "value": "50% (50,000 / 100,000 lb)",
+          "status": "OK",
+          "status_kind": "ok"
+        }
+      ]
+    }
+  ]
+}

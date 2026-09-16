@@ -12,6 +12,9 @@ mod models;
 mod pages;
 mod print;
 
+#[cfg(test)]
+mod golden_tests;
+
 use dioxus::prelude::*;
 use uuid::Uuid;
 
