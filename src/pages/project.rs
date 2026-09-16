@@ -7,7 +7,7 @@ use crate::Route;
 use crate::app_state::AppCtx;
 use bth_rigging::format::format_lbs;
 use bth_rigging::domain::{MatAnalysis, Pick, Project};
-use bth_rigging::print::{calc_package_filename, render_project_calc_package};
+use bth_rigging::report::{calc_package_filename, render_project_calc_package};
 
 #[component]
 pub fn ProjectPage(id: Uuid) -> Element {

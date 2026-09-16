@@ -9,5 +9,5 @@ pub mod format;
 pub mod hardware;
 pub mod layers;
 pub mod mats;
-pub mod print;
+pub mod report;
 pub mod store;

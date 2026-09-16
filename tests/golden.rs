@@ -11,7 +11,7 @@ use uuid::Uuid;
 use bth_rigging::domain::{
     Hitch, MatAnalysis, Pick, Project, SavedMat, SavedSpreader, SlingLayer,
 };
-use bth_rigging::print::{CalcPackage, assemble_calc_package};
+use bth_rigging::report::{CalcPackage, assemble_calc_package};
 
 fn fixtures_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures")
