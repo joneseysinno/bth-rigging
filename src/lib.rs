@@ -9,5 +9,5 @@ pub mod domain;
 pub mod format;
 pub mod hardware;
 pub mod layers;
-pub mod mat_calc;
+pub mod mats;
 pub mod print;

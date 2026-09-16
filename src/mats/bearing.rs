@@ -3,6 +3,7 @@
 //! Based on Eqs. 1–4 / 15 from David Duerr, P.E.,
 //! “Effective Bearing Length of Crane Mats” (2010).
 //! Full bending/shear MST quadratics are out of scope for this slice.
+//! Roadmap: Step 0 foundation.
 
 use crate::domain::SavedMat;
 

@@ -7,7 +7,7 @@ use crate::Route;
 use crate::app_state::AppCtx;
 use crate::diagram::MatBearingDiagram;
 use bth_rigging::format::{format_lbs, format_num};
-use bth_rigging::mat_calc::{MatBearingInput, calculate_mat_bearing};
+use bth_rigging::mats::{MatBearingInput, calculate_mat_bearing};
 use bth_rigging::domain::{MatAnalysis, Project, SavedMat};
 
 #[component]
