@@ -6,7 +6,6 @@
 pub mod catalog;
 pub mod domain;
 pub mod format;
-pub mod hardware;
 pub mod layers;
 pub mod mats;
 pub mod report;

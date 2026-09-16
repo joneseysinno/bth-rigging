@@ -1,4 +1,6 @@
-//! Page module exports.
+//! Routed pages.
+//!
+//! Roadmap: Step 0 foundation; pick editor internals deferred to Step 2.
 
 pub mod home;
 pub mod mat_editor;

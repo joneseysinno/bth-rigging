@@ -3,9 +3,8 @@
 use dioxus::prelude::*;
 use uuid::Uuid;
 
-use crate::Route;
-use crate::app_state::AppCtx;
-use crate::diagram::{DiagramLayer, RiggingDiagram};
+use crate::app::{AppCtx, Route};
+use crate::ui::components::{DiagramLayer, RiggingDiagram};
 use bth_rigging::catalog::{POLYESTER_ROUNDSLINGS, SHACKLES};
 use bth_rigging::domain::{Hitch, Pick, Project, SavedSpreader, SlingLayer};
 use bth_rigging::format::{format_lbs, format_num};

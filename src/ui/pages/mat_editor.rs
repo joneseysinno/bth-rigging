@@ -3,12 +3,11 @@
 use dioxus::prelude::*;
 use uuid::Uuid;
 
-use crate::Route;
-use crate::app_state::AppCtx;
-use crate::diagram::MatBearingDiagram;
+use crate::app::{AppCtx, Route};
+use crate::ui::components::MatBearingDiagram;
+use bth_rigging::domain::{MatAnalysis, Project, SavedMat};
 use bth_rigging::format::{format_lbs, format_num};
 use bth_rigging::mats::{MatBearingInput, calculate_mat_bearing};
-use bth_rigging::domain::{MatAnalysis, Project, SavedMat};
 
 #[component]
 pub fn MatEditor(project_id: Uuid, analysis_id: Uuid) -> Element {
