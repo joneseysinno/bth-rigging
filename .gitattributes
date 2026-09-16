@@ -1,0 +1,7 @@
+* text=auto eol=crlf
+*.rs text eol=crlf
+*.toml text eol=crlf
+*.md text eol=crlf
+*.typ text eol=crlf
+*.css text eol=crlf
+*.json text eol=crlf
