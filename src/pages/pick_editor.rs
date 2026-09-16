@@ -3,14 +3,14 @@
 use dioxus::prelude::*;
 use uuid::Uuid;
 
-use crate::app_state::{format_lbs, format_num, AppCtx};
+use crate::Route;
+use crate::app_state::{AppCtx, format_lbs, format_num};
 use crate::calc::calculate_pick;
 use crate::catalog::POLYESTER_ROUNDSLINGS;
 use crate::diagram::{DiagramLayer, RiggingDiagram};
-use crate::geometry::{resolve_geometry, LayerGeometry};
+use crate::geometry::{LayerGeometry, resolve_geometry};
 use crate::hardware::SHACKLES;
 use crate::models::{Hitch, Pick, Project, SavedSpreader, SlingLayer};
-use crate::Route;
 
 #[derive(Clone, PartialEq)]
 struct LayerDraft {

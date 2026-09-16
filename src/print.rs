@@ -4,14 +4,14 @@ use chrono::Local;
 use serde::Serialize;
 use thiserror::Error;
 use typst::foundations::{Dict, IntoValue};
-use typst_as_lib::typst_kit_options::TypstKitFontOptions;
 use typst_as_lib::TypstEngine;
+use typst_as_lib::typst_kit_options::TypstKitFontOptions;
 use uuid::Uuid;
 
 use crate::app_state::{format_lbs, format_num};
 use crate::calc::calculate_pick;
 use crate::db::RiggingStore;
-use crate::mat_calc::{calculate_mat_bearing, MatBearingInput};
+use crate::mat_calc::{MatBearingInput, calculate_mat_bearing};
 use crate::models::{MatAnalysis, Pick, Project, SavedMat, SavedSpreader, SlingLayer};
 
 const TEMPLATE: &str = include_str!("../assets/calc-package.typ");
@@ -224,9 +224,7 @@ fn assemble_pick_sheet(
             rigging_weight: "—".into(),
             rigging_height: None,
             hook_load: "—".into(),
-            warn: Some(
-                "Enter a valid payload on the final layer to compute reactions.".into(),
-            ),
+            warn: Some("Enter a valid payload on the final layer to compute reactions.".into()),
             rows: Vec::new(),
         };
     }
@@ -307,11 +305,7 @@ fn assemble_pick_sheet(
             let ends = l.sling_count.max(2);
             let end_r = r.load_on_spreader_lbs / f64::from(ends);
             let over = end_r > f64::from(sp.wll_lbs);
-            let (sp_status, sp_kind) = if over {
-                ("OVER", "over")
-            } else {
-                ("OK", "ok")
-            };
+            let (sp_status, sp_kind) = if over { ("OVER", "over") } else { ("OK", "ok") };
             rows.push(PickRow {
                 layer: "↳ bar".into(),
                 config: sp.name.clone(),
@@ -343,9 +337,12 @@ fn assemble_pick_sheet(
         name: pick.name.clone(),
         payload: format!("{} lb", format_lbs(weight)),
         rigging_weight: format!("{} lb", format_lbs(pr.rigging_weight_lbs)),
-        rigging_height: pr
-            .rigging_height_ft
-            .map(|h| format!("≈ {} ft (excl. shackle / bar depth)", format_num((h * 100.0).round() / 100.0))),
+        rigging_height: pr.rigging_height_ft.map(|h| {
+            format!(
+                "≈ {} ft (excl. shackle / bar depth)",
+                format_num((h * 100.0).round() / 100.0)
+            )
+        }),
         hook_load: format!("{} lb", format_lbs(pr.hook_load_lbs)),
         warn: None,
         rows,
@@ -563,10 +560,7 @@ mod tests {
             calc_package_filename("Job <A>/B:?\"*"),
             "Job -A--B---- calc package.pdf"
         );
-        assert_eq!(
-            calc_package_filename("   "),
-            "project calc package.pdf"
-        );
+        assert_eq!(calc_package_filename("   "), "project calc package.pdf");
     }
 
     #[test]
@@ -590,12 +584,7 @@ mod tests {
             spread_angle_deg: 45.0,
         };
 
-        let pkg = assemble_calc_package(
-            &project,
-            &[(pick, layers)],
-            &[],
-            &[(analysis, Some(mat))],
-        );
+        let pkg = assemble_calc_package(&project, &[(pick, layers)], &[], &[(analysis, Some(mat))]);
 
         assert_eq!(pkg.project, "Tower A");
         assert_eq!(pkg.picks.len(), 1);
@@ -607,10 +596,12 @@ mod tests {
         assert_eq!(pkg.picks[0].rigging_weight, "20 lb");
         assert_eq!(pkg.picks[0].hook_load, "10,020 lb");
         assert!(pkg.mats[0].warn.is_none());
-        assert!(pkg.mats[0]
-            .rows
-            .iter()
-            .any(|r| r.label == "Soil utilization"));
+        assert!(
+            pkg.mats[0]
+                .rows
+                .iter()
+                .any(|r| r.label == "Soil utilization")
+        );
     }
 
     #[test]
@@ -650,12 +641,7 @@ mod tests {
             allowable_psf: 3_000.0,
             spread_angle_deg: 45.0,
         };
-        let pkg = assemble_calc_package(
-            &project,
-            &[(pick, layers)],
-            &[],
-            &[(analysis, Some(mat))],
-        );
+        let pkg = assemble_calc_package(&project, &[(pick, layers)], &[], &[(analysis, Some(mat))]);
         let pdf = render_calc_package_pdf(&pkg).expect("pdf");
         assert!(pdf.starts_with(b"%PDF"));
     }

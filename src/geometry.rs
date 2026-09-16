@@ -101,7 +101,9 @@ impl LayerGeometry {
                 .map(|s| format!("Bar span {} ft", fmt_ft(s))),
             SpacingSource::SingleSling => Some("Single sling, plumb".into()),
             SpacingSource::Entered => match (self.spacing_ft, self.width_ft) {
-                (Some(s), Some(w)) => Some(format!("Picks @ {} ft × {} ft wide", fmt_ft(s), fmt_ft(w))),
+                (Some(s), Some(w)) => {
+                    Some(format!("Picks @ {} ft × {} ft wide", fmt_ft(s), fmt_ft(w)))
+                }
                 (Some(s), None) => Some(format!("Picks @ {} ft", fmt_ft(s))),
                 (None, Some(w)) => Some(format!("Picks {} ft wide", fmt_ft(w))),
                 (None, None) => None,
@@ -117,12 +119,10 @@ impl LayerGeometry {
         }
         if let Some(ref e) = self.error {
             out.push(e.clone());
-        } else if let (Some(_), Some(h), Some(d)) = (self.angle_deg, self.max_reach_ft, self.drop_ft) {
-            out.push(format!(
-                "Reach {} ft · drop {} ft",
-                fmt_ft(h),
-                fmt_ft(d)
-            ));
+        } else if let (Some(_), Some(h), Some(d)) =
+            (self.angle_deg, self.max_reach_ft, self.drop_ft)
+        {
+            out.push(format!("Reach {} ft · drop {} ft", fmt_ft(h), fmt_ft(d)));
         } else if let Some(ref m) = self.missing {
             out.push(format!("Manual angle — {m}"));
         }
@@ -266,11 +266,13 @@ pub fn resolve_geometry(layers: &[SlingLayer], spreaders: &[SavedSpreader]) -> V
         // --- Reaches and angles ---
         let length = layer.sling_length_ft;
         if g.pick_points.is_empty() {
-            g.missing = Some(if layer.spreader_id.is_some() || layer.spreader_wll_lbs.is_some() {
-                "Enter the spreader span to calculate the angle.".into()
-            } else {
-                "Enter pick-point spacing to calculate the angle.".into()
-            });
+            g.missing = Some(
+                if layer.spreader_id.is_some() || layer.spreader_wll_lbs.is_some() {
+                    "Enter the spreader span to calculate the angle.".into()
+                } else {
+                    "Enter pick-point spacing to calculate the angle.".into()
+                },
+            );
         } else if apexes.is_empty() {
             g.missing = Some("Pick points of the layer above are unknown.".into());
         } else if !(length.is_finite() && length > 0.0) {
@@ -442,7 +444,10 @@ mod tests {
         let g = resolve_geometry(&[l1, l2], &[]);
         let h = 13.0_f64.sqrt();
         assert!(g[1].reaches_ft.iter().all(|r| close(*r, h)));
-        assert!(close(g[1].angle_deg.unwrap(), (h / 10.0).acos().to_degrees()));
+        assert!(close(
+            g[1].angle_deg.unwrap(),
+            (h / 10.0).acos().to_degrees()
+        ));
     }
 
     #[test]

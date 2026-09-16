@@ -2,9 +2,9 @@
 
 use dioxus::prelude::*;
 
-use crate::app_state::{format_updated, AppCtx};
-use crate::models::Project;
 use crate::Route;
+use crate::app_state::{AppCtx, format_updated};
+use crate::models::Project;
 
 #[component]
 pub fn Home() -> Element {

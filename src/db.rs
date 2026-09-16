@@ -146,7 +146,11 @@ impl RiggingStore {
             !row.tombstone
                 && serde_json::from_slice::<serde_json::Value>(&row.data)
                     .ok()
-                    .and_then(|v| v.get("kind").and_then(|k| k.as_str()).map(|s| s == "shackle"))
+                    .and_then(|v| {
+                        v.get("kind")
+                            .and_then(|k| k.as_str())
+                            .map(|s| s == "shackle")
+                    })
                     .unwrap_or(false)
         });
         if has_shackle {
@@ -260,8 +264,7 @@ impl RiggingStore {
             );
         }
         let bytes = serde_json::to_vec(&payload)?;
-        self.db
-            .insert(SPACE_HARDWARE, mat_point(mat.id), bytes)?;
+        self.db.insert(SPACE_HARDWARE, mat_point(mat.id), bytes)?;
         self.db.sync()?;
         Ok(())
     }
@@ -477,12 +480,8 @@ impl RiggingStore {
                 id: HyperedgeId(edge_id),
                 kind: HyperedgeKind::new(KIND_PICK_HAS_LAYER),
                 endpoints: vec![
-                    EndpointRef::new(
-                        EndpointRole::new("pick"),
-                        SPACE_PICKS,
-                        pick_point(pick.id),
-                    )
-                    .with_polarity(EndpointPolarity::Tail),
+                    EndpointRef::new(EndpointRole::new("pick"), SPACE_PICKS, pick_point(pick.id))
+                        .with_polarity(EndpointPolarity::Tail),
                     EndpointRef::new(
                         EndpointRole::new("layer"),
                         SPACE_LAYERS,
@@ -676,10 +675,12 @@ mod tests {
         assert_eq!(listed[0].mat_id, mat.id);
 
         store2.delete_project(project.id).expect("delete");
-        assert!(store2
-            .list_mat_analyses_for_project(project.id)
-            .unwrap()
-            .is_empty());
+        assert!(
+            store2
+                .list_mat_analyses_for_project(project.id)
+                .unwrap()
+                .is_empty()
+        );
         // Catalog mats are global — not deleted with the project.
         assert_eq!(store2.list_mats().unwrap().len(), 1);
 

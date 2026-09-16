@@ -7,9 +7,9 @@ use std::collections::HashMap;
 
 use uuid::Uuid;
 
-use crate::catalog::{find_by_size, RoundSlingRating};
+use crate::catalog::{RoundSlingRating, find_by_size};
 use crate::geometry::{
-    endpoints_below_count, governing_angle, resolve_geometry, rigging_height_ft, LayerGeometry,
+    LayerGeometry, endpoints_below_count, governing_angle, resolve_geometry, rigging_height_ft,
 };
 use crate::hardware::find_shackle;
 use crate::models::{Hitch, SavedSpreader, SlingLayer};
@@ -81,10 +81,16 @@ impl RiggingWeight {
             }
         };
         push("Slings".into(), self.slings_lbs);
-        push(format!("Leg shackles ×{}", self.leg_shackle_count), self.leg_shackles_lbs);
+        push(
+            format!("Leg shackles ×{}", self.leg_shackle_count),
+            self.leg_shackles_lbs,
+        );
         push("Spreader".into(), self.spreader_lbs);
         push("Other tare".into(), self.other_tare_lbs);
-        push(format!("Apex shackles ×{}", self.apex_shackle_count), self.apex_shackles_lbs);
+        push(
+            format!("Apex shackles ×{}", self.apex_shackle_count),
+            self.apex_shackles_lbs,
+        );
         out
     }
 }
@@ -239,30 +245,28 @@ pub fn layer_rigging_weight(
     let slings = layer.sling_count.max(1);
     let slings_lbs = f64::from(slings) * rating.sling_weight_lbs(layer.sling_length_ft);
 
-    let (leg_shackle_count, leg_shackles_lbs) = match layer
-        .leg_shackle
-        .as_deref()
-        .and_then(find_shackle)
-    {
-        Some(sh) => (slings, f64::from(slings) * sh.weight_lbs),
-        None => (0, 0.0),
-    };
+    let (leg_shackle_count, leg_shackles_lbs) =
+        match layer.leg_shackle.as_deref().and_then(find_shackle) {
+            Some(sh) => (slings, f64::from(slings) * sh.weight_lbs),
+            None => (0, 0.0),
+        };
 
-    let (apex_shackle_count, apex_shackles_lbs) = match layer
-        .apex_shackle
-        .as_deref()
-        .and_then(find_shackle)
-    {
-        Some(sh) => (apex_count, f64::from(apex_count) * sh.weight_lbs),
-        None => (0, 0.0),
-    };
+    let (apex_shackle_count, apex_shackles_lbs) =
+        match layer.apex_shackle.as_deref().and_then(find_shackle) {
+            Some(sh) => (apex_count, f64::from(apex_count) * sh.weight_lbs),
+            None => (0, 0.0),
+        };
 
     let other = layer.tare_lbs;
     RiggingWeight {
         slings_lbs,
         leg_shackles_lbs,
         spreader_lbs: spreader.map(|s| s.weight_lbs.max(0.0)).unwrap_or(0.0),
-        other_tare_lbs: if other.is_finite() { other.max(0.0) } else { 0.0 },
+        other_tare_lbs: if other.is_finite() {
+            other.max(0.0)
+        } else {
+            0.0
+        },
         apex_shackles_lbs,
         apex_shackle_count,
         leg_shackle_count,
@@ -418,7 +422,10 @@ pub fn calculate_pick(
 
 /// Convenience: single layer carrying the payload (no tare / chain).
 pub fn calculate_layer(weight_lbs: f64, layer: &SlingLayer) -> Option<LayerTension> {
-    calculate_pick(weight_lbs, &[layer.clone()], &[])?.layers.into_iter().next()
+    calculate_pick(weight_lbs, &[layer.clone()], &[])?
+        .layers
+        .into_iter()
+        .next()
 }
 
 #[cfg(test)]
@@ -629,7 +636,11 @@ mod tests {
         assert!((r1.tension_lbs - expected_t).abs() < 1e-9);
 
         // L1 apex shackle sees everything hanging from it.
-        let apex = r1.hardware.iter().find(|h| h.name.starts_with("Apex")).unwrap();
+        let apex = r1
+            .hardware
+            .iter()
+            .find(|h| h.name.starts_with("Apex"))
+            .unwrap();
         assert!((apex.reaction_lbs - l1_carried).abs() < 1e-9);
     }
 

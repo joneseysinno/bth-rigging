@@ -11,10 +11,8 @@ use std::path::PathBuf;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::models::{
-    Hitch, MatAnalysis, Pick, Project, SavedMat, SavedSpreader, SlingLayer,
-};
-use crate::print::{assemble_calc_package, CalcPackage};
+use crate::models::{Hitch, MatAnalysis, Pick, Project, SavedMat, SavedSpreader, SlingLayer};
+use crate::print::{CalcPackage, assemble_calc_package};
 
 fn fixtures_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures")
@@ -36,7 +34,8 @@ fn read_or_write(path: &PathBuf, fresh: &str) {
     let expected = fs::read_to_string(path)
         .unwrap_or_else(|e| panic!("missing golden {}: {e}", path.display()));
     assert_eq!(
-        fresh, expected,
+        fresh,
+        expected,
         "golden mismatch for {} — set UPDATE_GOLDEN=1 to regenerate",
         path.display()
     );

@@ -3,11 +3,11 @@
 use dioxus::prelude::*;
 use uuid::Uuid;
 
-use crate::app_state::{format_lbs, format_num, AppCtx};
-use crate::diagram::MatBearingDiagram;
-use crate::mat_calc::{calculate_mat_bearing, MatBearingInput};
-use crate::models::{MatAnalysis, Project, SavedMat};
 use crate::Route;
+use crate::app_state::{AppCtx, format_lbs, format_num};
+use crate::diagram::MatBearingDiagram;
+use crate::mat_calc::{MatBearingInput, calculate_mat_bearing};
+use crate::models::{MatAnalysis, Project, SavedMat};
 
 #[component]
 pub fn MatEditor(project_id: Uuid, analysis_id: Uuid) -> Element {
@@ -64,9 +64,7 @@ pub fn MatEditor(project_id: Uuid, analysis_id: Uuid) -> Element {
 
     let selected_mat = {
         let id_str = mat_id();
-        mats()
-            .into_iter()
-            .find(|m| m.id.to_string() == id_str)
+        mats().into_iter().find(|m| m.id.to_string() == id_str)
     };
 
     let load: f64 = outrigger_load().trim().parse().unwrap_or(f64::NAN);
@@ -75,9 +73,7 @@ pub fn MatEditor(project_id: Uuid, analysis_id: Uuid) -> Element {
     let allow: f64 = allowable().trim().parse().unwrap_or(f64::NAN);
 
     let result = selected_mat.as_ref().and_then(|mat| {
-        calculate_mat_bearing(MatBearingInput::from_mat(
-            mat, load, pad_l, pad_w, allow,
-        ))
+        calculate_mat_bearing(MatBearingInput::from_mat(mat, load, pad_l, pad_w, allow))
     });
 
     rsx! {

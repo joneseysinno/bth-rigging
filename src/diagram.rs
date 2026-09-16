@@ -82,7 +82,11 @@ fn half_span_for(angle: f64, rise: f64) -> f64 {
 /// `level_loads[i]` is the load passing through the top of layer `i`
 /// (payload + all rigging at and below that layer). Empty when not computed.
 #[component]
-pub fn RiggingDiagram(layers: Vec<DiagramLayer>, weight_lbs: f64, level_loads: Vec<f64>) -> Element {
+pub fn RiggingDiagram(
+    layers: Vec<DiagramLayer>,
+    weight_lbs: f64,
+    level_loads: Vec<f64>,
+) -> Element {
     let n = layers.len().max(1) as f64;
     let slot = 160.0;
     let height = 100.0 + n * slot + 40.0;
@@ -101,11 +105,7 @@ pub fn RiggingDiagram(layers: Vec<DiagramLayer>, weight_lbs: f64, level_loads: V
         let half = half_span_for(angle, rise);
         let count = layer.sling_count.min(8);
 
-        let apex_xs = if i == 0 {
-            vec![cx]
-        } else {
-            parent_xs.clone()
-        };
+        let apex_xs = if i == 0 { vec![cx] } else { parent_xs.clone() };
 
         let foot_y = top_y + rise;
         let mut feet = Vec::new();

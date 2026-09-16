@@ -3,10 +3,10 @@
 use dioxus::prelude::*;
 use uuid::Uuid;
 
-use crate::app_state::{format_lbs, AppCtx};
+use crate::Route;
+use crate::app_state::{AppCtx, format_lbs};
 use crate::models::{MatAnalysis, Pick, Project};
 use crate::print::{calc_package_filename, render_project_calc_package};
-use crate::Route;
 
 #[component]
 pub fn ProjectPage(id: Uuid) -> Element {

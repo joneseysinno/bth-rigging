@@ -157,7 +157,10 @@ impl RoundSlingRating {
     }
 
     pub fn label(&self) -> String {
-        format!("RS-{} {} ({} lb vert)", self.size, self.color, self.vertical_lbs)
+        format!(
+            "RS-{} {} ({} lb vert)",
+            self.size, self.color, self.vertical_lbs
+        )
     }
 
     /// Self-weight of one sling of the given length (lb).
