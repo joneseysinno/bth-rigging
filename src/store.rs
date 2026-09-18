@@ -20,6 +20,7 @@ use thiserror::Error;
 
 pub use spaces::{
     SPACE_CATALOG, SPACE_HARDWARE, SPACE_LAYERS, SPACE_MAT_ANALYSES, SPACE_PICKS, SPACE_PROJECTS,
+    SPACE_RIG_BODIES, SPACE_RIG_MEMBERS, SPACE_RIG_NODES, SPACE_RIG_PARAMS, SPACE_RIGS,
     SPACE_TOPOLOGY,
 };
 
@@ -33,6 +34,8 @@ pub enum DbError {
     Json(#[from] serde_json::Error),
     #[error("data directory unavailable")]
     NoDataDir,
+    #[error("rig schema {found} is newer than this build (max {max})")]
+    SchemaTooNew { found: u16, max: u16 },
 }
 
 /// Shared store wrapping InfiniteDb.

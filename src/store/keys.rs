@@ -49,3 +49,20 @@ pub(super) fn mat_analysis_point(id: Uuid) -> DimensionVector {
     let (hi, lo) = uuid_coords(id);
     DimensionVector::new(vec![hi, lo])
 }
+
+pub(super) fn rig_point(id: Uuid) -> DimensionVector {
+    let (hi, lo) = uuid_coords(id);
+    DimensionVector::new(vec![hi, lo])
+}
+
+pub(super) fn rig_item_point(rig_id: Uuid, index: u32) -> DimensionVector {
+    let (hi, lo) = uuid_coords(rig_id);
+    DimensionVector::new(vec![hi, lo, index])
+}
+
+pub(super) fn member_edge_id(member_id: Uuid) -> u64 {
+    let (hi, lo) = uuid_coords(member_id);
+    ((u64::from(hi) << 32) | u64::from(lo))
+        .wrapping_mul(1_000_003)
+        .wrapping_add(0x524D) // "RM"
+}

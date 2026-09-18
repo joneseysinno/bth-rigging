@@ -47,6 +47,10 @@ impl RiggingStore {
         for analysis in analyses {
             self.delete_mat_analysis(analysis.id)?;
         }
+        let rigs = self.list_rigs_for_project(id)?;
+        for rig in rigs {
+            self.delete_rig(rig.id)?;
+        }
         self.db.delete(SPACE_PROJECTS, project_point(id))?;
         self.db.sync()?;
         Ok(())

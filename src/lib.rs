@@ -1,7 +1,7 @@
 //! Engineering core for BTH Rigging.
 //!
 //! No Dioxus or rfd. Headless tests: `cargo test --lib --no-default-features`.
-//! Roadmap: Step 0 foundation; Steps 1–7 land under `rig`, `crane`, and `checks`.
+//! Roadmap: Step 0 foundation; Step 1 rig graph; Steps 2–7 land under `rig`, `crane`, and `checks`.
 
 pub mod catalog;
 pub mod checks;

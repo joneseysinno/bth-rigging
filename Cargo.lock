@@ -537,6 +537,7 @@ dependencies = [
  "chrono",
  "dioxus",
  "dirs",
+ "indexmap",
  "infinite-db",
  "rfd 0.15.4",
  "serde",

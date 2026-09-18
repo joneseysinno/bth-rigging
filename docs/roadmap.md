@@ -7,7 +7,7 @@ Step 0 (this branch) reorganized the crate. Steps 1–7 build the rigging graph 
 | Step | Goal | Modules | Theory | Definition of done |
 |---:|---|---|---|---|
 | **0** | Module layout, edition 2024, lib/bin, scaffolds | `domain`, `catalog`, `layers`, `mats`, `store`, `report`, `format`, `app`, `ui`, stubs below | this plan | Tests + goldens green; no `mod.rs`; headless lib tests |
-| **1** | Graph model: bodies, nodes, members, components, parameters | `rig::{body,node,member,component,param,bearing,template}`, `store::rig`, `catalog::connection_hardware` | Readback Part 3 — graph elements; bearing width §4.7 | Template conversion: graph tensions match `layers` for sample picks |
+| **1** | Graph model: bodies, nodes, members, components, parameters | `rig::{body,node,member,component,param,bearing,template,build,fixtures}`, `store::rig`, `catalog::connection_hardware` | Readback Part 3 — graph elements; bearing width §4.7. Model reference: `docs/rig-model.md` | Template conversion: graph weights match `layers` for sample picks (tensions in Step 3) |
 | **2** | Eval parameters → 3D; side/end/plan views | `rig::{eval,views}` | Readback — coordinates as expressions; projections | Eval produces lengths/weights; views drive diagram |
 | **3** | Solver + shared checks | `rig::solve::{rank,hang,elastic,bounds,inverse}`, `checks::{sling,chain,shackle,lug,bar}` | §3.5 determinacy (`s = m − r`, `k = dof − r`); tension-only | Rank/hang/elastic on template graphs; checks stamp OK/OVER |
 | **4** | Crane config, chart, reeving | `crane::{config,chart,reeving}` | Readback crane capacity / reeving | Conservative chart lookup + line pull for a sample crane |
