@@ -54,7 +54,48 @@ struct Token {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 struct LexError {
+    kind: ParseErrorKind,
     span: Span,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ParseErrorKind {
+    Empty,
+    UnexpectedChar,
+    UnexpectedToken,
+    UnexpectedEnd,
+    UnclosedParen,
+    BadNumber,
+    UnknownName,
+    UnknownUnit,
+    Unsupported,
+    QuantityMismatch,
+    WrongQuantity,
+    NonFinite,
+    DivideByZero,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ParseError {
+    pub kind: ParseErrorKind,
+    pub span: Span,
+    pub column: usize,
+    pub message: String,
+    pub help: Option<String>,
+}
+
+impl ParseError {
+    pub fn caret(&self, src: &str) -> String {
+        let start = self.span.start.min(src.len());
+        let end = self.span.end.min(src.len()).max(start);
+        let prefix_chars = src[..start].chars().count();
+        let span_chars = src[start..end].chars().count().max(1);
+        format!(
+            "{src}\n{}{}",
+            " ".repeat(prefix_chars),
+            "^".repeat(span_chars)
+        )
+    }
 }
 
 pub fn column(src: &str, byte_offset: usize) -> usize {
@@ -138,6 +179,7 @@ fn lex(src: &str) -> Result<Vec<Token>, LexError> {
             }
             _ => {
                 return Err(LexError {
+                    kind: ParseErrorKind::UnexpectedChar,
                     span: Span {
                         start,
                         end: start + ch.len_utf8(),
@@ -204,6 +246,7 @@ fn scan_number(src: &str, offset: &mut usize) -> Result<TokenKind, LexError> {
         }
         if end == digits {
             return Err(LexError {
+                kind: ParseErrorKind::BadNumber,
                 span: Span {
                     start: exponent,
                     end,
@@ -214,6 +257,7 @@ fn scan_number(src: &str, offset: &mut usize) -> Result<TokenKind, LexError> {
 
     let number_end = end;
     let value = f64::from_str(&src[start..number_end]).map_err(|_| LexError {
+        kind: ParseErrorKind::BadNumber,
         span: Span {
             start,
             end: number_end,
@@ -295,6 +339,280 @@ fn scan_unit_suffix(src: &str, number_end: usize) -> (Option<Unit>, usize) {
     };
     unit.map(|unit| (Some(unit), word_end))
         .unwrap_or((None, number_end))
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum BinaryOp {
+    Add,
+    Sub,
+    Mul,
+    Div,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+enum SyntaxKind {
+    Literal {
+        value: f64,
+        unit: Option<Unit>,
+    },
+    Ident(String),
+    Neg(Box<SpannedExpr>),
+    Binary {
+        op: BinaryOp,
+        op_span: Span,
+        left: Box<SpannedExpr>,
+        right: Box<SpannedExpr>,
+    },
+    Group(Box<SpannedExpr>),
+}
+
+#[derive(Debug, Clone, PartialEq)]
+struct SpannedExpr {
+    kind: SyntaxKind,
+    span: Span,
+}
+
+fn parse_syntax(src: &str) -> Result<SpannedExpr, ParseError> {
+    let tokens = lex(src).map_err(|error| ParseError {
+        kind: error.kind,
+        span: error.span,
+        column: column(src, error.span.start),
+        message: match error.kind {
+            ParseErrorKind::UnexpectedChar => "unexpected character".into(),
+            ParseErrorKind::BadNumber => "invalid number".into(),
+            _ => unreachable!(),
+        },
+        help: None,
+    })?;
+    let mut parser = Parser {
+        src,
+        tokens,
+        cursor: 0,
+    };
+    if matches!(parser.peek().kind, TokenKind::End) {
+        return Err(parser.error(
+            ParseErrorKind::Empty,
+            Span { start: 0, end: 0 },
+            "expression is empty",
+            None,
+        ));
+    }
+    let expression = parser.parse_binary(0)?;
+    if !matches!(parser.peek().kind, TokenKind::End) {
+        return Err(parser.trailing_error());
+    }
+    Ok(expression)
+}
+
+struct Parser<'a> {
+    src: &'a str,
+    tokens: Vec<Token>,
+    cursor: usize,
+}
+
+impl Parser<'_> {
+    fn peek(&self) -> &Token {
+        &self.tokens[self.cursor]
+    }
+
+    fn take(&mut self) -> Token {
+        let token = self.tokens[self.cursor].clone();
+        self.cursor += 1;
+        token
+    }
+
+    fn error(
+        &self,
+        kind: ParseErrorKind,
+        span: Span,
+        message: impl Into<String>,
+        help: Option<&str>,
+    ) -> ParseError {
+        ParseError {
+            kind,
+            span,
+            column: column(self.src, span.start),
+            message: message.into(),
+            help: help.map(str::to_owned),
+        }
+    }
+
+    fn parse_binary(&mut self, min_precedence: u8) -> Result<SpannedExpr, ParseError> {
+        let mut left = self.parse_unary()?;
+        loop {
+            let token = self.peek().clone();
+            let (op, precedence) = match token.kind {
+                TokenKind::Plus => (BinaryOp::Add, 1),
+                TokenKind::Minus => (BinaryOp::Sub, 1),
+                TokenKind::Star => (BinaryOp::Mul, 2),
+                TokenKind::Slash => (BinaryOp::Div, 2),
+                TokenKind::Caret | TokenKind::DoubleStar | TokenKind::Percent => {
+                    return Err(self.error(
+                        ParseErrorKind::Unsupported,
+                        token.span,
+                        "operator isn't supported",
+                        Some("functions aren't supported yet"),
+                    ));
+                }
+                _ => {
+                    if starts_atom(&token.kind) {
+                        return Err(self.error(
+                            ParseErrorKind::Unsupported,
+                            token.span,
+                            "implicit multiplication isn't supported",
+                            None,
+                        ));
+                    }
+                    break;
+                }
+            };
+            if precedence < min_precedence {
+                break;
+            }
+            self.take();
+            let right = self.parse_binary(precedence + 1)?;
+            let span = Span {
+                start: left.span.start,
+                end: right.span.end,
+            };
+            left = SpannedExpr {
+                kind: SyntaxKind::Binary {
+                    op,
+                    op_span: token.span,
+                    left: Box::new(left),
+                    right: Box::new(right),
+                },
+                span,
+            };
+        }
+        Ok(left)
+    }
+
+    fn parse_unary(&mut self) -> Result<SpannedExpr, ParseError> {
+        if matches!(self.peek().kind, TokenKind::Minus) {
+            let minus = self.take();
+            let operand = self.parse_unary()?;
+            if let SyntaxKind::Literal { value, unit } = operand.kind {
+                return Ok(SpannedExpr {
+                    kind: SyntaxKind::Literal {
+                        value: -value,
+                        unit,
+                    },
+                    span: Span {
+                        start: minus.span.start,
+                        end: operand.span.end,
+                    },
+                });
+            }
+            return Ok(SpannedExpr {
+                span: Span {
+                    start: minus.span.start,
+                    end: operand.span.end,
+                },
+                kind: SyntaxKind::Neg(Box::new(operand)),
+            });
+        }
+        self.parse_atom()
+    }
+
+    fn parse_atom(&mut self) -> Result<SpannedExpr, ParseError> {
+        let token = self.peek().clone();
+        match token.kind {
+            TokenKind::Number { value, unit } => {
+                self.take();
+                Ok(SpannedExpr {
+                    kind: SyntaxKind::Literal { value, unit },
+                    span: token.span,
+                })
+            }
+            TokenKind::FeetInches { feet, inches } => {
+                self.take();
+                Ok(SpannedExpr {
+                    kind: SyntaxKind::Literal {
+                        value: feet + inches / 12.0,
+                        unit: Some(Unit::Feet),
+                    },
+                    span: token.span,
+                })
+            }
+            TokenKind::Ident(name) => {
+                self.take();
+                if matches!(self.peek().kind, TokenKind::LParen) {
+                    return Err(self.error(
+                        ParseErrorKind::Unsupported,
+                        token.span,
+                        "function calls aren't supported",
+                        Some("functions aren't supported yet"),
+                    ));
+                }
+                Ok(SpannedExpr {
+                    kind: SyntaxKind::Ident(name),
+                    span: token.span,
+                })
+            }
+            TokenKind::LParen => {
+                let open = self.take();
+                let inner = self.parse_binary(0)?;
+                if matches!(self.peek().kind, TokenKind::End) {
+                    return Err(self.error(
+                        ParseErrorKind::UnclosedParen,
+                        open.span,
+                        "unclosed parenthesis",
+                        None,
+                    ));
+                }
+                if !matches!(self.peek().kind, TokenKind::RParen) {
+                    let token = self.peek().clone();
+                    return Err(self.error(
+                        ParseErrorKind::UnexpectedToken,
+                        token.span,
+                        "expected ')'",
+                        None,
+                    ));
+                }
+                let close = self.take();
+                Ok(SpannedExpr {
+                    kind: SyntaxKind::Group(Box::new(inner)),
+                    span: Span {
+                        start: open.span.start,
+                        end: close.span.end,
+                    },
+                })
+            }
+            TokenKind::End => Err(self.error(
+                ParseErrorKind::UnexpectedEnd,
+                token.span,
+                "unexpected end of expression",
+                None,
+            )),
+            _ => Err(self.error(
+                ParseErrorKind::UnexpectedToken,
+                token.span,
+                "expected a number, name, or parenthesized expression",
+                None,
+            )),
+        }
+    }
+
+    fn trailing_error(&self) -> ParseError {
+        let token = self.peek();
+        self.error(
+            ParseErrorKind::UnexpectedToken,
+            token.span,
+            "unexpected token after expression",
+            None,
+        )
+    }
+}
+
+fn starts_atom(kind: &TokenKind) -> bool {
+    matches!(
+        kind,
+        TokenKind::Number { .. }
+            | TokenKind::FeetInches { .. }
+            | TokenKind::Ident(_)
+            | TokenKind::LParen
+    )
 }
 
 #[cfg(test)]
@@ -461,5 +779,105 @@ mod tests {
         assert_eq!(err.span, Span { start: 7, end: 8 });
         assert_eq!(column(src, err.span.start), 7);
         assert_eq!(column("°x", 2), 2);
+    }
+
+    #[test]
+    fn parser_obeys_precedence_and_left_associativity() {
+        let expression = parse_syntax("a + b*c").unwrap();
+        assert!(matches!(
+            expression.kind,
+            SyntaxKind::Binary {
+                op: BinaryOp::Add,
+                right,
+                ..
+            } if matches!(right.kind, SyntaxKind::Binary { op: BinaryOp::Mul, .. })
+        ));
+
+        let expression = parse_syntax("a - b - c").unwrap();
+        assert!(matches!(
+            expression.kind,
+            SyntaxKind::Binary {
+                op: BinaryOp::Sub,
+                left,
+                ..
+            } if matches!(left.kind, SyntaxKind::Binary { op: BinaryOp::Sub, .. })
+        ));
+
+        let expression = parse_syntax("-a*b").unwrap();
+        assert!(matches!(
+            expression.kind,
+            SyntaxKind::Binary {
+                op: BinaryOp::Mul,
+                left,
+                ..
+            } if matches!(left.kind, SyntaxKind::Neg(_))
+        ));
+    }
+
+    #[test]
+    fn parser_folds_only_unparenthesized_negative_literals() {
+        let folded = parse_syntax("- 2").unwrap();
+        assert!(matches!(
+            folded.kind,
+            SyntaxKind::Literal {
+                value: -2.0,
+                unit: None
+            }
+        ));
+
+        let grouped = parse_syntax("-(2)").unwrap();
+        assert!(matches!(
+            grouped.kind,
+            SyntaxKind::Neg(inner) if matches!(inner.kind, SyntaxKind::Group(_))
+        ));
+
+        let feet_inches = parse_syntax("8'-6\"").unwrap();
+        assert!(matches!(
+            feet_inches.kind,
+            SyntaxKind::Literal {
+                value: 8.5,
+                unit: Some(Unit::Feet)
+            }
+        ));
+
+        assert!(matches!(
+            parse_syntax("8' - 6\"").unwrap().kind,
+            SyntaxKind::Binary {
+                op: BinaryOp::Sub,
+                ..
+            }
+        ));
+    }
+
+    #[test]
+    fn each_structural_error_reports_its_character_column() {
+        let cases = [
+            ("", ParseErrorKind::Empty, 1),
+            ("@", ParseErrorKind::UnexpectedChar, 1),
+            (")", ParseErrorKind::UnexpectedToken, 1),
+            ("a +", ParseErrorKind::UnexpectedEnd, 4),
+            ("(a", ParseErrorKind::UnclosedParen, 1),
+            ("1e+", ParseErrorKind::BadNumber, 2),
+            ("a + °", ParseErrorKind::UnexpectedToken, 5),
+        ];
+        for (source, kind, expected_column) in cases {
+            let error = parse_syntax(source).unwrap_err();
+            assert_eq!(error.kind, kind, "source: {source:?}");
+            assert_eq!(error.column, expected_column, "source: {source:?}");
+        }
+    }
+
+    #[test]
+    fn reserved_and_implicit_forms_are_unsupported() {
+        for source in ["sqrt(a)", "a^2", "a**2", "a % b", "2G", "2(a)"] {
+            let error = parse_syntax(source).unwrap_err();
+            assert_eq!(error.kind, ParseErrorKind::Unsupported, "source: {source}");
+        }
+        let error = parse_syntax("name(x)").unwrap_err();
+        assert_eq!(error.kind, ParseErrorKind::Unsupported);
+        assert_eq!(
+            error.help.as_deref(),
+            Some("functions aren't supported yet")
+        );
     }
 }
