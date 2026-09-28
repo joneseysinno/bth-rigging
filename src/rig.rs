@@ -17,6 +17,7 @@ pub mod bearing;
 pub mod body;
 pub mod build;
 pub mod component;
+pub mod edit;
 pub mod eval;
 pub mod fixtures;
 pub mod id;
