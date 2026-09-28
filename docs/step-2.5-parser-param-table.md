@@ -474,7 +474,7 @@ UI items also run `cargo check --features desktop`.
 |---|---|
 | Duplo10 edit latency, release (median / max) | 170.171 ms / 262.467 ms (20 edits; over the 50 ms budget) |
 | Tests after 2.5 (lib / eval_geometry / golden / solve_layers) | 168 passed + 1 ignored / 10 / 3 / 8 |
-| Deviations from this plan | The measured inline recompute exceeds §7.3's budget. Stopped before the threaded path pending AJ approval. |
+| Deviations from this plan | The measured inline recompute exceeds §7.3's budget, so recompute uses `std::thread` with generation-guarded results. `Snapshot::solving` exposes the pending state; the editor panel renders it in 2.5.10. |
 
 ---
 
