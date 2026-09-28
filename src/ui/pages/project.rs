@@ -7,13 +7,17 @@ use crate::app::{AppCtx, Route};
 use bth_rigging::domain::{MatAnalysis, Pick, Project};
 use bth_rigging::format::format_lbs;
 use bth_rigging::report::{calc_package_filename, render_project_calc_package};
+use bth_rigging::rig;
+use bth_rigging::store::rig::RigHeaderView;
 
 #[component]
 pub fn ProjectPage(id: Uuid) -> Element {
     let ctx = use_context::<AppCtx>();
     let mut project = use_signal(|| None::<Project>);
     let mut picks = use_signal(Vec::<Pick>::new);
+    let mut rigs = use_signal(Vec::<RigHeaderView>::new);
     let mut mat_analyses = use_signal(Vec::<MatAnalysis>::new);
+    let mut selected_pick = use_signal(String::new);
     let mut status = use_signal(|| String::new());
     let navigator = use_navigator();
 
@@ -23,6 +27,7 @@ pub fn ProjectPage(id: Uuid) -> Element {
             if let Some(ref s) = ctx.store {
                 project.set(s.load_project(id).ok().flatten());
                 picks.set(s.list_picks_for_project(id).unwrap_or_default());
+                rigs.set(s.list_rigs_for_project(id).unwrap_or_default());
                 mat_analyses.set(s.list_mat_analyses_for_project(id).unwrap_or_default());
             }
         });
@@ -183,6 +188,92 @@ pub fn ProjectPage(id: Uuid) -> Element {
                     }
                 }
 
+                h2 { class: "section-label list-section", "Rigs" }
+                div { class: "toolbar",
+                    label { class: "field grow",
+                        span { class: "field-label", "Rig from pick…" }
+                        select {
+                            class: "field-input",
+                            value: "{selected_pick}",
+                            onchange: move |event| selected_pick.set(event.value()),
+                            option { value: "", "Select a pick" }
+                            for pick in picks() {
+                                option { value: "{pick.id}", "{pick.name}" }
+                            }
+                        }
+                    }
+                    button {
+                        class: "btn btn-primary",
+                        disabled: selected_pick().is_empty(),
+                        onclick: {
+                            let ctx = ctx.clone();
+                            move |_| {
+                                let Ok(pick_id) = Uuid::parse_str(&selected_pick()) else {
+                                    status.set("Select a pick first.".into());
+                                    return;
+                                };
+                                let Some(ref store) = ctx.store else {
+                                    status.set("Database not available.".into());
+                                    return;
+                                };
+                                match store.load_pick(pick_id) {
+                                    Ok(Some((pick, pick_layers))) => match store.list_spreaders() {
+                                        Ok(spreaders) => {
+                                            let mut rig = rig::from_layers(&pick, &pick_layers, &spreaders);
+                                            rig.project_id = id;
+                                            match store.save_rig(&rig) {
+                                                Ok(()) => {
+                                                    rigs.set(store.list_rigs_for_project(id).unwrap_or_default());
+                                                    status.set("Rig created from pick.".into());
+                                                    navigator.push(Route::RigEditor {
+                                                        project_id: id,
+                                                        rig_id: rig.id,
+                                                    });
+                                                }
+                                                Err(error) => status.set(error.to_string()),
+                                            }
+                                        }
+                                        Err(error) => status.set(error.to_string()),
+                                    },
+                                    Ok(None) => status.set("Pick no longer exists.".into()),
+                                    Err(error) => status.set(error.to_string()),
+                                }
+                            }
+                        },
+                        "Create rig"
+                    }
+                    {debug_demo_rig_button(id, status, rigs)}
+                }
+                if rigs().is_empty() {
+                    div { class: "empty-state compact",
+                        h2 { "No rigs yet" }
+                    }
+                } else {
+                    ul { class: "pick-list",
+                        for rig in rigs() {
+                            {
+                                let rig_id = rig.id;
+                                let name = rig.name.clone();
+                                rsx! {
+                                    li { key: "{rig_id}", class: "pick-row",
+                                        button {
+                                            class: "pick-row-main",
+                                            onclick: move |_| {
+                                                navigator.push(Route::RigEditor {
+                                                    project_id: id,
+                                                    rig_id,
+                                                });
+                                            },
+                                            span { class: "pick-name", "{name}" }
+                                            span { class: "muted", "Open" }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
                 h2 { class: "section-label list-section", "Mat analyses" }
                 if mat_analyses().is_empty() {
                     div { class: "empty-state compact",
@@ -234,4 +325,47 @@ pub fn ProjectPage(id: Uuid) -> Element {
             }
         }
     }
+}
+
+#[cfg(debug_assertions)]
+fn debug_demo_rig_button(
+    project_id: Uuid,
+    mut status: Signal<String>,
+    mut rigs: Signal<Vec<RigHeaderView>>,
+) -> Element {
+    let ctx = use_context::<AppCtx>();
+    let navigator = use_navigator();
+    rsx! {
+        button {
+            class: "btn btn-secondary",
+            onclick: move |_| {
+                let Some(ref store) = ctx.store else {
+                    status.set("Database not available.".into());
+                    return;
+                };
+                let mut rig = rig::duplo10();
+                rig.project_id = project_id;
+                match store.save_rig(&rig) {
+                    Ok(()) => {
+                        rigs.set(store.list_rigs_for_project(project_id).unwrap_or_default());
+                        navigator.push(Route::RigEditor {
+                            project_id,
+                            rig_id: rig.id,
+                        });
+                    }
+                    Err(error) => status.set(error.to_string()),
+                }
+            },
+            "Add Duplo10 demo rig"
+        }
+    }
+}
+
+#[cfg(not(debug_assertions))]
+fn debug_demo_rig_button(
+    _project_id: Uuid,
+    _status: Signal<String>,
+    _rigs: Signal<Vec<RigHeaderView>>,
+) -> Element {
+    rsx! {}
 }

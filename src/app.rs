@@ -9,7 +9,7 @@ pub use context::AppCtx;
 use dioxus::prelude::*;
 use uuid::Uuid;
 
-use crate::ui::pages::{Home, MatEditor, PickEditor, ProjectPage};
+use crate::ui::pages::{Home, MatEditor, PickEditor, ProjectPage, RigEditorPage};
 use bth_rigging::store::RiggingStore;
 
 const TAILWIND: Asset = asset!("/assets/tailwind.css");
@@ -26,6 +26,8 @@ pub enum Route {
     PickEditor { project_id: Uuid, pick_id: Uuid },
     #[route("/project/:project_id/mat/:analysis_id")]
     MatEditor { project_id: Uuid, analysis_id: Uuid },
+    #[route("/project/:project_id/rig/:rig_id")]
+    RigEditor { project_id: Uuid, rig_id: Uuid },
 }
 
 #[component]
@@ -51,4 +53,9 @@ pub fn App() -> Element {
 #[component]
 fn Project(id: Uuid) -> Element {
     rsx! { ProjectPage { id } }
+}
+
+#[component]
+fn RigEditor(project_id: Uuid, rig_id: Uuid) -> Element {
+    rsx! { RigEditorPage { project_id, rig_id } }
 }
