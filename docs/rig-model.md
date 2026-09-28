@@ -49,14 +49,60 @@ valid rig can still be a mechanism — that is Step 3's rank test.
 
 ## Expressions
 
-There is no parser in Step 1. Expressions are an AST built through `RigBuilder`
-and ordinary `+ - * /` on `ParamId` / `Expr`:
+Expressions can be built with `RigBuilder` and ordinary `+ - * /` on
+`ParamId` / `Expr`, or entered as text with `rig::param::syntax::parse_expr`:
 
 ```rust
 let s12 = b.param("s12", Quantity::Length, 8.0).assumed();
-let s23 = b.param("s23", Quantity::Length, 8.0).assumed();
-let x_p3 = -(s12 + s23); // Expr
+let g = b.param("lug_gauge_G", Quantity::Length, 12.0).assumed();
+let x_p3 = -(s12 + g); // Expr
+
+let parsed = parse_expr("s12 + 2*lug_gauge_G", &rig.params)?;
 ```
+
+The expression grammar is deliberately small:
+
+```text
+expr   := term (('+' | '-') term)*
+term   := unary (('*' | '/') unary)*
+unary  := '-' unary | atom
+atom   := literal | ident | '(' expr ')'
+literal := number unit? | feet-inches
+```
+
+Binary operators are left-associative; unary minus binds more tightly than
+multiplication, matching Rust builder expressions. Identifiers are
+case-sensitive and use `[A-Za-z_][A-Za-z0-9_]*`. Functions, exponentiation,
+implicit multiplication and `%` as an operator are unsupported. The parser
+keeps byte spans internally and reports 1-based character columns, including
+for multi-byte symbols. It stops at the first error. Quantity mismatches point
+to the operator that combines the incompatible expressions.
+
+Unit suffixes are recognized only immediately after a number, with or without
+intervening whitespace. Values are checked and converted to base units during
+parsing:
+
+| Unit suffix | Quantity | Base-unit factor |
+|---|---|---:|
+| `ft`, `'` | Length | 1 ft |
+| `in`, `"` | Length | 1/12 ft |
+| `lb`, `lbs` | Weight | 1 lb |
+| `kip` | Weight | 1000 lb |
+| `deg`, `°` | Angle | 1 degree |
+| `%` | Ratio | 0.01 |
+
+Feet-inches without internal whitespace are one literal (`8'-6"` = 8.5 ft);
+with whitespace (`8' - 6"`) the hyphen is subtraction. Unsupported unit words
+include `ton`, `kips`, `mm`, `m` and `kg`.
+
+`Expr::to_text` prints canonical text. For finite expressions,
+`parse_expr(expr.to_text(&table), &table).expr == expr`, including negative
+constants, explicit negation and nested operator trees. Parentheses preserve
+AST shape; numeric text round-trips exactly. Literal unit spelling is not
+stored: `6 in` becomes `Const(0.5)` and prints as `0.5`. A dangling parameter
+prints as a non-rebinding `?<uuid-prefix>` marker. The AST remains the source
+of truth; no expression text is persisted and no `Expr` variants or schema
+version were added.
 
 `Expr::eval` walks the tree, tracks quantity, and reports `UnknownParam`,
 `ParamCycle`, `QuantityMismatch` or `BadValue`. `param::sweep` evaluates a
@@ -64,11 +110,8 @@ closure at nominal and at each parameter's min and max, one at a time
 (not full factorial — Step 7 upgrades that).
 
 `ParamSource::Assumed` is what makes a report say "provisional". Weight
-roll-up sets `RigWeights.assumed` when any input is assumed.
-
-Base units are ft, lb, deg, matching the rest of the app. `Quantity` keeps a
-length from being added to a weight. When `kip` is ready, `f64` becomes its
-exact type and `Quantity` becomes its unit.
+roll-up sets `RigWeights.assumed` when any input is assumed. Base units are
+ft, lb and deg.
 
 ## Five member shapes
 

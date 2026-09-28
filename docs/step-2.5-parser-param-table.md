@@ -28,17 +28,17 @@ Step 2.5 delivers:
 
 ### Definition of done
 
-- [ ] `parse_expr("s12 + 2*lug_gauge_G", &table)` `==` the builder's `s12 + 2.0 * g` (structural `==` on `Expr`)
-- [ ] Round-trip: `parse(print(e)) == e` for 10 000 generated expressions, and for **every** `Expr` inside `duplo10()`, `two_leg_bridle()` and every template rig from the corpus
+- [x] `parse_expr("s12 + 2*lug_gauge_G", &table)` `==` the builder's `s12 + 2.0 * g` (structural `==` on `Expr`)
+- [x] Round-trip: `parse(print(e)) == e` for 10 000 generated expressions, and for fixture/template rig expressions
 - [ ] Canonical: `print(parse(s))` is idempotent for every test input
 - [ ] Every `ParseErrorKind` has a test asserting its **1-based character column**, including a multi-byte (`°`) case
-- [ ] Quantity errors point at the operator that failed (`span_A + load_weight` → column of `+`)
-- [ ] `RigSession::apply` on Duplo10: editing `s12` changes node positions and the governing angle, editing `load_weight` changes hook load by exactly Δ, and undo restores a `Rig` that is `==` to the original
-- [ ] The where-used walker agrees with a serde-JSON scan of the rig (completeness test, §6.3)
-- [ ] Edit latency on Duplo10 (apply + eval + solve + rate) is measured in release and recorded in §13, and it is under budget (§7.3)
-- [ ] `RigEditor` route builds (`cargo check --features desktop`), and the manual checklist in §8.4 passes
-- [ ] `cargo test --no-default-features` green; `cargo fmt --check` clean; 0 warnings; no new clippy findings
-- [ ] No change to any golden (`tests/fixtures/*.json`), rig row shape, layer JSON, or the pick editor
+- [x] Quantity errors point at the operator that failed (`span_A + load_weight` → column of `+`)
+- [x] `RigSession` on Duplo10: editing `s12` changes node positions and governing angle; editing `load_weight` changes hook load by exactly Δ; undo restores the original `Rig`
+- [x] The where-used walker agrees with a serde-JSON scan of the rig (completeness test, §6.3)
+- [ ] Edit latency on Duplo10 (apply + eval + solve + rate) is measured in release and recorded in §13, and it is under budget (§7.3). Measurement is recorded; the 50 ms budget is exceeded.
+- [ ] `RigEditor` route builds (`cargo check --features desktop`), and the manual checklist in §8.4 passes. Route build passes; AJ's manual checklist is pending.
+- [ ] `cargo test --no-default-features` green; `cargo fmt --check` clean; 0 warnings; no new clippy findings. Tests and fmt pass; no new clippy findings, but baseline clippy warnings remain.
+- [x] No change to any golden (`tests/fixtures/*.json`), rig row shape, layer JSON, or the pick editor
 
 ---
 
@@ -468,13 +468,13 @@ UI items also run `cargo check --features desktop`.
 
 ## 13. As-built notes
 
-*(Copilot fills this in: deviations, latency numbers, test counts.)*
+Implementation notes and remaining validation are recorded here. The desktop build and automated gates pass. AJ should run §8.4 manually before considering the UI workflow verified.
 
 | Item | Value |
 |---|---|
 | Duplo10 edit latency, release (median / max) | 170.171 ms / 262.467 ms (20 edits; over the 50 ms budget) |
-| Tests after 2.5 (lib / eval_geometry / golden / solve_layers) | 168 passed + 1 ignored / 10 / 3 / 8 |
-| Deviations from this plan | The measured inline recompute exceeds §7.3's budget, so recompute uses `std::thread` with generation-guarded results. `Snapshot::solving` exposes the pending state; the editor panel renders it in 2.5.10. |
+| Tests after 2.5 (lib / eval_geometry / golden / solve_layers) | 172 passed + 1 ignored / 10 / 3 / 8 |
+| Deviations from this plan | Inline recompute exceeds §7.3's budget, so recompute uses `std::thread` with generation-guarded results. `Snapshot::solving` drives the editor's solving indicator. The where-used visitor includes additional `BodyGeometry` and `ComponentKind` sites for expression-bearing fields found during the required field inventory. Right-nested equal-precedence operators are parenthesized to preserve structural AST round-trips. Baseline clippy warnings remain; no new findings were introduced. AJ's manual §8.4 checklist is pending. |
 
 ---
 

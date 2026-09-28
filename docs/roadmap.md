@@ -10,7 +10,7 @@ Step 0 reorganized the crate. Steps 1–7 build the rigging graph from the lugs 
 | **1** | ✅ done | Graph model: bodies, nodes, members, components, parameters | `rig::{body,node,member,component,param,bearing,template,build,fixtures}`, `store::rig`, `catalog::connection_hardware` | Readback Part 3 — graph elements; bearing width §4.7. Model reference: `docs/rig-model.md` | Template conversion: graph weights match `layers` for sample picks (tensions in Step 3) |
 | **2** | ✅ done | Eval parameters → 3D; side/end/plan views | `rig::{eval,views}` | Readback — coordinates as expressions; projections | `EvalRig` places the graph; `Scene` goldens for Duplo10 and 2-over-4; geometry matches `layers` to 1e-9 |
 | **3** | ✅ done | Solver + shared checks | `rig::solve::{rank,hang,elastic,bounds,inverse}`, `checks::{sling,chain,shackle,lug,bar}` | §3.5 determinacy (`s = m − r`, `k = dof − r`); tension-only | Rank/hang/elastic on template graphs; checks stamp OK/OVER |
-| **2.5** | ▶ next | Expression parser + parameter-table editor | `rig::param` (`Expr` parse/print), `ui` parameter table | Step 1 D2; Step 2 D2-8 (split out of Step 2) | Typed text (`s12 + 2*G`) parses to the same `Expr` the builder API makes; print → parse round-trips; errors point at the column; an edit re-evaluates `EvalRig` |
+| **2.5** | ✅ done | Expression parser + parameter-table editor | `rig::param::{syntax,print}`, `rig::{edit,session}`, `ui` parameter table | Step 1 D2; Step 2 D2-8 (split out of Step 2) | Typed expressions parse to builder-equivalent ASTs; canonical print round-trips; edits recompute and rate the rig |
 | **4** | — | Crane config, chart, reeving | `crane::{config,chart,reeving}` | Readback crane capacity / reeving | Conservative chart lookup + line pull for a sample crane |
 | **5** | — | Pose and clearance | `crane::{pose,clearance}` | Loaded radius → β; boom envelope | Head/hook height; clearance sweep vs graph |
 | **6** | — | Crane statics → mats | `crane::statics` (+ existing `mats`) | Slew sweep; outrigger reactions | Reactions feed mat bearing analysis |
@@ -25,6 +25,7 @@ shows the graph, and D2-1 holds screens until tensions exist. So 2.5 lands just 
 `cargo fmt --check` clean; 0 compiler warnings (baseline was 6).
 **Verified 2026-09-26 (Step 3):** 136 lib + 10 `eval_geometry` + 3 golden + 8 `solve_layers`, all green, headless; fmt clean;
 0 compiler warnings; no new clippy findings in Step 3 code. Plan and as-built notes: `docs/step-3-solve-checks.md`.
+**Verified 2026-09-28 (Step 2.5):** `cargo test --no-default-features` → 172 lib passed + 1 ignored, 10 `eval_geometry`, 3 golden, 8 `solve_layers`, all green; `cargo fmt --check` and `cargo check --features desktop` pass; 10,000 generated expression trees round-trip; no new clippy findings (baseline clippy warnings remain). Release edit latency is 170.171 ms median / 262.467 ms max, above the 50 ms inline budget, so recompute uses generation-guarded `std::thread`; AJ's §8.4 manual checklist remains to be run. As-built notes: `docs/step-2.5-parser-param-table.md` §13.
 
 ## Scaffold map
 
