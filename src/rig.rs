@@ -24,6 +24,7 @@ pub mod id;
 pub mod member;
 pub mod node;
 pub mod param;
+pub mod session;
 pub mod solve;
 pub mod template;
 pub mod views;
