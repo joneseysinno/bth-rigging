@@ -16,6 +16,8 @@ use super::RigError;
 use super::RigErrorKind;
 use super::id::ParamId;
 
+pub mod syntax;
+
 /// Insertion-ordered parameter table. UUID keys; name lookup is a scan / index
 /// rebuilt on load.
 pub type ParamTable = IndexMap<ParamId, Param>;
