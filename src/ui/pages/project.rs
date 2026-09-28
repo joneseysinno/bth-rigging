@@ -67,10 +67,11 @@ pub fn ProjectPage(id: Uuid) -> Element {
                                         status.set(e.to_string());
                                         return;
                                     }
-                                    navigator.push(Route::PickEditor {
-                                        project_id: id,
-                                        pick_id: pick.id,
-                                    });
+                                    navigator
+                                        .push(Route::PickEditor {
+                                            project_id: id,
+                                            pick_id: pick.id,
+                                        });
                                 }
                             }
                         },
@@ -88,10 +89,11 @@ pub fn ProjectPage(id: Uuid) -> Element {
                                         status.set(e.to_string());
                                         return;
                                     }
-                                    navigator.push(Route::MatEditor {
-                                        project_id: id,
-                                        analysis_id: analysis.id,
-                                    });
+                                    navigator
+                                        .push(Route::MatEditor {
+                                            project_id: id,
+                                            analysis_id: analysis.id,
+                                        });
                                 }
                             }
                         },
@@ -105,9 +107,7 @@ pub fn ProjectPage(id: Uuid) -> Element {
                             let proj_name = proj.name.clone();
                             move |_| {
                                 if picks().is_empty() && mat_analyses().is_empty() {
-                                    status.set(
-                                        "Add a pick or mat analysis before printing.".into(),
-                                    );
+                                    status.set("Add a pick or mat analysis before printing.".into());
                                     return;
                                 }
                                 let Some(ref s) = ctx.store else {
@@ -119,15 +119,17 @@ pub fn ProjectPage(id: Uuid) -> Element {
                                     .set_file_name(&default_name)
                                     .add_filter("PDF", &["pdf"])
                                     .save_file()
-                                else {
+                                    else {
                                     status.set("Save cancelled.".into());
                                     return;
                                 };
                                 match render_project_calc_package(s, id) {
-                                    Ok(bytes) => match std::fs::write(&path, bytes) {
-                                        Ok(()) => status.set("Saved calc package.".into()),
-                                        Err(e) => status.set(format!("Save failed: {e}")),
-                                    },
+                                    Ok(bytes) => {
+                                        match std::fs::write(&path, bytes) {
+                                            Ok(()) => status.set("Saved calc package.".into()),
+                                            Err(e) => status.set(format!("Save failed: {e}")),
+                                        }
+                                    }
                                     Err(e) => status.set(e.to_string()),
                                 }
                             }
@@ -158,10 +160,12 @@ pub fn ProjectPage(id: Uuid) -> Element {
                                         button {
                                             class: "pick-row-main",
                                             onclick: move |_| {
-                                                navigator.push(Route::PickEditor {
-                                                    project_id: id,
-                                                    pick_id,
-                                                });
+                                                navigator
+                                                    .push(Route::PickEditor {
+                                                        project_id: id,
+                                                        pick_id,
+                                                    }
+                                                    button {
                                             },
                                             span { class: "pick-name", "{name}" }
                                             span { class: "muted", "{weight as u64} lb" }
@@ -173,9 +177,7 @@ pub fn ProjectPage(id: Uuid) -> Element {
                                                 move |_| {
                                                     if let Some(ref s) = ctx.store {
                                                         let _ = s.delete_pick(pick_id);
-                                                        picks.set(
-                                                            s.list_picks_for_project(id).unwrap_or_default(),
-                                                        );
+                                                        picks.set(s.list_picks_for_project(id).unwrap_or_default());
                                                     }
                                                 }
                                             },
@@ -217,24 +219,33 @@ pub fn ProjectPage(id: Uuid) -> Element {
                                     return;
                                 };
                                 match store.load_pick(pick_id) {
-                                    Ok(Some((pick, pick_layers))) => match store.list_spreaders() {
-                                        Ok(spreaders) => {
-                                            let mut rig = rig::from_layers(&pick, &pick_layers, &spreaders);
-                                            rig.project_id = id;
-                                            match store.save_rig(&rig) {
-                                                Ok(()) => {
-                                                    rigs.set(store.list_rigs_for_project(id).unwrap_or_default());
-                                                    status.set("Rig created from pick.".into());
-                                                    navigator.push(Route::RigEditor {
-                                                        project_id: id,
-                                                        rig_id: rig.id,
-                                                    });
+                                    Ok(Some((pick, pick_layers))) => {
+                                        match store.list_spreaders() {
+                                            Ok(spreaders) => {
+                                                let mut rig = rig::from_layers(
+                                                    &pick,
+                                                    &pick_layers,
+                                                    &spreaders,
+                                                );
+                                                rig.project_id = id;
+                                                match store.save_rig(&rig) {
+                                                    Ok(()) => {
+                                                        rigs.set(
+                                                            store.list_rigs_for_project(id).unwrap_or_default(),
+                                                        );
+                                                        status.set("Rig created from pick.".into());
+                                                        navigator
+                                                            .push(Route::RigEditor {
+                                                                project_id: id,
+                                                                rig_id: rig.id,
+                                                            });
+                                                    }
+                                                    Err(error) => status.set(error.to_string()),
                                                 }
-                                                Err(error) => status.set(error.to_string()),
                                             }
+                                            Err(error) => status.set(error.to_string()),
                                         }
-                                        Err(error) => status.set(error.to_string()),
-                                    },
+                                    }
                                     Ok(None) => status.set("Pick no longer exists.".into()),
                                     Err(error) => status.set(error.to_string()),
                                 }
@@ -259,10 +270,12 @@ pub fn ProjectPage(id: Uuid) -> Element {
                                         button {
                                             class: "pick-row-main",
                                             onclick: move |_| {
-                                                navigator.push(Route::RigEditor {
-                                                    project_id: id,
-                                                    rig_id,
-                                                });
+                                                navigator
+                                                    .push(Route::RigEditor {
+                                                        project_id: id,
+                                                        rig_id,
+                                                    }
+                                                    }
                                             },
                                             span { class: "pick-name", "{name}" }
                                             span { class: "muted", "Open" }
@@ -292,10 +305,12 @@ pub fn ProjectPage(id: Uuid) -> Element {
                                         button {
                                             class: "pick-row-main",
                                             onclick: move |_| {
-                                                navigator.push(Route::MatEditor {
-                                                    project_id: id,
-                                                    analysis_id,
-                                                });
+                                                navigator
+                                                    .push(Route::MatEditor {
+                                                        project_id: id,
+                                                        analysis_id,
+                                                    }
+                                                    button {
                                             },
                                             span { class: "pick-name", "{name}" }
                                             span { class: "muted", "{format_lbs(load)} lb outrigger" }
@@ -307,10 +322,8 @@ pub fn ProjectPage(id: Uuid) -> Element {
                                                 move |_| {
                                                     if let Some(ref s) = ctx.store {
                                                         let _ = s.delete_mat_analysis(analysis_id);
-                                                        mat_analyses.set(
-                                                            s.list_mat_analyses_for_project(id)
-                                                                .unwrap_or_default(),
-                                                        );
+                                                        mat_analyses
+                                                            .set(s.list_mat_analyses_for_project(id).unwrap_or_default());
                                                     }
                                                 }
                                             },
@@ -348,10 +361,11 @@ fn debug_demo_rig_button(
                 match store.save_rig(&rig) {
                     Ok(()) => {
                         rigs.set(store.list_rigs_for_project(project_id).unwrap_or_default());
-                        navigator.push(Route::RigEditor {
-                            project_id,
-                            rig_id: rig.id,
-                        });
+                        navigator
+                            .push(Route::RigEditor {
+                                project_id,
+                                rig_id: rig.id,
+                            }
                     }
                     Err(error) => status.set(error.to_string()),
                 }

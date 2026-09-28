@@ -52,10 +52,14 @@ pub fn App() -> Element {
 
 #[component]
 fn Project(id: Uuid) -> Element {
-    rsx! { ProjectPage { id } }
+    rsx! {
+        ProjectPage { id }
+    }
 }
 
 #[component]
 fn RigEditor(project_id: Uuid, rig_id: Uuid) -> Element {
-    rsx! { RigEditorPage { project_id, rig_id } }
+    rsx! {
+        RigEditorPage { project_id, rig_id }
+    }
 }

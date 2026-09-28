@@ -109,7 +109,11 @@ pub fn RigEditorPage(project_id: Uuid, rig_id: Uuid) -> Element {
             return rsx! {
                 div { class: "page-shell",
                     main { class: "page-main",
-                        Link { to: Route::Project { id: project_id }, class: "back-link", "← Project" }
+                        Link {
+                            to: Route::Project { id: project_id },
+                            class: "back-link",
+                            "← Project"
+                        }
                         p { class: "status-line", "{error}" }
                     }
                 }
@@ -208,12 +212,20 @@ pub fn RigEditorPage(project_id: Uuid, rig_id: Uuid) -> Element {
                         }
                         button {
                             class: "btn btn-ghost",
-                            onclick: move |_| { if let Some(current) = session.write().as_mut() { current.undo(); } },
+                            onclick: move |_| {
+                                if let Some(current) = session.write().as_mut() {
+                                    current.undo();
+                                }
+                            },
                             "Undo"
                         }
                         button {
                             class: "btn btn-ghost",
-                            onclick: move |_| { if let Some(current) = session.write().as_mut() { current.redo(); } },
+                            onclick: move |_| {
+                                if let Some(current) = session.write().as_mut() {
+                                    current.redo();
+                                }
+                            },
                             "Redo"
                         }
                     }
@@ -249,10 +261,16 @@ pub fn RigEditorPage(project_id: Uuid, rig_id: Uuid) -> Element {
                         h2 { class: "panel-title", "Unsaved rig changes" }
                         p { "Leave without saving these parameter edits?" }
                         div { class: "toolbar",
-                            button { class: "btn btn-ghost", onclick: move |_| show_leave_confirm.set(false), "Stay" }
+                            button {
+                                class: "btn btn-ghost",
+                                onclick: move |_| show_leave_confirm.set(false),
+                                "Stay"
+                            }
                             button {
                                 class: "btn btn-primary",
-                                onclick: move |_| { navigator.push(Route::Project { id: project_id }); },
+                                onclick: move |_| {
+                                    navigator.push(Route::Project { id: project_id });
+                                },
                                 "Leave"
                             }
                         }
@@ -280,7 +298,9 @@ fn ResultsPanel(
         section { class: "results-panel",
             div { class: "results-heading",
                 h2 { class: "panel-title", "Live results" }
-                if solving { span { class: "solving-indicator", "Solving…" } }
+                if solving {
+                    span { class: "solving-indicator", "Solving…" }
+                }
             }
             if headline.assumed_count > 0 {
                 div { class: "provisional-banner",
@@ -291,25 +311,40 @@ fn ResultsPanel(
             if !validation.errors.is_empty() || !validation.warnings.is_empty() {
                 section { class: "results-section validation-list",
                     h3 { "Validation" }
-                    for error in validation.errors.iter() { p { class: "validation-error", "{error}" } }
-                    for warning in validation.warnings.iter() { p { class: "validation-warning", "{warning}" } }
+                    for error in validation.errors.iter() {
+                        p { class: "validation-error", "{error}" }
+                    }
+                    for warning in validation.warnings.iter() {
+                        p { class: "validation-warning", "{warning}" }
+                    }
                 }
             }
             if let Err(errors) = &eval {
                 div { class: "results-error",
                     h3 { "Evaluation failed" }
-                    for error in errors { p { "{error}" } }
+                    for error in errors {
+                        p { "{error}" }
+                    }
                 }
             }
             if let Some(errors) = &solve_errors {
                 div { class: "results-error",
                     h3 { "Solve failed" }
-                    for error in errors { p { "{error}" } }
+                    for error in errors {
+                        p { "{error}" }
+                    }
                 }
             }
-            if headline_is_last_good { p { class: "last-good-label", "Last good results" } }
+            if headline_is_last_good {
+                p { class: "last-good-label", "Last good results" }
+            }
             div { class: if headline_is_last_good { "headline-grid is-last-good" } else { "headline-grid" },
-                HeadlineValue { label: "Hook load", value: format!("{} lb", format_lbs(headline.hook_load_lbs)), delta: delta.map(|change| change.hook_load_lbs), unit: "lb" }
+                HeadlineValue {
+                    label: "Hook load",
+                    value: format!("{} lb", format_lbs(headline.hook_load_lbs)),
+                    delta: delta.map(|change| change.hook_load_lbs),
+                    unit: "lb",
+                }
                 if let Some(weights) = &weight_breakdown {
                     div { class: "headline-breakdown",
                         span { "Load {format_lbs(weights.load_lbs)} lb" }
@@ -317,9 +352,24 @@ fn ResultsPanel(
                         span { "Rigging {format_lbs(weights.rigging_lbs)} lb" }
                     }
                 }
-                HeadlineValue { label: "Governing angle", value: format!("{}°", format_num(headline.governing_angle_deg)), delta: delta.map(|change| change.governing_angle_deg), unit: "°" }
-                HeadlineValue { label: "Maximum tension", value: format!("{} lb", format_lbs(headline.max_tension_lbs)), delta: delta.map(|change| change.max_tension_lbs), unit: "lb" }
-                HeadlineValue { label: "Maximum utilization", value: format!("{}%", format_num(headline.max_utilization * 100.0)), delta: delta.map(|change| change.max_utilization * 100.0), unit: "%" }
+                HeadlineValue {
+                    label: "Governing angle",
+                    value: format!("{}°", format_num(headline.governing_angle_deg)),
+                    delta: delta.map(|change| change.governing_angle_deg),
+                    unit: "°",
+                }
+                HeadlineValue {
+                    label: "Maximum tension",
+                    value: format!("{} lb", format_lbs(headline.max_tension_lbs)),
+                    delta: delta.map(|change| change.max_tension_lbs),
+                    unit: "lb",
+                }
+                HeadlineValue {
+                    label: "Maximum utilization",
+                    value: format!("{}%", format_num(headline.max_utilization * 100.0)),
+                    delta: delta.map(|change| change.max_utilization * 100.0),
+                    unit: "%",
+                }
                 div { class: "headline-value headline-status",
                     span { class: "field-label", "Worst status" }
                     span { class: status_class(headline.worst_status), "{headline.worst_status.label()}" }
@@ -330,9 +380,17 @@ fn ResultsPanel(
                     h3 { "Members" }
                     div { class: "result-table-wrap",
                         table { class: "result-table",
-                            thead { tr { th { "Member" } th { "Tension" } th { "Angle" } th { "State" } th { "Status" } } }
+                            thead {
+                                tr {
+                                    th { "Member" }
+                                    th { "Tension" }
+                                    th { "Angle" }
+                                    th { "State" }
+                                    th { "Status" }
+                                }
+                            }
                             tbody {
-                                for (label, member_id, force) in &solved_members {
+                                for (label , member_id , force) in &solved_members {
                                     {
                                         let member_status = rated_for_member(&rated, *member_id);
                                         let angle = force.angle_deg.iter().copied().fold(0.0, f64::max);
@@ -341,8 +399,16 @@ fn ResultsPanel(
                                                 td { "{label}" }
                                                 td { "{format_lbs(force.tension_lbs)} lb" }
                                                 td { "{format_num(angle)}°" }
-                                                td { if force.taut { "Taut" } else { "Slack" } }
-                                                td { span { class: status_class(member_status), "{member_status.label()}" } }
+                                                td {
+                                                    if force.taut {
+                                                        "Taut"
+                                                    } else {
+                                                        "Slack"
+                                                    }
+                                                }
+                                                td {
+                                                    span { class: status_class(member_status), "{member_status.label()}" }
+                                                }
                                             }
                                         }
                                     }
@@ -355,14 +421,22 @@ fn ResultsPanel(
             if let Ok(eval) = &eval {
                 section { class: "results-section residual-list",
                     h3 { "Residuals" }
-                    if eval.residuals.is_empty() { p { class: "muted", "No residuals." } }
+                    if eval.residuals.is_empty() {
+                        p { class: "muted", "No residuals." }
+                    }
                     for residual in &eval.residuals {
-                        p { class: "residual-item", strong { "{residual.kind:?}" } span { "{residual.message}" } }
+                        p { class: "residual-item",
+                            strong { "{residual.kind:?}" }
+                            span { "{residual.message}" }
+                        }
                     }
                 }
             }
             {
-                let failures: Vec<&Rated> = rated.iter().filter(|item| item.check.status != Status::Ok).collect();
+                let failures: Vec<&Rated> = rated
+                    .iter()
+                    .filter(|item| item.check.status != Status::Ok)
+                    .collect();
                 if !failures.is_empty() {
                     rsx! {
                         section { class: "results-section rating-list",
@@ -373,8 +447,12 @@ fn ResultsPanel(
                                         strong { "{item.owner}" }
                                         span { class: status_class(item.check.status), "{item.check.status.label()}" }
                                     }
-                                    p { "{item.check.item}: {format_lbs(item.check.demand_lbs)} lb / {format_lbs(item.check.capacity_lbs)} lb" }
-                                    for note in &item.check.notes { p { class: "muted", "{note}" } }
+                                    p {
+                                        "{item.check.item}: {format_lbs(item.check.demand_lbs)} lb / {format_lbs(item.check.capacity_lbs)} lb"
+                                    }
+                                    for note in &item.check.notes {
+                                        p { class: "muted", "{note}" }
+                                    }
                                 }
                             }
                         }
@@ -399,7 +477,9 @@ fn HeadlineValue(
             span { class: "field-label", "{label}" }
             strong { "{value}" }
             if let Some(change) = delta {
-                span { class: if change > 0.0 { "delta-chip delta-up" } else if change < 0.0 { "delta-chip delta-down" } else { "delta-chip" }, "{format_delta(change, unit)}" }
+                span { class: if change > 0.0 { "delta-chip delta-up" } else if change < 0.0 { "delta-chip delta-down" } else { "delta-chip" },
+                    "{format_delta(change, unit)}"
+                }
             }
         }
     }

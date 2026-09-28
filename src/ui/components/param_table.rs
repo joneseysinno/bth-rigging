@@ -90,7 +90,11 @@ fn ParamRow(
                     onchange: move |event| {
                         let name = event.value();
                         name_draft.set(name.clone());
-                        on_edit.call(ParamEdit::Rename { id: param.id, name });
+                        on_edit
+                            .call(ParamEdit::Rename {
+                                id: param.id,
+                                name,
+                            });
                     },
                 }
             }
@@ -112,7 +116,10 @@ fn ParamRow(
                         },
                         onchange: move |event| {
                             let text = event.value();
-                            let edit = ParamEdit::SetValue { id: param.id, text: text.clone() };
+                            let edit = ParamEdit::SetValue {
+                                id: param.id,
+                                text: text.clone(),
+                            };
                             match apply(&rig, &edit) {
                                 Ok(_) => {
                                     on_edit.call(edit);
@@ -136,7 +143,9 @@ fn ParamRow(
                             }
                         },
                     }
-                    if derived { span { class: "tag-fx", "fx" } }
+                    if derived {
+                        span { class: "tag-fx", "fx" }
+                    }
                 }
                 if let Some(error) = value_error() {
                     p { class: "param-error-message", "{error.message}" }
@@ -159,7 +168,12 @@ fn ParamRow(
                     onchange: move |event| {
                         let text = event.value();
                         minus_draft.set(text.clone());
-                        on_edit.call(ParamEdit::SetTol { id: param.id, minus: text, plus: plus_draft() });
+                        on_edit
+                            .call(ParamEdit::SetTol {
+                                id: param.id,
+                                minus: text,
+                                plus: plus_draft(),
+                            });
                     },
                 }
             }
@@ -171,7 +185,12 @@ fn ParamRow(
                     onchange: move |event| {
                         let text = event.value();
                         plus_draft.set(text.clone());
-                        on_edit.call(ParamEdit::SetTol { id: param.id, minus: minus_draft(), plus: text });
+                        on_edit
+                            .call(ParamEdit::SetTol {
+                                id: param.id,
+                                minus: minus_draft(),
+                                plus: text,
+                            });
                     },
                 }
             }
@@ -181,7 +200,11 @@ fn ParamRow(
                     value: "{source_key(param.source)}",
                     onchange: move |event| {
                         if let Some(source) = parse_source(&event.value()) {
-                            on_edit.call(ParamEdit::SetSource { id: param.id, source });
+                            on_edit
+                                .call(ParamEdit::SetSource {
+                                    id: param.id,
+                                    source,
+                                });
                         }
                     },
                     option { value: "Drawing", "Drawing" }
@@ -190,7 +213,9 @@ fn ParamRow(
                     option { value: "Assumed", "Assumed" }
                     option { value: "Derived", "Derived" }
                 }
-                if param.source == ParamSource::Assumed { span { class: "tag-assumed", "Assumed" } }
+                if param.source == ParamSource::Assumed {
+                    span { class: "tag-assumed", "Assumed" }
+                }
             }
             td {
                 div { class: "used-cell",
@@ -215,7 +240,11 @@ fn ParamRow(
                     onchange: move |event| {
                         let note = event.value();
                         note_draft.set(note.clone());
-                        on_edit.call(ParamEdit::SetNote { id: param.id, note });
+                        on_edit
+                            .call(ParamEdit::SetNote {
+                                id: param.id,
+                                note,
+                            });
                     },
                 }
             }
@@ -245,12 +274,23 @@ fn AddParamRow(rig: Rig, on_edit: EventHandler<ParamEdit>) -> Element {
     let mut value = use_signal(String::new);
     rsx! {
         tr { class: "param-add-row",
-            td { input { class: "param-input", placeholder: "new_name", value: "{name}", oninput: move |event| name.set(event.value()) } }
+            td {
+                input {
+                    class: "param-input",
+                    placeholder: "new_name",
+                    value: "{name}",
+                    oninput: move |event| name.set(event.value()),
+                }
+            }
             td {
                 select {
                     class: "param-input",
                     value: "{quantity_key(quantity())}",
-                    onchange: move |event| if let Some(parsed) = parse_quantity(&event.value()) { quantity.set(parsed) },
+                    onchange: move |event| {
+                        if let Some(parsed) = parse_quantity(&event.value()) {
+                            quantity.set(parsed)
+                        }
+                    },
                     option { value: "Length", "ft" }
                     option { value: "Weight", "lb" }
                     option { value: "Angle", "deg" }
@@ -258,7 +298,14 @@ fn AddParamRow(rig: Rig, on_edit: EventHandler<ParamEdit>) -> Element {
                     option { value: "Count", "ea" }
                 }
             }
-            td { input { class: "param-input", value: "{value}", placeholder: "8'-6\"  ·  s12 + 2*lug_gauge_G  ·  12 kip", oninput: move |event| value.set(event.value()) } }
+            td {
+                input {
+                    class: "param-input",
+                    value: "{value}",
+                    placeholder: "8'-6\"  ·  s12 + 2*lug_gauge_G  ·  12 kip",
+                    oninput: move |event| value.set(event.value()),
+                }
+            }
             td { "—" }
             td { "—" }
             td { "—" }
@@ -274,7 +321,12 @@ fn AddParamRow(rig: Rig, on_edit: EventHandler<ParamEdit>) -> Element {
                             let name_text = name().trim().to_owned();
                             let value_text = value();
                             if parse_for(&value_text, &table, quantity()).is_ok() {
-                                on_edit.call(ParamEdit::Add { name: name_text, quantity: quantity(), value: value_text });
+                                on_edit
+                                    .call(ParamEdit::Add {
+                                        name: name_text,
+                                        quantity: quantity(),
+                                        value: value_text,
+                                    });
                                 name.set(String::new());
                                 value.set(String::new());
                             }
