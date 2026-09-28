@@ -10,8 +10,265 @@ use std::collections::HashMap;
 
 use super::body::{BodyKind, Placement};
 use super::component::ComponentKind;
-use super::param::Expr;
-use super::{BodyId, MemberId, NodeId, ParamId, Rig};
+use super::param::{Expr, ParamSource, check_param_cycles};
+use super::{BodyId, MemberId, NodeId, Param, ParamId, ParamTable, Quantity, Rig};
+use crate::rig::param::syntax::{ParseError, parse_for};
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum ParamEdit {
+    Add {
+        name: String,
+        quantity: Quantity,
+        value: String,
+    },
+    Rename {
+        id: ParamId,
+        name: String,
+    },
+    SetValue {
+        id: ParamId,
+        text: String,
+    },
+    SetTol {
+        id: ParamId,
+        minus: String,
+        plus: String,
+    },
+    SetSource {
+        id: ParamId,
+        source: ParamSource,
+    },
+    SetNote {
+        id: ParamId,
+        note: String,
+    },
+    Delete {
+        id: ParamId,
+    },
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ParamField {
+    Name,
+    Value,
+    Minus,
+    Plus,
+    Source,
+    Note,
+    Row,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct EditError {
+    pub field: ParamField,
+    pub parse: Option<ParseError>,
+    pub message: String,
+    pub uses: Vec<UseSite>,
+}
+
+#[allow(clippy::result_large_err)]
+pub fn apply(rig: &Rig, edit: &ParamEdit) -> Result<Rig, EditError> {
+    let mut trial = rig.clone();
+    match edit {
+        ParamEdit::Add {
+            name,
+            quantity,
+            value,
+        } => {
+            validate_name(name, &trial.params, None)
+                .map_err(|message| edit_error(ParamField::Name, message))?;
+            let parsed = parse_for(value, &trial.params, *quantity)
+                .map_err(|error| parse_error(ParamField::Value, error))?;
+            let mut param = Param::new(name, *quantity, 0.0);
+            if parsed.is_constant {
+                param.nominal = parsed
+                    .expr
+                    .eval(&trial.params)
+                    .map_err(|error| edit_error(ParamField::Value, error.to_string()))?;
+            } else {
+                param.source = ParamSource::Derived;
+                param.expr = Some(parsed.expr);
+                insert_then_evaluate(
+                    &mut trial.params,
+                    param.id,
+                    param.clone(),
+                    ParamField::Value,
+                )?;
+                param.nominal = Expr::Param(param.id)
+                    .eval(&trial.params)
+                    .map_err(|error| edit_error(ParamField::Value, error.to_string()))?;
+            }
+            trial.params.insert(param.id, param);
+        }
+        ParamEdit::Rename { id, name } => {
+            validate_name(name, &trial.params, Some(*id))
+                .map_err(|message| edit_error(ParamField::Name, message))?;
+            let param = trial.params.get_mut(id).ok_or_else(|| missing_row(*id))?;
+            param.name.clone_from(name);
+        }
+        ParamEdit::SetValue { id, text } => {
+            let param = trial.params.get(id).ok_or_else(|| missing_row(*id))?;
+            let parsed = parse_for(text, &trial.params, param.quantity)
+                .map_err(|error| parse_error(ParamField::Value, error))?;
+            let source = if parsed.is_constant {
+                if param.source == ParamSource::Derived {
+                    ParamSource::Assumed
+                } else {
+                    param.source
+                }
+            } else {
+                ParamSource::Derived
+            };
+            let mut updated = param.clone();
+            updated.source = source;
+            updated.expr = (!parsed.is_constant).then_some(parsed.expr.clone());
+            updated.nominal = parsed
+                .expr
+                .eval(&trial.params)
+                .map_err(|error| edit_error(ParamField::Value, error.to_string()))?;
+            trial.params.insert(*id, updated);
+            check_edited_param(&trial.params, *id, ParamField::Value)?;
+        }
+        ParamEdit::SetTol { id, minus, plus } => {
+            let param = trial.params.get(id).ok_or_else(|| missing_row(*id))?;
+            if param.source == ParamSource::Derived {
+                return Err(edit_error(
+                    ParamField::Minus,
+                    "tolerance comes from its inputs",
+                ));
+            }
+            let (minus, plus) = if let Some(value) = minus.strip_prefix("±") {
+                (value, value)
+            } else if let Some(value) = plus.strip_prefix("±") {
+                (value, value)
+            } else {
+                (minus.as_str(), plus.as_str())
+            };
+            let minus_value = parse_tolerance(minus, param, &trial.params, ParamField::Minus)?;
+            let plus_value = parse_tolerance(plus, param, &trial.params, ParamField::Plus)?;
+            let param = trial.params.get_mut(id).expect("row checked above");
+            param.minus = minus_value;
+            param.plus = plus_value;
+        }
+        ParamEdit::SetSource { id, source } => {
+            let param = trial.params.get(id).ok_or_else(|| missing_row(*id))?;
+            if *source == ParamSource::Derived && param.expr.is_none() {
+                return Err(edit_error(
+                    ParamField::Source,
+                    "type an expression to derive this value",
+                ));
+            }
+            let mut updated = param.clone();
+            if *source != ParamSource::Derived {
+                if let Some(expr) = &updated.expr {
+                    updated.nominal = expr
+                        .eval(&trial.params)
+                        .map_err(|error| edit_error(ParamField::Source, error.to_string()))?;
+                }
+                updated.expr = None;
+            }
+            updated.source = *source;
+            trial.params.insert(*id, updated);
+        }
+        ParamEdit::SetNote { id, note } => {
+            trial
+                .params
+                .get_mut(id)
+                .ok_or_else(|| missing_row(*id))?
+                .note
+                .clone_from(note);
+        }
+        ParamEdit::Delete { id } => {
+            let uses = uses(&trial, *id);
+            if !uses.is_empty() {
+                return Err(EditError {
+                    field: ParamField::Row,
+                    parse: None,
+                    message: "parameter is still in use".into(),
+                    uses,
+                });
+            }
+            trial
+                .params
+                .shift_remove(id)
+                .ok_or_else(|| missing_row(*id))?;
+        }
+    }
+    Ok(trial)
+}
+
+#[allow(clippy::result_large_err)]
+fn parse_tolerance(
+    text: &str,
+    param: &Param,
+    table: &ParamTable,
+    field: ParamField,
+) -> Result<f64, EditError> {
+    if text.trim().is_empty() {
+        return Ok(0.0);
+    }
+    let parsed =
+        parse_for(text, table, param.quantity).map_err(|error| parse_error(field, error))?;
+    if !parsed.is_constant {
+        return Err(edit_error(field, "tolerance must be a literal"));
+    }
+    let value = parsed
+        .expr
+        .eval(table)
+        .map_err(|error| edit_error(field, error.to_string()))?;
+    if value < 0.0 {
+        return Err(edit_error(field, "tolerance must be non-negative"));
+    }
+    Ok(value)
+}
+
+#[allow(clippy::result_large_err)]
+fn insert_then_evaluate(
+    table: &mut ParamTable,
+    id: ParamId,
+    param: Param,
+    field: ParamField,
+) -> Result<(), EditError> {
+    table.insert(id, param);
+    let nominal = Expr::Param(id)
+        .eval(table)
+        .map_err(|error| edit_error(field, error.to_string()))?;
+    table.get_mut(&id).expect("inserted row").nominal = nominal;
+    check_edited_param(table, id, field)
+}
+
+#[allow(clippy::result_large_err)]
+fn check_edited_param(table: &ParamTable, id: ParamId, field: ParamField) -> Result<(), EditError> {
+    Expr::Param(id)
+        .eval(table)
+        .map_err(|error| edit_error(field, error.to_string()))?;
+    if let Err(error) = check_param_cycles(table) {
+        return Err(edit_error(field, error.to_string()));
+    }
+    Ok(())
+}
+
+fn parse_error(field: ParamField, error: ParseError) -> EditError {
+    EditError {
+        field,
+        message: error.message.clone(),
+        parse: Some(error),
+        uses: Vec::new(),
+    }
+}
+
+fn edit_error(field: ParamField, message: impl Into<String>) -> EditError {
+    EditError {
+        field,
+        parse: None,
+        message: message.into(),
+        uses: Vec::new(),
+    }
+}
+
+fn missing_row(id: ParamId) -> EditError {
+    edit_error(ParamField::Row, format!("parameter {id} does not exist"))
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum UseSite {
@@ -488,5 +745,267 @@ mod tests {
         assert!(validate_name("span_A", &table, None).is_err());
         assert!(validate_name("span_A", &table, Some(param.id)).is_ok());
         assert!(validate_name("span_2", &table, None).is_ok());
+    }
+
+    #[test]
+    fn set_value_supports_literals_derived_values_and_source_transitions() {
+        let rig = crate::rig::duplo10();
+        let s12 = rig.param_named("s12").unwrap().id;
+        let s23 = rig.param_named("s23").unwrap().id;
+
+        let literal = apply(
+            &rig,
+            &ParamEdit::SetValue {
+                id: s12,
+                text: "8'-6\"".into(),
+            },
+        )
+        .unwrap();
+        assert_eq!(literal.params[&s12].nominal, 8.5);
+        assert!(literal.params[&s12].expr.is_none());
+        assert_eq!(literal.params[&s12].source, ParamSource::Assumed);
+
+        let derived = apply(
+            &literal,
+            &ParamEdit::SetValue {
+                id: s12,
+                text: "s23 + 6 in".into(),
+            },
+        )
+        .unwrap();
+        assert_eq!(derived.params[&s12].nominal, 8.5);
+        assert_eq!(derived.params[&s12].source, ParamSource::Derived);
+        assert_eq!(
+            derived.params[&s12]
+                .expr
+                .as_ref()
+                .unwrap()
+                .to_text(&derived.params),
+            "s23 + 0.5"
+        );
+
+        let assumed = apply(
+            &derived,
+            &ParamEdit::SetValue {
+                id: s12,
+                text: "9 ft".into(),
+            },
+        )
+        .unwrap();
+        assert_eq!(assumed.params[&s12].source, ParamSource::Assumed);
+        assert!(assumed.params[&s12].expr.is_none());
+
+        let _ = s23;
+    }
+
+    #[test]
+    fn edit_cycle_is_refused_with_the_parameter_name_path() {
+        let mut rig = crate::rig::duplo10();
+        let s12 = rig.param_named("s12").unwrap().id;
+        let s23 = rig.param_named("s23").unwrap().id;
+        rig.params.get_mut(&s12).unwrap().expr = Some(Expr::Param(s23));
+        rig.params.get_mut(&s12).unwrap().source = ParamSource::Derived;
+
+        let error = apply(
+            &rig,
+            &ParamEdit::SetValue {
+                id: s23,
+                text: "s12".into(),
+            },
+        )
+        .unwrap_err();
+        assert_eq!(error.field, ParamField::Value);
+        assert!(
+            error.message.contains("s23 → s12 → s23"),
+            "{}",
+            error.message
+        );
+    }
+
+    #[test]
+    fn rename_updates_printed_dependants_without_rewriting_ids() {
+        let rig = crate::rig::duplo10();
+        let s12 = rig.param_named("s12").unwrap().id;
+        let s23 = rig.param_named("s23").unwrap().id;
+        let derived = apply(
+            &rig,
+            &ParamEdit::SetValue {
+                id: s12,
+                text: "s23 + 0.5".into(),
+            },
+        )
+        .unwrap();
+        let renamed = apply(
+            &derived,
+            &ParamEdit::Rename {
+                id: s23,
+                name: "span_23".into(),
+            },
+        )
+        .unwrap();
+        assert_eq!(
+            renamed.params[&s12]
+                .expr
+                .as_ref()
+                .unwrap()
+                .to_text(&renamed.params),
+            "span_23 + 0.5"
+        );
+        assert_eq!(renamed.params[&s23].id, s23);
+    }
+
+    #[test]
+    fn tolerance_edits_enforce_quantity_sign_and_derived_rules() {
+        let rig = crate::rig::duplo10();
+        let s12 = rig.param_named("s12").unwrap().id;
+        let tolerance = apply(
+            &rig,
+            &ParamEdit::SetTol {
+                id: s12,
+                minus: "±0.25 in".into(),
+                plus: String::new(),
+            },
+        )
+        .unwrap();
+        assert!((tolerance.params[&s12].minus - 0.25 / 12.0).abs() < 1e-12);
+        assert_eq!(tolerance.params[&s12].minus, tolerance.params[&s12].plus);
+
+        let negative = apply(
+            &rig,
+            &ParamEdit::SetTol {
+                id: s12,
+                minus: "-1 ft".into(),
+                plus: String::new(),
+            },
+        )
+        .unwrap_err();
+        assert_eq!(negative.field, ParamField::Minus);
+        assert!(negative.message.contains("non-negative"));
+
+        let expression = apply(
+            &rig,
+            &ParamEdit::SetTol {
+                id: s12,
+                minus: "s23".into(),
+                plus: String::new(),
+            },
+        )
+        .unwrap_err();
+        assert!(expression.message.contains("must be a literal"));
+
+        let derived = apply(
+            &rig,
+            &ParamEdit::SetValue {
+                id: s12,
+                text: "s23 + 1 ft".into(),
+            },
+        )
+        .unwrap();
+        let error = apply(
+            &derived,
+            &ParamEdit::SetTol {
+                id: s12,
+                minus: "1 ft".into(),
+                plus: "1 ft".into(),
+            },
+        )
+        .unwrap_err();
+        assert!(error.message.contains("tolerance comes from its inputs"));
+    }
+
+    #[test]
+    fn deleting_used_params_is_refused_with_use_sites() {
+        let rig = crate::rig::duplo10();
+        let gauge = rig.param_named("lug_gauge_G").unwrap().id;
+        let error = apply(&rig, &ParamEdit::Delete { id: gauge }).unwrap_err();
+        assert_eq!(error.field, ParamField::Row);
+        assert!(!error.uses.is_empty());
+        assert!(
+            error
+                .uses
+                .iter()
+                .any(|site| matches!(site, UseSite::NodeCoord { .. }))
+        );
+    }
+
+    #[test]
+    fn source_note_add_and_delete_commands_are_pure() {
+        let rig = crate::rig::duplo10();
+        let original = rig.clone();
+        let s12 = rig.param_named("s12").unwrap().id;
+        let added = apply(
+            &rig,
+            &ParamEdit::Add {
+                name: "new_span".into(),
+                quantity: Quantity::Length,
+                value: "s12 + 1 ft".into(),
+            },
+        )
+        .unwrap();
+        assert_eq!(rig, original);
+        let new_param = added.param_named("new_span").unwrap();
+        assert_eq!(new_param.nominal, 9.0);
+        assert_eq!(new_param.source, ParamSource::Derived);
+        let new_id = new_param.id;
+
+        let source_error = apply(
+            &rig,
+            &ParamEdit::SetSource {
+                id: s12,
+                source: ParamSource::Derived,
+            },
+        )
+        .unwrap_err();
+        assert_eq!(source_error.field, ParamField::Source);
+
+        let changed = apply(
+            &added,
+            &ParamEdit::SetNote {
+                id: s12,
+                note: "field measurement".into(),
+            },
+        )
+        .unwrap();
+        assert_eq!(changed.params[&s12].note, "field measurement");
+
+        let changed = apply(
+            &changed,
+            &ParamEdit::SetValue {
+                id: s12,
+                text: "10 ft".into(),
+            },
+        )
+        .unwrap();
+        let detached = apply(
+            &changed,
+            &ParamEdit::SetSource {
+                id: new_id,
+                source: ParamSource::Assumed,
+            },
+        )
+        .unwrap();
+        assert_eq!(detached.params[&new_id].nominal, 11.0);
+        assert!(detached.params[&new_id].expr.is_none());
+
+        let deleted = apply(&detached, &ParamEdit::Delete { id: new_id }).unwrap();
+        assert!(!deleted.params.contains_key(&new_id));
+    }
+
+    #[test]
+    fn failed_edits_leave_the_input_rig_unchanged_and_keep_parse_details() {
+        let rig = crate::rig::duplo10();
+        let original = rig.clone();
+        let s12 = rig.param_named("s12").unwrap().id;
+        let error = apply(
+            &rig,
+            &ParamEdit::SetValue {
+                id: s12,
+                text: "span_A + load_weight".into(),
+            },
+        )
+        .unwrap_err();
+        assert_eq!(error.field, ParamField::Value);
+        assert_eq!(error.parse.unwrap().column, 8);
+        assert_eq!(rig, original);
     }
 }
