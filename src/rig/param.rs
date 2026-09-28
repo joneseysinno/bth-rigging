@@ -16,6 +16,7 @@ use super::RigError;
 use super::RigErrorKind;
 use super::id::ParamId;
 
+pub mod print;
 pub mod syntax;
 
 /// Insertion-ordered parameter table. UUID keys; name lookup is a scan / index

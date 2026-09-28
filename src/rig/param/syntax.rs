@@ -774,6 +774,15 @@ fn check_and_lower(
             }
         }
         SyntaxKind::Ident(name) => {
+            if matches!(name.as_str(), "nan" | "inf") {
+                return Err(parse_error(
+                    src,
+                    ParseErrorKind::NonFinite,
+                    node.span,
+                    "non-finite constants are not accepted",
+                    None,
+                ));
+            }
             if let Some(&(id, quantity)) = names.get(name.as_str()) {
                 return Ok((Expr::Param(id), Some(quantity)));
             }
