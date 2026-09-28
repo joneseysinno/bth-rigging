@@ -253,7 +253,10 @@ fn eval_param(
     }
 }
 
-fn merge_add(a: Option<Quantity>, b: Option<Quantity>) -> Result<Option<Quantity>, RigError> {
+pub(super) fn merge_add(
+    a: Option<Quantity>,
+    b: Option<Quantity>,
+) -> Result<Option<Quantity>, RigError> {
     match (a, b) {
         (None, q) | (q, None) => Ok(q),
         (Some(x), Some(y)) if x == y => Ok(Some(x)),
@@ -264,7 +267,10 @@ fn merge_add(a: Option<Quantity>, b: Option<Quantity>) -> Result<Option<Quantity
     }
 }
 
-fn merge_mul(a: Option<Quantity>, b: Option<Quantity>) -> Result<Option<Quantity>, RigError> {
+pub(super) fn merge_mul(
+    a: Option<Quantity>,
+    b: Option<Quantity>,
+) -> Result<Option<Quantity>, RigError> {
     match (a, b) {
         (None, q) | (q, None) => Ok(q),
         (Some(Quantity::Ratio), q) | (q, Some(Quantity::Ratio)) => Ok(q),
@@ -280,7 +286,10 @@ fn merge_mul(a: Option<Quantity>, b: Option<Quantity>) -> Result<Option<Quantity
     }
 }
 
-fn merge_div(a: Option<Quantity>, b: Option<Quantity>) -> Result<Option<Quantity>, RigError> {
+pub(super) fn merge_div(
+    a: Option<Quantity>,
+    b: Option<Quantity>,
+) -> Result<Option<Quantity>, RigError> {
     match (a, b) {
         (q, None) => Ok(q),
         (None, Some(Quantity::Ratio) | Some(Quantity::Count)) => Ok(None),
