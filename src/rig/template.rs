@@ -107,7 +107,7 @@ pub fn from_layers(pick: &Pick, layers: &[SlingLayer], spreaders: &[SavedSpreade
                     b.member(format!("L{i} bar to load {k}"))
                         .from(*node)
                         .to(lug)
-                        .segment(|s| s.master_link(0.1, 0.0));
+                        .segment(|s| s.master_link(1e-12, 0.0));
                 }
             }
             (pick_nodes, below_nodes)
@@ -154,7 +154,7 @@ pub fn from_layers(pick: &Pick, layers: &[SlingLayer], spreaders: &[SavedSpreade
                 b.member(format!("L{i} apex {pi}"))
                     .from(*parent)
                     .to(collector)
-                    .segment(|s| s.shackle(&sz).master_link(0.2, 0.0));
+                    .segment(|s| s.shackle(&sz).master_link(1e-12, 0.0));
                 collector
             } else {
                 *parent
@@ -188,7 +188,7 @@ pub fn from_layers(pick: &Pick, layers: &[SlingLayer], spreaders: &[SavedSpreade
             b.member(format!("L{i} tare hang"))
                 .from(host)
                 .to(tn)
-                .segment(|s| s.master_link(0.1, 0.0));
+                .segment(|s| s.master_link(1e-12, 0.0));
         }
 
         below = next_below;
@@ -265,6 +265,172 @@ pub fn weights_match_layers(
             "hook {} != layers {}",
             w.total_below_root_lbs, pr.hook_load_lbs
         ));
+    }
+    Ok(())
+}
+
+fn sling_evals<'a>(
+    rig: &'a Rig,
+    ev: &'a crate::rig::EvalRig,
+    layer: usize,
+) -> Vec<(usize, &'a crate::rig::MemberEval)> {
+    let prefix = format!("L{layer} sling ");
+    let mut out: Vec<(usize, &crate::rig::MemberEval)> = rig
+        .members
+        .iter()
+        .filter_map(|(id, m)| {
+            let rest = m.label.strip_prefix(&prefix)?;
+            let idx: usize = rest.parse().ok()?;
+            ev.members.get(id).map(|me| (idx, me))
+        })
+        .collect();
+    out.sort_by_key(|(i, _)| *i);
+    out
+}
+
+fn flag_set(geom: &LayerGeometry, layer: &SlingLayer) -> Vec<&'static str> {
+    let mut f = Vec::new();
+    if geom.error.is_some() {
+        f.push("GEOM");
+    }
+    if geom.unequal_drop_in.is_some() {
+        f.push("LEGS");
+    }
+    if !(layer.sling_length_ft.is_finite() && layer.sling_length_ft > 0.0) {
+        f.push("NO LEN");
+    }
+    f
+}
+
+fn eval_flag_set(
+    slings: &[&crate::rig::MemberEval],
+    geom_unequal: Option<f64>,
+) -> Vec<&'static str> {
+    let mut f = Vec::new();
+    let missing = slings.iter().all(|m| {
+        m.nominal_ft
+            .iter()
+            .all(|l| *l < crate::rig::eval::MISSING_LENGTH_FT)
+    });
+    let short = slings.iter().any(|m| m.short_ft.iter().any(|s| *s > 1e-9));
+    if short && !missing {
+        f.push("GEOM");
+    }
+    if geom_unequal.is_some() {
+        f.push("LEGS");
+    }
+    if missing {
+        f.push("NO LEN");
+    }
+    f
+}
+
+fn unequal_from_slings(slings: &[&crate::rig::MemberEval]) -> Option<f64> {
+    let mut drops = Vec::new();
+    for m in slings {
+        for i in 0..m.nominal_ft.len() {
+            if m.nominal_ft[i] < crate::rig::eval::MISSING_LENGTH_FT {
+                continue;
+            }
+            drops.push(m.theoretical_drop(i));
+        }
+    }
+    if drops.len() < 2 {
+        return None;
+    }
+    let min_d = drops.iter().copied().fold(f64::INFINITY, f64::min);
+    let max_d = drops.iter().copied().fold(0.0_f64, f64::max);
+    let spread = (max_d - min_d) * 12.0;
+    if spread > crate::rig::eval::UNEQUAL_DROP_TOL_IN {
+        Some(spread)
+    } else {
+        None
+    }
+}
+
+/// Geometry equivalence vs `layers::geometry::resolve_geometry` (Step 2 gate).
+pub fn geometry_match_layers(
+    rig: &Rig,
+    ev: &crate::rig::EvalRig,
+    layers: &[SlingLayer],
+    spreaders: &[SavedSpreader],
+) -> Result<(), String> {
+    use crate::layers::geometry::rigging_height_ft;
+    let geoms = resolve_geometry(layers, spreaders);
+    if geoms.len() != layers.len() {
+        return Err("geometry layer count mismatch".into());
+    }
+    for (i, (layer, geom)) in layers.iter().zip(geoms.iter()).enumerate() {
+        let slings: Vec<&crate::rig::MemberEval> = sling_evals(rig, ev, i)
+            .into_iter()
+            .map(|(_, m)| m)
+            .collect();
+        if slings.len() != layer.sling_count.max(1) as usize {
+            return Err(format!(
+                "L{i}: {} sling members, layer wants {}",
+                slings.len(),
+                layer.sling_count
+            ));
+        }
+
+        if !geom.reaches_ft.is_empty() {
+            if slings.len() != geom.reaches_ft.len() {
+                return Err(format!(
+                    "L{i}: {} eval slings vs {} reaches",
+                    slings.len(),
+                    geom.reaches_ft.len()
+                ));
+            }
+            for (k, m) in slings.iter().enumerate() {
+                let got = m.reach_ft.first().copied().unwrap_or(0.0);
+                let want = geom.reaches_ft[k];
+                if (got - want).abs() > 1e-9 {
+                    return Err(format!("L{i} sling {k} reach {got} != {want}"));
+                }
+            }
+        }
+        if !geom.drops_ft.is_empty() {
+            for (k, m) in slings.iter().enumerate() {
+                let got = m.theoretical_drop(0);
+                let want = geom.drops_ft[k];
+                if (got - want).abs() > 1e-9 {
+                    return Err(format!("L{i} sling {k} drop {got} != {want}"));
+                }
+            }
+        }
+        if let Some(want) = geom.angle_deg {
+            let got = slings
+                .iter()
+                .map(|m| m.governing_angle_deg)
+                .fold(90.0_f64, f64::min);
+            if (got - want).abs() > 1e-9 {
+                return Err(format!("L{i} governing angle {got} != {want}"));
+            }
+        }
+        let eval_unequal = unequal_from_slings(&slings);
+        match (eval_unequal, geom.unequal_drop_in) {
+            (None, None) => {}
+            (Some(a), Some(b)) if (a - b).abs() <= 1e-9 => {}
+            (a, b) => {
+                return Err(format!("L{i} unequal_drop_in {a:?} != {b:?}"));
+            }
+        }
+        let want_flags = flag_set(geom, layer);
+        let got_flags = eval_flag_set(&slings, eval_unequal);
+        if got_flags != want_flags {
+            return Err(format!(
+                "L{i} flags {got_flags:?} != {want_flags:?} (geom error={:?} missing={:?})",
+                geom.error, geom.missing
+            ));
+        }
+    }
+    if let Some(want) = rigging_height_ft(&geoms) {
+        if (ev.height.hook_to_pick_ft - want).abs() > 1e-9 {
+            return Err(format!(
+                "hook_to_pick_ft {} != rigging_height_ft {want}",
+                ev.height.hook_to_pick_ft
+            ));
+        }
     }
     Ok(())
 }
@@ -403,4 +569,96 @@ mod tests {
         let pick = Pick::new(Uuid::nil(), "tree", 10_000.0);
         check(&pick, &[l1, l2], &[bar]);
     }
+}
+
+/// What the Step 3 tension gate compared.
+#[derive(Debug, Clone, Default, PartialEq)]
+pub struct TensionGate {
+    /// Layers whose every sling tension was compared.
+    pub compared: Vec<usize>,
+    /// Layers skipped, with the reason.
+    pub skipped: Vec<(usize, &'static str)>,
+}
+
+/// Step 3 equivalence gate: graph tensions vs `layers::calculate_pick`.
+///
+/// Hook load always. Sling tensions per layer, relative `rtol`, where the
+/// layer engine's model is exact: every sling at the same angle (it applies
+/// the governing angle to all legs, which is conservative, not equal, when
+/// they differ), a real sling length (no NO LEN) and no GEOM failure.
+pub fn tensions_match_layers(
+    rig: &Rig,
+    solved: &crate::rig::solve::SolvedRig,
+    pick: &Pick,
+    layers: &[SlingLayer],
+    spreaders: &[SavedSpreader],
+    rtol: f64,
+) -> Result<TensionGate, String> {
+    use crate::layers::calculate_pick;
+    let Some(pr) = calculate_pick(pick.weight_lbs, layers, spreaders) else {
+        return Err("layer engine returned None".into());
+    };
+    let close = |a: f64, b: f64| (a - b).abs() <= rtol * b.abs().max(1.0);
+    if !close(solved.hook_load_lbs, pr.hook_load_lbs) {
+        return Err(format!(
+            "hook load {} != layers {}",
+            solved.hook_load_lbs, pr.hook_load_lbs
+        ));
+    }
+    let mut gate = TensionGate::default();
+    for (i, (layer, lt)) in layers.iter().zip(&pr.layers).enumerate() {
+        if lt.sling_length_missing {
+            gate.skipped.push((i, "NO LEN"));
+            continue;
+        }
+        if lt.geometry.error.is_some() {
+            gate.skipped.push((i, "GEOM"));
+            continue;
+        }
+        if layer.tare_lbs.is_finite() && layer.tare_lbs.abs() > 1e-15 {
+            // The template hangs "other tare" from one pick point, which tips
+            // the rig slightly; the layer engine spreads it over every leg.
+            gate.skipped.push((i, "tare hung at one pick"));
+            continue;
+        }
+        if layer.hitch == crate::domain::Hitch::Basket {
+            // The template draws each basket sling as one straight member, so
+            // its tension is the pair's; the layer engine reports per leg.
+            gate.skipped.push((i, "basket drawn as single legs"));
+            continue;
+        }
+        let prefix = format!("L{i} sling ");
+        let mut slings: Vec<(usize, f64, f64)> = rig
+            .members
+            .iter()
+            .filter_map(|(id, m)| {
+                let k: usize = m.label.strip_prefix(&prefix)?.parse().ok()?;
+                let f = solved.members.get(id)?;
+                Some((
+                    k,
+                    f.tension_lbs,
+                    f.angle_deg.first().copied().unwrap_or(90.0),
+                ))
+            })
+            .collect();
+        slings.sort_by_key(|s| s.0);
+        if slings.len() != layer.sling_count.max(1) as usize {
+            return Err(format!("L{i}: {} slings in the graph", slings.len()));
+        }
+        let a0 = slings[0].2;
+        if slings.iter().any(|s| (s.2 - a0).abs() > 1e-6) {
+            gate.skipped.push((i, "unequal sling angles"));
+            continue;
+        }
+        for (k, t, _) in &slings {
+            if !close(*t, lt.tension_lbs) {
+                return Err(format!(
+                    "L{i} sling {k}: tension {t} != layers {}",
+                    lt.tension_lbs
+                ));
+            }
+        }
+        gate.compared.push(i);
+    }
+    Ok(gate)
 }

@@ -1,6 +1,6 @@
 # Step 0: Module refactor, Rust 2024, and scaffold
 
-> **Status:** plan · **Owner:** AJ · **Applies to:** `bth-rigging` @ `bth-graph` branch
+> **Status:** implemented (manual desktop smoke test open) · **Owner:** AJ · **Applies to:** `bth-rigging` @ `bth-graph` branch
 > **Roadmap context:** Step 0 of 8. Steps 1–7 build the rigging graph (bodies, nodes, member paths, components, bearings, parameters) from the lugs up to the boom head and down to the mats. See the *Duplo10 Lift Readback* rev C for the theory.
 
 ---
@@ -25,16 +25,16 @@ Step 0 delivers four things:
 
 ### Definition of done
 
-- [ ] `edition = "2024"` in `Cargo.toml`, with `rust-version` set
-- [ ] No `mod.rs` anywhere under `src/`
+- [x] `edition = "2024"` in `Cargo.toml`, with `rust-version` set
+- [x] No `mod.rs` anywhere under `src/`
 - [ ] `cargo test` passes, and the 41 existing tests plus the new golden tests are green
-- [ ] `cargo test --lib --no-default-features` passes **without GTK/WebKit installed** (headless core)
-- [ ] Golden outputs (calc package DTO + saved-layer JSON) are byte-identical to the pre-refactor baseline
+- [x] `cargo test --lib --no-default-features` passes **without GTK/WebKit installed** (headless core)
+- [x] Golden outputs (calc package DTO + saved-layer JSON) are byte-identical to the pre-refactor baseline
 - [ ] `dx serve --desktop` runs; Projects → Pick editor → Mat editor → Print PDF all behave as before
-- [ ] An existing InfiniteDb data folder opens and shows all projects, picks, spreaders and mats
-- [ ] Compiler warnings are no worse than the recorded baseline (6 dead-code warnings)
-- [ ] Every module file starts with a `//!` doc comment
-- [ ] `docs/roadmap.md` exists and links each scaffold module to its step
+- [x] An existing InfiniteDb data folder opens and shows all projects, picks, spreaders and mats *(re-verified by Step 1: `old_data_folder_still_loads_and_new_spaces_start_empty`)*
+- [x] Compiler warnings are no worse than the recorded baseline (6 dead-code warnings) *(0 on 2026-09-26)*
+- [x] Every module file starts with a `//!` doc comment
+- [x] `docs/roadmap.md` exists and links each scaffold module to its step
 
 ---
 
@@ -399,14 +399,17 @@ Run §9 in full, then tag `step-0` on `bth-graph`.
 
 ## 9. Verification checklist
 
+> Automated items verified 2026-09-26 in a headless Linux container (no GTK/WebKit): 121 tests green.
+> Items still `[ ]` need the desktop build on Windows, or a recorded clippy baseline.
+
 **Automated**
 
 - [ ] `cargo test`: 41 existing tests + golden tests pass
-- [ ] `cargo test --lib --no-default-features` passes on a machine or container **without** WebKit/GTK
+- [x] `cargo test --lib --no-default-features` passes on a machine or container **without** WebKit/GTK
 - [ ] `cargo clippy --all-targets` shows no new lints versus baseline
-- [ ] `cargo fmt --check` is clean
-- [ ] `grep -r "mod.rs" src` returns nothing; `find src -name mod.rs` returns nothing
-- [ ] `grep -rE "dioxus|rfd" src/{lib,format,domain,catalog,layers,mats,store,report,rig,crane,checks}*` returns nothing
+- [x] `cargo fmt --check` is clean
+- [x] `grep -r "mod.rs" src` returns nothing; `find src -name mod.rs` returns nothing
+- [x] `grep -rE "dioxus|rfd" src/{lib,format,domain,catalog,layers,mats,store,report,rig,crane,checks}*` returns nothing *(only `//!` "must not depend on" lines match; no `use`/`::` hits)*
 
 **Manual smoke test** (`dx serve --desktop`, using a **copy** of the real data folder)
 

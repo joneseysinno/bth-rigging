@@ -78,6 +78,11 @@ impl Member {
         self.segments.iter().map(|s| s.eval_length(params)).sum()
     }
 
+    /// Hardware length available along the member (same as [`Self::nominal_length`]).
+    pub fn available_length(&self, params: &ParamTable) -> Result<f64, RigError> {
+        self.nominal_length(params)
+    }
+
     pub fn weight(&self, params: &ParamTable) -> Result<f64, RigError> {
         self.segments.iter().map(|s| s.eval_weight(params)).sum()
     }

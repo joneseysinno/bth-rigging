@@ -1,0 +1,5155 @@
+{
+  "duplo10": {
+    "end": {
+      "bounds": {
+        "max": [
+          6.0,
+          0.0
+        ],
+        "min": [
+          -6.0,
+          -42.16834027
+        ]
+      },
+      "items": [
+        {
+          "depth": -24.0,
+          "label": null,
+          "pts": [
+            [
+              -6.0,
+              -42.16834027
+            ],
+            [
+              -6.0,
+              -42.16834027
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": -24.0,
+          "label": null,
+          "pts": [
+            [
+              6.0,
+              -42.16834027
+            ],
+            [
+              6.0,
+              -42.16834027
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": -24.0,
+          "label": null,
+          "pts": [
+            [
+              6.0,
+              -42.16834027
+            ],
+            [
+              -6.0,
+              -42.16834027
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": -24.0,
+          "label": null,
+          "pts": [
+            [
+              -6.0,
+              -31.16834027
+            ],
+            [
+              -6.0,
+              -31.16834027
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": -24.0,
+          "label": null,
+          "pts": [
+            [
+              6.0,
+              -31.16834027
+            ],
+            [
+              6.0,
+              -31.16834027
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": -24.0,
+          "label": null,
+          "pts": [
+            [
+              6.0,
+              -31.16834027
+            ],
+            [
+              -6.0,
+              -31.16834027
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": -24.0,
+          "label": null,
+          "pts": [
+            [
+              -6.0,
+              -42.16834027
+            ],
+            [
+              -6.0,
+              -31.16834027
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": -24.0,
+          "label": null,
+          "pts": [
+            [
+              6.0,
+              -42.16834027
+            ],
+            [
+              6.0,
+              -31.16834027
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "at": [
+            -6.0,
+            -31.16834027
+          ],
+          "depth": -24.0,
+          "label": "P1-front",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            6.0,
+            -31.16834027
+          ],
+          "depth": -24.0,
+          "label": "P1-back",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "depth": -24.0,
+          "label": null,
+          "pts": [
+            [
+              -6.0,
+              -31.16834027
+            ],
+            [
+              -6.0,
+              -23.618505835
+            ],
+            [
+              -6.0,
+              -31.16834027
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "depth": -24.0,
+          "label": null,
+          "pts": [
+            [
+              6.0,
+              -31.16834027
+            ],
+            [
+              6.0,
+              -23.618505835
+            ],
+            [
+              6.0,
+              -31.16834027
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "at": [
+            0.0,
+            -13.518505835
+          ],
+          "depth": -17.0,
+          "label": "Bar top end A",
+          "role": "bow",
+          "type": "marker"
+        },
+        {
+          "depth": -16.0,
+          "label": "Bar top",
+          "pts": [
+            [
+              -6.0,
+              -13.518505835
+            ],
+            [
+              6.0,
+              -13.518505835
+            ]
+          ],
+          "role": "bar",
+          "type": "polyline"
+        },
+        {
+          "depth": -16.0,
+          "label": "Bar L",
+          "pts": [
+            [
+              -6.0,
+              -23.618505835
+            ],
+            [
+              6.0,
+              -23.518505835
+            ]
+          ],
+          "role": "bar",
+          "type": "polyline"
+        },
+        {
+          "depth": -16.0,
+          "label": null,
+          "pts": [
+            [
+              -0.4,
+              -23.568505835
+            ],
+            [
+              0.4,
+              -23.568505835
+            ]
+          ],
+          "role": "bar",
+          "type": "polyline"
+        },
+        {
+          "at": [
+            -6.0,
+            -13.518505835
+          ],
+          "depth": -16.0,
+          "label": "Top→L front",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            6.0,
+            -13.518505835
+          ],
+          "depth": -16.0,
+          "label": "Top→L back",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            -6.0,
+            -23.618505835
+          ],
+          "depth": -16.0,
+          "label": "Bar L bow F",
+          "role": "bow",
+          "type": "marker"
+        },
+        {
+          "at": [
+            6.0,
+            -23.618505835
+          ],
+          "depth": -16.0,
+          "label": "Bar L bow B",
+          "role": "bow",
+          "type": "marker"
+        },
+        {
+          "at": [
+            -6.0,
+            -23.518505835
+          ],
+          "depth": -16.0,
+          "label": "Bar L lug F",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            6.0,
+            -23.518505835
+          ],
+          "depth": -16.0,
+          "label": "Bar L lug B",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            -6.0,
+            -31.16834027
+          ],
+          "depth": -16.0,
+          "label": "P2-front",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            6.0,
+            -31.16834027
+          ],
+          "depth": -16.0,
+          "label": "P2-back",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "depth": -16.0,
+          "label": null,
+          "pts": [
+            [
+              -6.0,
+              -23.518505835
+            ],
+            [
+              -6.0,
+              -31.16834027
+            ]
+          ],
+          "role": "slack_member",
+          "type": "polyline"
+        },
+        {
+          "depth": -16.0,
+          "label": null,
+          "pts": [
+            [
+              6.0,
+              -23.518505835
+            ],
+            [
+              6.0,
+              -31.16834027
+            ]
+          ],
+          "role": "slack_member",
+          "type": "polyline"
+        },
+        {
+          "depth": -16.0,
+          "label": null,
+          "pts": [
+            [
+              -6.0,
+              -13.518505835
+            ],
+            [
+              -6.0,
+              -23.518505835
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "depth": -16.0,
+          "label": null,
+          "pts": [
+            [
+              6.0,
+              -13.518505835
+            ],
+            [
+              6.0,
+              -23.518505835
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "at": [
+            -1.0,
+            -13.518505835
+          ],
+          "depth": -8.5,
+          "label": "Top hook LF",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            1.0,
+            -13.518505835
+          ],
+          "depth": -8.5,
+          "label": "Top hook LB",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "depth": -8.5,
+          "label": null,
+          "pts": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              -1.0,
+              -13.518505835
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "depth": -8.5,
+          "label": null,
+          "pts": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              1.0,
+              -13.518505835
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "at": [
+            -6.0,
+            -31.16834027
+          ],
+          "depth": -8.0,
+          "label": "P3-front",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            6.0,
+            -31.16834027
+          ],
+          "depth": -8.0,
+          "label": "P3-back",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            0.0,
+            0.0
+          ],
+          "depth": 0.0,
+          "label": "Hook",
+          "role": "hook",
+          "type": "marker"
+        },
+        {
+          "depth": 0.0,
+          "label": null,
+          "pts": [
+            [
+              -0.4,
+              -13.518505835
+            ],
+            [
+              0.4,
+              -13.518505835
+            ]
+          ],
+          "role": "bar",
+          "type": "polyline"
+        },
+        {
+          "depth": 0.0,
+          "label": "Bar C",
+          "pts": [
+            [
+              -6.0,
+              -14.932396974
+            ],
+            [
+              6.0,
+              -14.832396974
+            ]
+          ],
+          "role": "bar",
+          "type": "polyline"
+        },
+        {
+          "depth": 0.0,
+          "label": null,
+          "pts": [
+            [
+              -0.4,
+              -14.882396974
+            ],
+            [
+              0.4,
+              -14.882396974
+            ]
+          ],
+          "role": "bar",
+          "type": "polyline"
+        },
+        {
+          "at": [
+            0.0,
+            0.0
+          ],
+          "depth": 0.0,
+          "label": "hook",
+          "role": "hook",
+          "type": "marker"
+        },
+        {
+          "at": [
+            -6.0,
+            -14.932396974
+          ],
+          "depth": 0.0,
+          "label": "Bar C bow F",
+          "role": "bow",
+          "type": "marker"
+        },
+        {
+          "at": [
+            6.0,
+            -14.932396974
+          ],
+          "depth": 0.0,
+          "label": "Bar C bow B",
+          "role": "bow",
+          "type": "marker"
+        },
+        {
+          "at": [
+            -6.0,
+            -14.832396974
+          ],
+          "depth": 0.0,
+          "label": "Bar C lug F",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            6.0,
+            -14.832396974
+          ],
+          "depth": 0.0,
+          "label": "Bar C lug B",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            -6.0,
+            -31.16834027
+          ],
+          "depth": 0.0,
+          "label": "P4-front",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            6.0,
+            -31.16834027
+          ],
+          "depth": 0.0,
+          "label": "P4-back",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "depth": 0.0,
+          "label": null,
+          "pts": [
+            [
+              -6.0,
+              -31.16834027
+            ],
+            [
+              -6.0,
+              -23.618505835
+            ],
+            [
+              -6.0,
+              -31.16834027
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "depth": 0.0,
+          "label": null,
+          "pts": [
+            [
+              6.0,
+              -31.16834027
+            ],
+            [
+              6.0,
+              -23.618505835
+            ],
+            [
+              6.0,
+              -31.16834027
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "depth": 0.0,
+          "label": null,
+          "pts": [
+            [
+              -6.0,
+              -14.832396974
+            ],
+            [
+              -6.0,
+              -31.16834027
+            ]
+          ],
+          "role": "slack_member",
+          "type": "polyline"
+        },
+        {
+          "depth": 0.0,
+          "label": null,
+          "pts": [
+            [
+              6.0,
+              -14.832396974
+            ],
+            [
+              6.0,
+              -31.16834027
+            ]
+          ],
+          "role": "slack_member",
+          "type": "polyline"
+        },
+        {
+          "depth": 0.0,
+          "label": null,
+          "pts": [
+            [
+              -6.0,
+              -23.518505835
+            ],
+            [
+              -6.0,
+              -31.16834027
+            ]
+          ],
+          "role": "slack_member",
+          "type": "polyline"
+        },
+        {
+          "depth": 0.0,
+          "label": null,
+          "pts": [
+            [
+              6.0,
+              -23.518505835
+            ],
+            [
+              6.0,
+              -31.16834027
+            ]
+          ],
+          "role": "slack_member",
+          "type": "polyline"
+        },
+        {
+          "depth": 0.0,
+          "label": null,
+          "pts": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              -1.0,
+              -13.518505835
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "depth": 0.0,
+          "label": null,
+          "pts": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              1.0,
+              -13.518505835
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "depth": 0.0,
+          "label": null,
+          "pts": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              -6.0,
+              -14.832396974
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "depth": 0.0,
+          "label": null,
+          "pts": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              6.0,
+              -14.832396974
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "depth": 0.0,
+          "label": null,
+          "pts": [
+            [
+              -6.0,
+              -13.518505835
+            ],
+            [
+              -6.0,
+              -23.518505835
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "depth": 0.0,
+          "label": null,
+          "pts": [
+            [
+              6.0,
+              -13.518505835
+            ],
+            [
+              6.0,
+              -23.518505835
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "at": [
+            -6.0,
+            -31.16834027
+          ],
+          "depth": 8.0,
+          "label": "P5-front",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            6.0,
+            -31.16834027
+          ],
+          "depth": 8.0,
+          "label": "P5-back",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            -1.0,
+            -13.518505835
+          ],
+          "depth": 8.5,
+          "label": "Top hook RF",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            1.0,
+            -13.518505835
+          ],
+          "depth": 8.5,
+          "label": "Top hook RB",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "depth": 16.0,
+          "label": "Bar R",
+          "pts": [
+            [
+              -6.0,
+              -23.618505835
+            ],
+            [
+              6.0,
+              -23.518505835
+            ]
+          ],
+          "role": "bar",
+          "type": "polyline"
+        },
+        {
+          "depth": 16.0,
+          "label": null,
+          "pts": [
+            [
+              -0.4,
+              -23.568505835
+            ],
+            [
+              0.4,
+              -23.568505835
+            ]
+          ],
+          "role": "bar",
+          "type": "polyline"
+        },
+        {
+          "at": [
+            -6.0,
+            -13.518505835
+          ],
+          "depth": 16.0,
+          "label": "Top→R front",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            6.0,
+            -13.518505835
+          ],
+          "depth": 16.0,
+          "label": "Top→R back",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            -6.0,
+            -23.618505835
+          ],
+          "depth": 16.0,
+          "label": "Bar R bow F",
+          "role": "bow",
+          "type": "marker"
+        },
+        {
+          "at": [
+            6.0,
+            -23.618505835
+          ],
+          "depth": 16.0,
+          "label": "Bar R bow B",
+          "role": "bow",
+          "type": "marker"
+        },
+        {
+          "at": [
+            -6.0,
+            -23.518505835
+          ],
+          "depth": 16.0,
+          "label": "Bar R lug F",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            6.0,
+            -23.518505835
+          ],
+          "depth": 16.0,
+          "label": "Bar R lug B",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            -6.0,
+            -31.16834027
+          ],
+          "depth": 16.0,
+          "label": "P6-front",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            6.0,
+            -31.16834027
+          ],
+          "depth": 16.0,
+          "label": "P6-back",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            0.0,
+            -13.518505835
+          ],
+          "depth": 17.0,
+          "label": "Bar top end B",
+          "role": "bow",
+          "type": "marker"
+        },
+        {
+          "depth": 24.0,
+          "label": null,
+          "pts": [
+            [
+              -6.0,
+              -42.16834027
+            ],
+            [
+              6.0,
+              -42.16834027
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": 24.0,
+          "label": null,
+          "pts": [
+            [
+              -6.0,
+              -31.16834027
+            ],
+            [
+              6.0,
+              -31.16834027
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": 24.0,
+          "label": null,
+          "pts": [
+            [
+              -6.0,
+              -42.16834027
+            ],
+            [
+              -6.0,
+              -31.16834027
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": 24.0,
+          "label": null,
+          "pts": [
+            [
+              6.0,
+              -42.16834027
+            ],
+            [
+              6.0,
+              -31.16834027
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "at": [
+            -6.0,
+            -31.16834027
+          ],
+          "depth": 24.0,
+          "label": "P7-front",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            6.0,
+            -31.16834027
+          ],
+          "depth": 24.0,
+          "label": "P7-back",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "from": [
+            -6.0,
+            -13.518505835
+          ],
+          "offset_ft": 1.0,
+          "text": "34.18 ft (assumed)",
+          "to": [
+            6.0,
+            -13.518505835
+          ],
+          "type": "dim"
+        },
+        {
+          "from": [
+            -6.0,
+            -23.618505835
+          ],
+          "offset_ft": 1.0,
+          "text": "12 ft (assumed)",
+          "to": [
+            6.0,
+            -23.618505835
+          ],
+          "type": "dim"
+        },
+        {
+          "from": [
+            -6.0,
+            -14.932396974
+          ],
+          "offset_ft": 1.0,
+          "text": "12 ft (assumed)",
+          "to": [
+            6.0,
+            -14.932396974
+          ],
+          "type": "dim"
+        },
+        {
+          "from": [
+            -6.0,
+            -23.618505835
+          ],
+          "offset_ft": 1.0,
+          "text": "12 ft (assumed)",
+          "to": [
+            6.0,
+            -23.618505835
+          ],
+          "type": "dim"
+        },
+        {
+          "from": [
+            -6.0,
+            -31.16834027
+          ],
+          "offset_ft": 0.6,
+          "text": "8 ft (assumed)",
+          "to": [
+            -6.0,
+            -31.16834027
+          ],
+          "type": "dim"
+        },
+        {
+          "from": [
+            -6.0,
+            -31.16834027
+          ],
+          "offset_ft": 0.6,
+          "text": "8 ft (assumed)",
+          "to": [
+            -6.0,
+            -31.16834027
+          ],
+          "type": "dim"
+        },
+        {
+          "from": [
+            -6.0,
+            -31.16834027
+          ],
+          "offset_ft": 0.6,
+          "text": "8 ft (assumed)",
+          "to": [
+            -6.0,
+            -31.16834027
+          ],
+          "type": "dim"
+        },
+        {
+          "from": [
+            -6.0,
+            -31.16834027
+          ],
+          "offset_ft": 0.6,
+          "text": "8 ft (assumed)",
+          "to": [
+            -6.0,
+            -31.16834027
+          ],
+          "type": "dim"
+        },
+        {
+          "from": [
+            -6.0,
+            -31.16834027
+          ],
+          "offset_ft": 0.6,
+          "text": "8 ft (assumed)",
+          "to": [
+            -6.0,
+            -31.16834027
+          ],
+          "type": "dim"
+        },
+        {
+          "from": [
+            -6.0,
+            -31.16834027
+          ],
+          "offset_ft": 0.6,
+          "text": "8 ft (assumed)",
+          "to": [
+            -6.0,
+            -31.16834027
+          ],
+          "type": "dim"
+        },
+        {
+          "from": [
+            0.0,
+            0.0
+          ],
+          "offset_ft": 1.2,
+          "text": "31.17 ft (assumed)",
+          "to": [
+            -6.0,
+            -31.16834027
+          ],
+          "type": "dim"
+        },
+        {
+          "at": [
+            -6.0,
+            -31.16834027
+          ],
+          "from_deg": 0.0,
+          "radius_ft": 1.5,
+          "text": "43.34° (assumed)",
+          "to_deg": 43.341758227,
+          "type": "arc"
+        },
+        {
+          "at": [
+            0.0,
+            0.0
+          ],
+          "role": "warning",
+          "text": "check residuals (assumed)",
+          "type": "text"
+        }
+      ],
+      "kind": "End"
+    },
+    "plan": {
+      "bounds": {
+        "max": [
+          24.0,
+          6.0
+        ],
+        "min": [
+          -24.0,
+          -6.0
+        ]
+      },
+      "items": [
+        {
+          "depth": -42.16834027,
+          "label": null,
+          "pts": [
+            [
+              -24.0,
+              -6.0
+            ],
+            [
+              24.0,
+              -6.0
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": -42.16834027,
+          "label": null,
+          "pts": [
+            [
+              24.0,
+              -6.0
+            ],
+            [
+              24.0,
+              6.0
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": -42.16834027,
+          "label": null,
+          "pts": [
+            [
+              24.0,
+              6.0
+            ],
+            [
+              -24.0,
+              6.0
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": -42.16834027,
+          "label": null,
+          "pts": [
+            [
+              -24.0,
+              6.0
+            ],
+            [
+              -24.0,
+              -6.0
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": -42.16834027,
+          "label": null,
+          "pts": [
+            [
+              -24.0,
+              -6.0
+            ],
+            [
+              -24.0,
+              -6.0
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": -42.16834027,
+          "label": null,
+          "pts": [
+            [
+              24.0,
+              -6.0
+            ],
+            [
+              24.0,
+              -6.0
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": -42.16834027,
+          "label": null,
+          "pts": [
+            [
+              24.0,
+              6.0
+            ],
+            [
+              24.0,
+              6.0
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": -42.16834027,
+          "label": null,
+          "pts": [
+            [
+              -24.0,
+              6.0
+            ],
+            [
+              -24.0,
+              6.0
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "at": [
+            0.0,
+            0.0
+          ],
+          "depth": -36.66834027,
+          "label": "Al MDC enclosure CG",
+          "role": "cg",
+          "type": "marker"
+        },
+        {
+          "depth": -31.16834027,
+          "label": null,
+          "pts": [
+            [
+              -24.0,
+              -6.0
+            ],
+            [
+              24.0,
+              -6.0
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": -31.16834027,
+          "label": null,
+          "pts": [
+            [
+              24.0,
+              -6.0
+            ],
+            [
+              24.0,
+              6.0
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": -31.16834027,
+          "label": null,
+          "pts": [
+            [
+              24.0,
+              6.0
+            ],
+            [
+              -24.0,
+              6.0
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": -31.16834027,
+          "label": null,
+          "pts": [
+            [
+              -24.0,
+              6.0
+            ],
+            [
+              -24.0,
+              -6.0
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "at": [
+            -24.0,
+            -6.0
+          ],
+          "depth": -31.16834027,
+          "label": "P1-front",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            -24.0,
+            6.0
+          ],
+          "depth": -31.16834027,
+          "label": "P1-back",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            -16.0,
+            -6.0
+          ],
+          "depth": -31.16834027,
+          "label": "P2-front",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            -16.0,
+            6.0
+          ],
+          "depth": -31.16834027,
+          "label": "P2-back",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            -8.0,
+            -6.0
+          ],
+          "depth": -31.16834027,
+          "label": "P3-front",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            -8.0,
+            6.0
+          ],
+          "depth": -31.16834027,
+          "label": "P3-back",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            0.0,
+            -6.0
+          ],
+          "depth": -31.16834027,
+          "label": "P4-front",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            0.0,
+            6.0
+          ],
+          "depth": -31.16834027,
+          "label": "P4-back",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            8.0,
+            -6.0
+          ],
+          "depth": -31.16834027,
+          "label": "P5-front",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            8.0,
+            6.0
+          ],
+          "depth": -31.16834027,
+          "label": "P5-back",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            16.0,
+            -6.0
+          ],
+          "depth": -31.16834027,
+          "label": "P6-front",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            16.0,
+            6.0
+          ],
+          "depth": -31.16834027,
+          "label": "P6-back",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            24.0,
+            -6.0
+          ],
+          "depth": -31.16834027,
+          "label": "P7-front",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            24.0,
+            6.0
+          ],
+          "depth": -31.16834027,
+          "label": "P7-back",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "depth": -31.16834027,
+          "label": null,
+          "pts": [
+            [
+              -24.0,
+              -6.0
+            ],
+            [
+              -16.0,
+              -6.0
+            ],
+            [
+              -8.0,
+              -6.0
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "depth": -31.16834027,
+          "label": null,
+          "pts": [
+            [
+              -24.0,
+              6.0
+            ],
+            [
+              -16.0,
+              6.0
+            ],
+            [
+              -8.0,
+              6.0
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "depth": -31.16834027,
+          "label": null,
+          "pts": [
+            [
+              8.0,
+              -6.0
+            ],
+            [
+              16.0,
+              -6.0
+            ],
+            [
+              24.0,
+              -6.0
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "depth": -31.16834027,
+          "label": null,
+          "pts": [
+            [
+              8.0,
+              6.0
+            ],
+            [
+              16.0,
+              6.0
+            ],
+            [
+              24.0,
+              6.0
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "depth": -31.16834027,
+          "label": null,
+          "pts": [
+            [
+              -16.0,
+              -6.0
+            ],
+            [
+              -16.0,
+              -6.0
+            ]
+          ],
+          "role": "slack_member",
+          "type": "polyline"
+        },
+        {
+          "depth": -31.16834027,
+          "label": null,
+          "pts": [
+            [
+              -16.0,
+              6.0
+            ],
+            [
+              -16.0,
+              6.0
+            ]
+          ],
+          "role": "slack_member",
+          "type": "polyline"
+        },
+        {
+          "depth": -31.16834027,
+          "label": null,
+          "pts": [
+            [
+              0.0,
+              -6.0
+            ],
+            [
+              0.0,
+              -6.0
+            ]
+          ],
+          "role": "slack_member",
+          "type": "polyline"
+        },
+        {
+          "depth": -31.16834027,
+          "label": null,
+          "pts": [
+            [
+              0.0,
+              6.0
+            ],
+            [
+              0.0,
+              6.0
+            ]
+          ],
+          "role": "slack_member",
+          "type": "polyline"
+        },
+        {
+          "depth": -31.16834027,
+          "label": null,
+          "pts": [
+            [
+              16.0,
+              -6.0
+            ],
+            [
+              16.0,
+              -6.0
+            ]
+          ],
+          "role": "slack_member",
+          "type": "polyline"
+        },
+        {
+          "depth": -31.16834027,
+          "label": null,
+          "pts": [
+            [
+              16.0,
+              6.0
+            ],
+            [
+              16.0,
+              6.0
+            ]
+          ],
+          "role": "slack_member",
+          "type": "polyline"
+        },
+        {
+          "depth": -23.968505835,
+          "label": null,
+          "pts": [
+            [
+              -16.0,
+              0.0
+            ],
+            [
+              -16.0,
+              0.0
+            ]
+          ],
+          "role": "bar",
+          "type": "polyline"
+        },
+        {
+          "depth": -23.968505835,
+          "label": null,
+          "pts": [
+            [
+              16.0,
+              0.0
+            ],
+            [
+              16.0,
+              0.0
+            ]
+          ],
+          "role": "bar",
+          "type": "polyline"
+        },
+        {
+          "depth": -23.618505835,
+          "label": "Bar L",
+          "pts": [
+            [
+              -16.0,
+              -6.0
+            ],
+            [
+              -16.0,
+              6.0
+            ]
+          ],
+          "role": "bar",
+          "type": "polyline"
+        },
+        {
+          "at": [
+            -16.0,
+            0.0
+          ],
+          "depth": -23.618505835,
+          "label": "Bar L CG",
+          "role": "cg",
+          "type": "marker"
+        },
+        {
+          "depth": -23.618505835,
+          "label": "Bar R",
+          "pts": [
+            [
+              16.0,
+              -6.0
+            ],
+            [
+              16.0,
+              6.0
+            ]
+          ],
+          "role": "bar",
+          "type": "polyline"
+        },
+        {
+          "at": [
+            16.0,
+            0.0
+          ],
+          "depth": -23.618505835,
+          "label": "Bar R CG",
+          "role": "cg",
+          "type": "marker"
+        },
+        {
+          "at": [
+            -16.0,
+            -6.0
+          ],
+          "depth": -23.618505835,
+          "label": "Bar L bow F",
+          "role": "bow",
+          "type": "marker"
+        },
+        {
+          "at": [
+            -16.0,
+            6.0
+          ],
+          "depth": -23.618505835,
+          "label": "Bar L bow B",
+          "role": "bow",
+          "type": "marker"
+        },
+        {
+          "at": [
+            16.0,
+            -6.0
+          ],
+          "depth": -23.618505835,
+          "label": "Bar R bow F",
+          "role": "bow",
+          "type": "marker"
+        },
+        {
+          "at": [
+            16.0,
+            6.0
+          ],
+          "depth": -23.618505835,
+          "label": "Bar R bow B",
+          "role": "bow",
+          "type": "marker"
+        },
+        {
+          "at": [
+            -16.0,
+            -6.0
+          ],
+          "depth": -23.518505835,
+          "label": "Bar L lug F",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            -16.0,
+            6.0
+          ],
+          "depth": -23.518505835,
+          "label": "Bar L lug B",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            16.0,
+            -6.0
+          ],
+          "depth": -23.518505835,
+          "label": "Bar R lug F",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            16.0,
+            6.0
+          ],
+          "depth": -23.518505835,
+          "label": "Bar R lug B",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "depth": -23.518505835,
+          "label": null,
+          "pts": [
+            [
+              -16.0,
+              -6.0
+            ],
+            [
+              -16.0,
+              -6.0
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "depth": -23.518505835,
+          "label": null,
+          "pts": [
+            [
+              -16.0,
+              6.0
+            ],
+            [
+              -16.0,
+              6.0
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "depth": -23.518505835,
+          "label": null,
+          "pts": [
+            [
+              16.0,
+              -6.0
+            ],
+            [
+              16.0,
+              -6.0
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "depth": -23.518505835,
+          "label": null,
+          "pts": [
+            [
+              16.0,
+              6.0
+            ],
+            [
+              16.0,
+              6.0
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "at": [
+            0.0,
+            0.0
+          ],
+          "depth": -22.334775997,
+          "label": "Al MDC enclosure support",
+          "role": "cg",
+          "type": "marker"
+        },
+        {
+          "depth": -15.282396974,
+          "label": null,
+          "pts": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ]
+          ],
+          "role": "bar",
+          "type": "polyline"
+        },
+        {
+          "depth": -14.932396974,
+          "label": "Bar C",
+          "pts": [
+            [
+              0.0,
+              -6.0
+            ],
+            [
+              0.0,
+              6.0
+            ]
+          ],
+          "role": "bar",
+          "type": "polyline"
+        },
+        {
+          "at": [
+            0.0,
+            0.0
+          ],
+          "depth": -14.932396974,
+          "label": "Bar C CG",
+          "role": "cg",
+          "type": "marker"
+        },
+        {
+          "at": [
+            0.0,
+            -6.0
+          ],
+          "depth": -14.932396974,
+          "label": "Bar C bow F",
+          "role": "bow",
+          "type": "marker"
+        },
+        {
+          "at": [
+            0.0,
+            6.0
+          ],
+          "depth": -14.932396974,
+          "label": "Bar C bow B",
+          "role": "bow",
+          "type": "marker"
+        },
+        {
+          "at": [
+            0.0,
+            -6.0
+          ],
+          "depth": -14.832396974,
+          "label": "Bar C lug F",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            0.0,
+            6.0
+          ],
+          "depth": -14.832396974,
+          "label": "Bar C lug B",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "depth": -14.832396974,
+          "label": null,
+          "pts": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              -6.0
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "depth": -14.832396974,
+          "label": null,
+          "pts": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              6.0
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "depth": -13.918505835,
+          "label": null,
+          "pts": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ]
+          ],
+          "role": "bar",
+          "type": "polyline"
+        },
+        {
+          "depth": -13.518505835,
+          "label": "Bar top",
+          "pts": [
+            [
+              -16.0,
+              -6.0
+            ],
+            [
+              16.0,
+              6.0
+            ]
+          ],
+          "role": "bar",
+          "type": "polyline"
+        },
+        {
+          "at": [
+            0.0,
+            0.0
+          ],
+          "depth": -13.518505835,
+          "label": "Bar top CG",
+          "role": "cg",
+          "type": "marker"
+        },
+        {
+          "at": [
+            -16.0,
+            0.0
+          ],
+          "depth": -13.518505835,
+          "label": "Bar L support",
+          "role": "cg",
+          "type": "marker"
+        },
+        {
+          "at": [
+            16.0,
+            0.0
+          ],
+          "depth": -13.518505835,
+          "label": "Bar R support",
+          "role": "cg",
+          "type": "marker"
+        },
+        {
+          "at": [
+            -17.0,
+            0.0
+          ],
+          "depth": -13.518505835,
+          "label": "Bar top end A",
+          "role": "bow",
+          "type": "marker"
+        },
+        {
+          "at": [
+            17.0,
+            0.0
+          ],
+          "depth": -13.518505835,
+          "label": "Bar top end B",
+          "role": "bow",
+          "type": "marker"
+        },
+        {
+          "at": [
+            -16.0,
+            -6.0
+          ],
+          "depth": -13.518505835,
+          "label": "Top→L front",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            -16.0,
+            6.0
+          ],
+          "depth": -13.518505835,
+          "label": "Top→L back",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            16.0,
+            -6.0
+          ],
+          "depth": -13.518505835,
+          "label": "Top→R front",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            16.0,
+            6.0
+          ],
+          "depth": -13.518505835,
+          "label": "Top→R back",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            -8.5,
+            -1.0
+          ],
+          "depth": -13.518505835,
+          "label": "Top hook LF",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            -8.5,
+            1.0
+          ],
+          "depth": -13.518505835,
+          "label": "Top hook LB",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            8.5,
+            -1.0
+          ],
+          "depth": -13.518505835,
+          "label": "Top hook RF",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            8.5,
+            1.0
+          ],
+          "depth": -13.518505835,
+          "label": "Top hook RB",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "depth": -13.518505835,
+          "label": null,
+          "pts": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              -8.5,
+              -1.0
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "depth": -13.518505835,
+          "label": null,
+          "pts": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              -8.5,
+              1.0
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "depth": -13.518505835,
+          "label": null,
+          "pts": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              8.5,
+              -1.0
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "depth": -13.518505835,
+          "label": null,
+          "pts": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              8.5,
+              1.0
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "at": [
+            0.0,
+            0.0
+          ],
+          "depth": 0.0,
+          "label": "Hook",
+          "role": "hook",
+          "type": "marker"
+        },
+        {
+          "at": [
+            0.0,
+            0.0
+          ],
+          "depth": 0.0,
+          "label": "Hook CG",
+          "role": "cg",
+          "type": "marker"
+        },
+        {
+          "at": [
+            0.0,
+            0.0
+          ],
+          "depth": 0.0,
+          "label": "Bar top support",
+          "role": "cg",
+          "type": "marker"
+        },
+        {
+          "at": [
+            0.0,
+            0.0
+          ],
+          "depth": 0.0,
+          "label": "Bar C support",
+          "role": "cg",
+          "type": "marker"
+        },
+        {
+          "at": [
+            0.0,
+            0.0
+          ],
+          "depth": 0.0,
+          "label": "hook",
+          "role": "hook",
+          "type": "marker"
+        },
+        {
+          "from": [
+            -16.0,
+            -6.0
+          ],
+          "offset_ft": 1.0,
+          "text": "34.18 ft (assumed)",
+          "to": [
+            16.0,
+            6.0
+          ],
+          "type": "dim"
+        },
+        {
+          "from": [
+            -16.0,
+            -6.0
+          ],
+          "offset_ft": 1.0,
+          "text": "12 ft (assumed)",
+          "to": [
+            -16.0,
+            6.0
+          ],
+          "type": "dim"
+        },
+        {
+          "from": [
+            0.0,
+            -6.0
+          ],
+          "offset_ft": 1.0,
+          "text": "12 ft (assumed)",
+          "to": [
+            0.0,
+            6.0
+          ],
+          "type": "dim"
+        },
+        {
+          "from": [
+            16.0,
+            -6.0
+          ],
+          "offset_ft": 1.0,
+          "text": "12 ft (assumed)",
+          "to": [
+            16.0,
+            6.0
+          ],
+          "type": "dim"
+        },
+        {
+          "from": [
+            -24.0,
+            -6.0
+          ],
+          "offset_ft": 0.6,
+          "text": "8 ft (assumed)",
+          "to": [
+            -16.0,
+            -6.0
+          ],
+          "type": "dim"
+        },
+        {
+          "from": [
+            -16.0,
+            -6.0
+          ],
+          "offset_ft": 0.6,
+          "text": "8 ft (assumed)",
+          "to": [
+            -8.0,
+            -6.0
+          ],
+          "type": "dim"
+        },
+        {
+          "from": [
+            -8.0,
+            -6.0
+          ],
+          "offset_ft": 0.6,
+          "text": "8 ft (assumed)",
+          "to": [
+            0.0,
+            -6.0
+          ],
+          "type": "dim"
+        },
+        {
+          "from": [
+            0.0,
+            -6.0
+          ],
+          "offset_ft": 0.6,
+          "text": "8 ft (assumed)",
+          "to": [
+            8.0,
+            -6.0
+          ],
+          "type": "dim"
+        },
+        {
+          "from": [
+            8.0,
+            -6.0
+          ],
+          "offset_ft": 0.6,
+          "text": "8 ft (assumed)",
+          "to": [
+            16.0,
+            -6.0
+          ],
+          "type": "dim"
+        },
+        {
+          "from": [
+            16.0,
+            -6.0
+          ],
+          "offset_ft": 0.6,
+          "text": "8 ft (assumed)",
+          "to": [
+            24.0,
+            -6.0
+          ],
+          "type": "dim"
+        },
+        {
+          "at": [
+            0.0,
+            0.0
+          ],
+          "role": "warning",
+          "text": "check residuals (assumed)",
+          "type": "text"
+        }
+      ],
+      "kind": "Plan"
+    },
+    "side": {
+      "bounds": {
+        "max": [
+          24.0,
+          0.0
+        ],
+        "min": [
+          -24.0,
+          -42.16834027
+        ]
+      },
+      "items": [
+        {
+          "depth": -6.0,
+          "label": null,
+          "pts": [
+            [
+              -24.0,
+              -42.16834027
+            ],
+            [
+              24.0,
+              -42.16834027
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": -6.0,
+          "label": null,
+          "pts": [
+            [
+              24.0,
+              -42.16834027
+            ],
+            [
+              24.0,
+              -42.16834027
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": -6.0,
+          "label": null,
+          "pts": [
+            [
+              -24.0,
+              -42.16834027
+            ],
+            [
+              -24.0,
+              -42.16834027
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": -6.0,
+          "label": null,
+          "pts": [
+            [
+              -24.0,
+              -31.16834027
+            ],
+            [
+              24.0,
+              -31.16834027
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": -6.0,
+          "label": null,
+          "pts": [
+            [
+              24.0,
+              -31.16834027
+            ],
+            [
+              24.0,
+              -31.16834027
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": -6.0,
+          "label": null,
+          "pts": [
+            [
+              -24.0,
+              -31.16834027
+            ],
+            [
+              -24.0,
+              -31.16834027
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": -6.0,
+          "label": null,
+          "pts": [
+            [
+              -24.0,
+              -42.16834027
+            ],
+            [
+              -24.0,
+              -31.16834027
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": -6.0,
+          "label": null,
+          "pts": [
+            [
+              24.0,
+              -42.16834027
+            ],
+            [
+              24.0,
+              -31.16834027
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": -6.0,
+          "label": "Bar top",
+          "pts": [
+            [
+              -16.0,
+              -13.518505835
+            ],
+            [
+              16.0,
+              -13.518505835
+            ]
+          ],
+          "role": "bar",
+          "type": "polyline"
+        },
+        {
+          "depth": -6.0,
+          "label": "Bar L",
+          "pts": [
+            [
+              -16.0,
+              -23.618505835
+            ],
+            [
+              -16.0,
+              -23.518505835
+            ]
+          ],
+          "role": "bar",
+          "type": "polyline"
+        },
+        {
+          "depth": -6.0,
+          "label": "Bar C",
+          "pts": [
+            [
+              0.0,
+              -14.932396974
+            ],
+            [
+              0.0,
+              -14.832396974
+            ]
+          ],
+          "role": "bar",
+          "type": "polyline"
+        },
+        {
+          "depth": -6.0,
+          "label": "Bar R",
+          "pts": [
+            [
+              16.0,
+              -23.618505835
+            ],
+            [
+              16.0,
+              -23.518505835
+            ]
+          ],
+          "role": "bar",
+          "type": "polyline"
+        },
+        {
+          "at": [
+            -16.0,
+            -13.518505835
+          ],
+          "depth": -6.0,
+          "label": "Top→L front",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            16.0,
+            -13.518505835
+          ],
+          "depth": -6.0,
+          "label": "Top→R front",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            0.0,
+            -14.932396974
+          ],
+          "depth": -6.0,
+          "label": "Bar C bow F",
+          "role": "bow",
+          "type": "marker"
+        },
+        {
+          "at": [
+            0.0,
+            -14.832396974
+          ],
+          "depth": -6.0,
+          "label": "Bar C lug F",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            -16.0,
+            -23.618505835
+          ],
+          "depth": -6.0,
+          "label": "Bar L bow F",
+          "role": "bow",
+          "type": "marker"
+        },
+        {
+          "at": [
+            -16.0,
+            -23.518505835
+          ],
+          "depth": -6.0,
+          "label": "Bar L lug F",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            16.0,
+            -23.618505835
+          ],
+          "depth": -6.0,
+          "label": "Bar R bow F",
+          "role": "bow",
+          "type": "marker"
+        },
+        {
+          "at": [
+            16.0,
+            -23.518505835
+          ],
+          "depth": -6.0,
+          "label": "Bar R lug F",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            -24.0,
+            -31.16834027
+          ],
+          "depth": -6.0,
+          "label": "P1-front",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            -16.0,
+            -31.16834027
+          ],
+          "depth": -6.0,
+          "label": "P2-front",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            -8.0,
+            -31.16834027
+          ],
+          "depth": -6.0,
+          "label": "P3-front",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            0.0,
+            -31.16834027
+          ],
+          "depth": -6.0,
+          "label": "P4-front",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            8.0,
+            -31.16834027
+          ],
+          "depth": -6.0,
+          "label": "P5-front",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            16.0,
+            -31.16834027
+          ],
+          "depth": -6.0,
+          "label": "P6-front",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            24.0,
+            -31.16834027
+          ],
+          "depth": -6.0,
+          "label": "P7-front",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "depth": -6.0,
+          "label": null,
+          "pts": [
+            [
+              -24.0,
+              -31.16834027
+            ],
+            [
+              -16.0,
+              -23.618505835
+            ],
+            [
+              -8.0,
+              -31.16834027
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "depth": -6.0,
+          "label": null,
+          "pts": [
+            [
+              8.0,
+              -31.16834027
+            ],
+            [
+              16.0,
+              -23.618505835
+            ],
+            [
+              24.0,
+              -31.16834027
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "depth": -6.0,
+          "label": null,
+          "pts": [
+            [
+              -16.0,
+              -23.518505835
+            ],
+            [
+              -16.0,
+              -31.16834027
+            ]
+          ],
+          "role": "slack_member",
+          "type": "polyline"
+        },
+        {
+          "depth": -6.0,
+          "label": null,
+          "pts": [
+            [
+              0.0,
+              -14.832396974
+            ],
+            [
+              0.0,
+              -31.16834027
+            ]
+          ],
+          "role": "slack_member",
+          "type": "polyline"
+        },
+        {
+          "depth": -6.0,
+          "label": null,
+          "pts": [
+            [
+              16.0,
+              -23.518505835
+            ],
+            [
+              16.0,
+              -31.16834027
+            ]
+          ],
+          "role": "slack_member",
+          "type": "polyline"
+        },
+        {
+          "depth": -6.0,
+          "label": null,
+          "pts": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              -14.832396974
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "depth": -6.0,
+          "label": null,
+          "pts": [
+            [
+              -16.0,
+              -13.518505835
+            ],
+            [
+              -16.0,
+              -23.518505835
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "depth": -6.0,
+          "label": null,
+          "pts": [
+            [
+              16.0,
+              -13.518505835
+            ],
+            [
+              16.0,
+              -23.518505835
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "at": [
+            -8.5,
+            -13.518505835
+          ],
+          "depth": -1.0,
+          "label": "Top hook LF",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            8.5,
+            -13.518505835
+          ],
+          "depth": -1.0,
+          "label": "Top hook RF",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "depth": -1.0,
+          "label": null,
+          "pts": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              -8.5,
+              -13.518505835
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "depth": -1.0,
+          "label": null,
+          "pts": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              8.5,
+              -13.518505835
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "depth": -0.4,
+          "label": null,
+          "pts": [
+            [
+              0.0,
+              -13.518505835
+            ],
+            [
+              0.0,
+              -13.518505835
+            ]
+          ],
+          "role": "bar",
+          "type": "polyline"
+        },
+        {
+          "depth": -0.4,
+          "label": null,
+          "pts": [
+            [
+              -16.0,
+              -23.568505835
+            ],
+            [
+              -16.0,
+              -23.568505835
+            ]
+          ],
+          "role": "bar",
+          "type": "polyline"
+        },
+        {
+          "depth": -0.4,
+          "label": null,
+          "pts": [
+            [
+              0.0,
+              -14.882396974
+            ],
+            [
+              0.0,
+              -14.882396974
+            ]
+          ],
+          "role": "bar",
+          "type": "polyline"
+        },
+        {
+          "depth": -0.4,
+          "label": null,
+          "pts": [
+            [
+              16.0,
+              -23.568505835
+            ],
+            [
+              16.0,
+              -23.568505835
+            ]
+          ],
+          "role": "bar",
+          "type": "polyline"
+        },
+        {
+          "at": [
+            0.0,
+            0.0
+          ],
+          "depth": 0.0,
+          "label": "Hook",
+          "role": "hook",
+          "type": "marker"
+        },
+        {
+          "at": [
+            0.0,
+            0.0
+          ],
+          "depth": 0.0,
+          "label": "hook",
+          "role": "hook",
+          "type": "marker"
+        },
+        {
+          "at": [
+            -17.0,
+            -13.518505835
+          ],
+          "depth": 0.0,
+          "label": "Bar top end A",
+          "role": "bow",
+          "type": "marker"
+        },
+        {
+          "at": [
+            17.0,
+            -13.518505835
+          ],
+          "depth": 0.0,
+          "label": "Bar top end B",
+          "role": "bow",
+          "type": "marker"
+        },
+        {
+          "depth": 0.0,
+          "label": null,
+          "pts": [
+            [
+              -24.0,
+              -31.16834027
+            ],
+            [
+              -16.0,
+              -23.618505835
+            ],
+            [
+              -8.0,
+              -31.16834027
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "depth": 0.0,
+          "label": null,
+          "pts": [
+            [
+              8.0,
+              -31.16834027
+            ],
+            [
+              16.0,
+              -23.618505835
+            ],
+            [
+              24.0,
+              -31.16834027
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "depth": 0.0,
+          "label": null,
+          "pts": [
+            [
+              -16.0,
+              -23.518505835
+            ],
+            [
+              -16.0,
+              -31.16834027
+            ]
+          ],
+          "role": "slack_member",
+          "type": "polyline"
+        },
+        {
+          "depth": 0.0,
+          "label": null,
+          "pts": [
+            [
+              0.0,
+              -14.832396974
+            ],
+            [
+              0.0,
+              -31.16834027
+            ]
+          ],
+          "role": "slack_member",
+          "type": "polyline"
+        },
+        {
+          "depth": 0.0,
+          "label": null,
+          "pts": [
+            [
+              16.0,
+              -23.518505835
+            ],
+            [
+              16.0,
+              -31.16834027
+            ]
+          ],
+          "role": "slack_member",
+          "type": "polyline"
+        },
+        {
+          "depth": 0.0,
+          "label": null,
+          "pts": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              -8.5,
+              -13.518505835
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "depth": 0.0,
+          "label": null,
+          "pts": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              8.5,
+              -13.518505835
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "depth": 0.0,
+          "label": null,
+          "pts": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              -14.832396974
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "depth": 0.0,
+          "label": null,
+          "pts": [
+            [
+              -16.0,
+              -13.518505835
+            ],
+            [
+              -16.0,
+              -23.518505835
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "depth": 0.0,
+          "label": null,
+          "pts": [
+            [
+              16.0,
+              -13.518505835
+            ],
+            [
+              16.0,
+              -23.518505835
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "at": [
+            -8.5,
+            -13.518505835
+          ],
+          "depth": 1.0,
+          "label": "Top hook LB",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            8.5,
+            -13.518505835
+          ],
+          "depth": 1.0,
+          "label": "Top hook RB",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "depth": 6.0,
+          "label": null,
+          "pts": [
+            [
+              24.0,
+              -42.16834027
+            ],
+            [
+              -24.0,
+              -42.16834027
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": 6.0,
+          "label": null,
+          "pts": [
+            [
+              24.0,
+              -31.16834027
+            ],
+            [
+              -24.0,
+              -31.16834027
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": 6.0,
+          "label": null,
+          "pts": [
+            [
+              24.0,
+              -42.16834027
+            ],
+            [
+              24.0,
+              -31.16834027
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": 6.0,
+          "label": null,
+          "pts": [
+            [
+              -24.0,
+              -42.16834027
+            ],
+            [
+              -24.0,
+              -31.16834027
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "at": [
+            -16.0,
+            -13.518505835
+          ],
+          "depth": 6.0,
+          "label": "Top→L back",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            16.0,
+            -13.518505835
+          ],
+          "depth": 6.0,
+          "label": "Top→R back",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            0.0,
+            -14.932396974
+          ],
+          "depth": 6.0,
+          "label": "Bar C bow B",
+          "role": "bow",
+          "type": "marker"
+        },
+        {
+          "at": [
+            0.0,
+            -14.832396974
+          ],
+          "depth": 6.0,
+          "label": "Bar C lug B",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            -16.0,
+            -23.618505835
+          ],
+          "depth": 6.0,
+          "label": "Bar L bow B",
+          "role": "bow",
+          "type": "marker"
+        },
+        {
+          "at": [
+            -16.0,
+            -23.518505835
+          ],
+          "depth": 6.0,
+          "label": "Bar L lug B",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            16.0,
+            -23.618505835
+          ],
+          "depth": 6.0,
+          "label": "Bar R bow B",
+          "role": "bow",
+          "type": "marker"
+        },
+        {
+          "at": [
+            16.0,
+            -23.518505835
+          ],
+          "depth": 6.0,
+          "label": "Bar R lug B",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            -24.0,
+            -31.16834027
+          ],
+          "depth": 6.0,
+          "label": "P1-back",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            -16.0,
+            -31.16834027
+          ],
+          "depth": 6.0,
+          "label": "P2-back",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            -8.0,
+            -31.16834027
+          ],
+          "depth": 6.0,
+          "label": "P3-back",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            0.0,
+            -31.16834027
+          ],
+          "depth": 6.0,
+          "label": "P4-back",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            8.0,
+            -31.16834027
+          ],
+          "depth": 6.0,
+          "label": "P5-back",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            16.0,
+            -31.16834027
+          ],
+          "depth": 6.0,
+          "label": "P6-back",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            24.0,
+            -31.16834027
+          ],
+          "depth": 6.0,
+          "label": "P7-back",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "from": [
+            -16.0,
+            -13.518505835
+          ],
+          "offset_ft": 1.0,
+          "text": "34.18 ft (assumed)",
+          "to": [
+            16.0,
+            -13.518505835
+          ],
+          "type": "dim"
+        },
+        {
+          "from": [
+            -16.0,
+            -23.618505835
+          ],
+          "offset_ft": 1.0,
+          "text": "12 ft (assumed)",
+          "to": [
+            -16.0,
+            -23.618505835
+          ],
+          "type": "dim"
+        },
+        {
+          "from": [
+            0.0,
+            -14.932396974
+          ],
+          "offset_ft": 1.0,
+          "text": "12 ft (assumed)",
+          "to": [
+            0.0,
+            -14.932396974
+          ],
+          "type": "dim"
+        },
+        {
+          "from": [
+            16.0,
+            -23.618505835
+          ],
+          "offset_ft": 1.0,
+          "text": "12 ft (assumed)",
+          "to": [
+            16.0,
+            -23.618505835
+          ],
+          "type": "dim"
+        },
+        {
+          "from": [
+            -24.0,
+            -31.16834027
+          ],
+          "offset_ft": 0.6,
+          "text": "8 ft (assumed)",
+          "to": [
+            -16.0,
+            -31.16834027
+          ],
+          "type": "dim"
+        },
+        {
+          "from": [
+            -16.0,
+            -31.16834027
+          ],
+          "offset_ft": 0.6,
+          "text": "8 ft (assumed)",
+          "to": [
+            -8.0,
+            -31.16834027
+          ],
+          "type": "dim"
+        },
+        {
+          "from": [
+            -8.0,
+            -31.16834027
+          ],
+          "offset_ft": 0.6,
+          "text": "8 ft (assumed)",
+          "to": [
+            0.0,
+            -31.16834027
+          ],
+          "type": "dim"
+        },
+        {
+          "from": [
+            0.0,
+            -31.16834027
+          ],
+          "offset_ft": 0.6,
+          "text": "8 ft (assumed)",
+          "to": [
+            8.0,
+            -31.16834027
+          ],
+          "type": "dim"
+        },
+        {
+          "from": [
+            8.0,
+            -31.16834027
+          ],
+          "offset_ft": 0.6,
+          "text": "8 ft (assumed)",
+          "to": [
+            16.0,
+            -31.16834027
+          ],
+          "type": "dim"
+        },
+        {
+          "from": [
+            16.0,
+            -31.16834027
+          ],
+          "offset_ft": 0.6,
+          "text": "8 ft (assumed)",
+          "to": [
+            24.0,
+            -31.16834027
+          ],
+          "type": "dim"
+        },
+        {
+          "from": [
+            0.0,
+            0.0
+          ],
+          "offset_ft": 1.2,
+          "text": "31.17 ft (assumed)",
+          "to": [
+            -24.0,
+            -31.16834027
+          ],
+          "type": "dim"
+        },
+        {
+          "at": [
+            -24.0,
+            -31.16834027
+          ],
+          "from_deg": 0.0,
+          "radius_ft": 1.5,
+          "text": "43.34° (assumed)",
+          "to_deg": 43.341758227,
+          "type": "arc"
+        },
+        {
+          "at": [
+            0.0,
+            0.0
+          ],
+          "role": "warning",
+          "text": "check residuals (assumed)",
+          "type": "text"
+        }
+      ],
+      "kind": "Side"
+    }
+  },
+  "two_over_four": {
+    "end": {
+      "bounds": {
+        "max": [
+          3.0,
+          0.0
+        ],
+        "min": [
+          -3.0,
+          -21.719683899
+        ]
+      },
+      "items": [
+        {
+          "depth": -6.0,
+          "label": "Spreader L0",
+          "pts": [
+            [
+              0.0,
+              -10.392304845
+            ],
+            [
+              0.0,
+              -10.392304845
+            ]
+          ],
+          "role": "bar",
+          "type": "polyline"
+        },
+        {
+          "at": [
+            0.0,
+            -10.392304845
+          ],
+          "depth": -6.0,
+          "label": "L0 bar pick 0",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "depth": -6.0,
+          "label": null,
+          "pts": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              -10.392304845
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "depth": -6.0,
+          "label": null,
+          "pts": [
+            [
+              0.0,
+              -10.392304845
+            ],
+            [
+              -3.0,
+              -19.719683899
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "depth": -6.0,
+          "label": null,
+          "pts": [
+            [
+              0.0,
+              -10.392304845
+            ],
+            [
+              3.0,
+              -19.719683899
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "depth": -4.0,
+          "label": null,
+          "pts": [
+            [
+              -3.0,
+              -21.719683899
+            ],
+            [
+              -3.0,
+              -21.719683899
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": -4.0,
+          "label": null,
+          "pts": [
+            [
+              3.0,
+              -21.719683899
+            ],
+            [
+              3.0,
+              -21.719683899
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": -4.0,
+          "label": null,
+          "pts": [
+            [
+              3.0,
+              -21.719683899
+            ],
+            [
+              -3.0,
+              -21.719683899
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": -4.0,
+          "label": null,
+          "pts": [
+            [
+              -3.0,
+              -19.719683899
+            ],
+            [
+              -3.0,
+              -19.719683899
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": -4.0,
+          "label": null,
+          "pts": [
+            [
+              3.0,
+              -19.719683899
+            ],
+            [
+              3.0,
+              -19.719683899
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": -4.0,
+          "label": null,
+          "pts": [
+            [
+              3.0,
+              -19.719683899
+            ],
+            [
+              -3.0,
+              -19.719683899
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": -4.0,
+          "label": null,
+          "pts": [
+            [
+              -3.0,
+              -21.719683899
+            ],
+            [
+              -3.0,
+              -19.719683899
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": -4.0,
+          "label": null,
+          "pts": [
+            [
+              3.0,
+              -21.719683899
+            ],
+            [
+              3.0,
+              -19.719683899
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "at": [
+            -3.0,
+            -19.719683899
+          ],
+          "depth": -4.0,
+          "label": "P0",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            3.0,
+            -19.719683899
+          ],
+          "depth": -4.0,
+          "label": "P1",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            0.0,
+            0.0
+          ],
+          "depth": 0.0,
+          "label": "Hook",
+          "role": "hook",
+          "type": "marker"
+        },
+        {
+          "depth": 0.0,
+          "label": null,
+          "pts": [
+            [
+              -0.4,
+              -10.392304845
+            ],
+            [
+              0.4,
+              -10.392304845
+            ]
+          ],
+          "role": "bar",
+          "type": "polyline"
+        },
+        {
+          "at": [
+            0.0,
+            0.0
+          ],
+          "depth": 0.0,
+          "label": "hook",
+          "role": "hook",
+          "type": "marker"
+        },
+        {
+          "depth": 0.0,
+          "label": null,
+          "pts": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              -10.392304845
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "depth": 0.0,
+          "label": null,
+          "pts": [
+            [
+              0.0,
+              -10.392304845
+            ],
+            [
+              -3.0,
+              -19.719683899
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "depth": 0.0,
+          "label": null,
+          "pts": [
+            [
+              0.0,
+              -10.392304845
+            ],
+            [
+              3.0,
+              -19.719683899
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "depth": 4.0,
+          "label": null,
+          "pts": [
+            [
+              -3.0,
+              -21.719683899
+            ],
+            [
+              3.0,
+              -21.719683899
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": 4.0,
+          "label": null,
+          "pts": [
+            [
+              -3.0,
+              -19.719683899
+            ],
+            [
+              3.0,
+              -19.719683899
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": 4.0,
+          "label": null,
+          "pts": [
+            [
+              -3.0,
+              -21.719683899
+            ],
+            [
+              -3.0,
+              -19.719683899
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": 4.0,
+          "label": null,
+          "pts": [
+            [
+              3.0,
+              -21.719683899
+            ],
+            [
+              3.0,
+              -19.719683899
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "at": [
+            -3.0,
+            -19.719683899
+          ],
+          "depth": 4.0,
+          "label": "P2",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            3.0,
+            -19.719683899
+          ],
+          "depth": 4.0,
+          "label": "P3",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            0.0,
+            -10.392304845
+          ],
+          "depth": 6.0,
+          "label": "L0 bar pick 1",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "from": [
+            0.0,
+            -10.392304845
+          ],
+          "offset_ft": 1.0,
+          "text": "12 ft (assumed)",
+          "to": [
+            0.0,
+            -10.392304845
+          ],
+          "type": "dim"
+        },
+        {
+          "from": [
+            -3.0,
+            -19.719683899
+          ],
+          "offset_ft": 0.6,
+          "text": "8 ft (assumed)",
+          "to": [
+            -3.0,
+            -19.719683899
+          ],
+          "type": "dim"
+        },
+        {
+          "from": [
+            0.0,
+            0.0
+          ],
+          "offset_ft": 1.2,
+          "text": "19.72 ft (assumed)",
+          "to": [
+            -3.0,
+            -19.719683899
+          ],
+          "type": "dim"
+        },
+        {
+          "at": [
+            0.0,
+            -10.392304845
+          ],
+          "from_deg": 0.0,
+          "radius_ft": 1.5,
+          "text": "60° (assumed)",
+          "to_deg": 60.0,
+          "type": "arc"
+        }
+      ],
+      "kind": "End"
+    },
+    "plan": {
+      "bounds": {
+        "max": [
+          6.0,
+          3.0
+        ],
+        "min": [
+          -6.0,
+          -3.0
+        ]
+      },
+      "items": [
+        {
+          "depth": -21.719683899,
+          "label": null,
+          "pts": [
+            [
+              -4.0,
+              -3.0
+            ],
+            [
+              4.0,
+              -3.0
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": -21.719683899,
+          "label": null,
+          "pts": [
+            [
+              4.0,
+              -3.0
+            ],
+            [
+              4.0,
+              3.0
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": -21.719683899,
+          "label": null,
+          "pts": [
+            [
+              4.0,
+              3.0
+            ],
+            [
+              -4.0,
+              3.0
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": -21.719683899,
+          "label": null,
+          "pts": [
+            [
+              -4.0,
+              3.0
+            ],
+            [
+              -4.0,
+              -3.0
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": -21.719683899,
+          "label": null,
+          "pts": [
+            [
+              -4.0,
+              -3.0
+            ],
+            [
+              -4.0,
+              -3.0
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": -21.719683899,
+          "label": null,
+          "pts": [
+            [
+              4.0,
+              -3.0
+            ],
+            [
+              4.0,
+              -3.0
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": -21.719683899,
+          "label": null,
+          "pts": [
+            [
+              4.0,
+              3.0
+            ],
+            [
+              4.0,
+              3.0
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": -21.719683899,
+          "label": null,
+          "pts": [
+            [
+              -4.0,
+              3.0
+            ],
+            [
+              -4.0,
+              3.0
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "at": [
+            0.0,
+            0.0
+          ],
+          "depth": -20.719683899,
+          "label": "Load CG",
+          "role": "cg",
+          "type": "marker"
+        },
+        {
+          "depth": -19.719683899,
+          "label": null,
+          "pts": [
+            [
+              -4.0,
+              -3.0
+            ],
+            [
+              4.0,
+              -3.0
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": -19.719683899,
+          "label": null,
+          "pts": [
+            [
+              4.0,
+              -3.0
+            ],
+            [
+              4.0,
+              3.0
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": -19.719683899,
+          "label": null,
+          "pts": [
+            [
+              4.0,
+              3.0
+            ],
+            [
+              -4.0,
+              3.0
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": -19.719683899,
+          "label": null,
+          "pts": [
+            [
+              -4.0,
+              3.0
+            ],
+            [
+              -4.0,
+              -3.0
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "at": [
+            -4.0,
+            -3.0
+          ],
+          "depth": -19.719683899,
+          "label": "P0",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            -4.0,
+            3.0
+          ],
+          "depth": -19.719683899,
+          "label": "P1",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            4.0,
+            -3.0
+          ],
+          "depth": -19.719683899,
+          "label": "P2",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            4.0,
+            3.0
+          ],
+          "depth": -19.719683899,
+          "label": "P3",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "depth": -19.719683899,
+          "label": null,
+          "pts": [
+            [
+              -6.0,
+              0.0
+            ],
+            [
+              -4.0,
+              -3.0
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "depth": -19.719683899,
+          "label": null,
+          "pts": [
+            [
+              -6.0,
+              0.0
+            ],
+            [
+              -4.0,
+              3.0
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "depth": -19.719683899,
+          "label": null,
+          "pts": [
+            [
+              6.0,
+              0.0
+            ],
+            [
+              4.0,
+              -3.0
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "depth": -19.719683899,
+          "label": null,
+          "pts": [
+            [
+              6.0,
+              0.0
+            ],
+            [
+              4.0,
+              3.0
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "depth": -10.792304845,
+          "label": null,
+          "pts": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0
+            ]
+          ],
+          "role": "bar",
+          "type": "polyline"
+        },
+        {
+          "at": [
+            0.0,
+            0.0
+          ],
+          "depth": -10.392304845,
+          "label": "Load support",
+          "role": "cg",
+          "type": "marker"
+        },
+        {
+          "depth": -10.392304845,
+          "label": "Spreader L0",
+          "pts": [
+            [
+              -6.0,
+              0.0
+            ],
+            [
+              6.0,
+              0.0
+            ]
+          ],
+          "role": "bar",
+          "type": "polyline"
+        },
+        {
+          "at": [
+            0.0,
+            0.0
+          ],
+          "depth": -10.392304845,
+          "label": "Spreader L0 CG",
+          "role": "cg",
+          "type": "marker"
+        },
+        {
+          "at": [
+            -6.0,
+            0.0
+          ],
+          "depth": -10.392304845,
+          "label": "L0 bar pick 0",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            6.0,
+            0.0
+          ],
+          "depth": -10.392304845,
+          "label": "L0 bar pick 1",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "depth": -10.392304845,
+          "label": null,
+          "pts": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              -6.0,
+              0.0
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "depth": -10.392304845,
+          "label": null,
+          "pts": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              6.0,
+              0.0
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "at": [
+            0.0,
+            0.0
+          ],
+          "depth": 0.0,
+          "label": "Hook",
+          "role": "hook",
+          "type": "marker"
+        },
+        {
+          "at": [
+            0.0,
+            0.0
+          ],
+          "depth": 0.0,
+          "label": "Hook CG",
+          "role": "cg",
+          "type": "marker"
+        },
+        {
+          "at": [
+            0.0,
+            0.0
+          ],
+          "depth": 0.0,
+          "label": "Spreader L0 support",
+          "role": "cg",
+          "type": "marker"
+        },
+        {
+          "at": [
+            0.0,
+            0.0
+          ],
+          "depth": 0.0,
+          "label": "hook",
+          "role": "hook",
+          "type": "marker"
+        },
+        {
+          "from": [
+            -6.0,
+            0.0
+          ],
+          "offset_ft": 1.0,
+          "text": "12 ft (assumed)",
+          "to": [
+            6.0,
+            0.0
+          ],
+          "type": "dim"
+        },
+        {
+          "from": [
+            -4.0,
+            -3.0
+          ],
+          "offset_ft": 0.6,
+          "text": "8 ft (assumed)",
+          "to": [
+            4.0,
+            -3.0
+          ],
+          "type": "dim"
+        }
+      ],
+      "kind": "Plan"
+    },
+    "side": {
+      "bounds": {
+        "max": [
+          6.0,
+          0.0
+        ],
+        "min": [
+          -6.0,
+          -21.719683899
+        ]
+      },
+      "items": [
+        {
+          "depth": -3.0,
+          "label": null,
+          "pts": [
+            [
+              -4.0,
+              -21.719683899
+            ],
+            [
+              4.0,
+              -21.719683899
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": -3.0,
+          "label": null,
+          "pts": [
+            [
+              4.0,
+              -21.719683899
+            ],
+            [
+              4.0,
+              -21.719683899
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": -3.0,
+          "label": null,
+          "pts": [
+            [
+              -4.0,
+              -21.719683899
+            ],
+            [
+              -4.0,
+              -21.719683899
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": -3.0,
+          "label": null,
+          "pts": [
+            [
+              -4.0,
+              -19.719683899
+            ],
+            [
+              4.0,
+              -19.719683899
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": -3.0,
+          "label": null,
+          "pts": [
+            [
+              4.0,
+              -19.719683899
+            ],
+            [
+              4.0,
+              -19.719683899
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": -3.0,
+          "label": null,
+          "pts": [
+            [
+              -4.0,
+              -19.719683899
+            ],
+            [
+              -4.0,
+              -19.719683899
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": -3.0,
+          "label": null,
+          "pts": [
+            [
+              -4.0,
+              -21.719683899
+            ],
+            [
+              -4.0,
+              -19.719683899
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": -3.0,
+          "label": null,
+          "pts": [
+            [
+              4.0,
+              -21.719683899
+            ],
+            [
+              4.0,
+              -19.719683899
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "at": [
+            -4.0,
+            -19.719683899
+          ],
+          "depth": -3.0,
+          "label": "P0",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            4.0,
+            -19.719683899
+          ],
+          "depth": -3.0,
+          "label": "P2",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "depth": -3.0,
+          "label": null,
+          "pts": [
+            [
+              -6.0,
+              -10.392304845
+            ],
+            [
+              -4.0,
+              -19.719683899
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "depth": -3.0,
+          "label": null,
+          "pts": [
+            [
+              6.0,
+              -10.392304845
+            ],
+            [
+              4.0,
+              -19.719683899
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "depth": -0.4,
+          "label": null,
+          "pts": [
+            [
+              0.0,
+              -10.392304845
+            ],
+            [
+              0.0,
+              -10.392304845
+            ]
+          ],
+          "role": "bar",
+          "type": "polyline"
+        },
+        {
+          "at": [
+            0.0,
+            0.0
+          ],
+          "depth": 0.0,
+          "label": "Hook",
+          "role": "hook",
+          "type": "marker"
+        },
+        {
+          "depth": 0.0,
+          "label": "Spreader L0",
+          "pts": [
+            [
+              -6.0,
+              -10.392304845
+            ],
+            [
+              6.0,
+              -10.392304845
+            ]
+          ],
+          "role": "bar",
+          "type": "polyline"
+        },
+        {
+          "at": [
+            0.0,
+            0.0
+          ],
+          "depth": 0.0,
+          "label": "hook",
+          "role": "hook",
+          "type": "marker"
+        },
+        {
+          "at": [
+            -6.0,
+            -10.392304845
+          ],
+          "depth": 0.0,
+          "label": "L0 bar pick 0",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            6.0,
+            -10.392304845
+          ],
+          "depth": 0.0,
+          "label": "L0 bar pick 1",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "depth": 0.0,
+          "label": null,
+          "pts": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              -6.0,
+              -10.392304845
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "depth": 0.0,
+          "label": null,
+          "pts": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              6.0,
+              -10.392304845
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "depth": 0.0,
+          "label": null,
+          "pts": [
+            [
+              -6.0,
+              -10.392304845
+            ],
+            [
+              -4.0,
+              -19.719683899
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "depth": 0.0,
+          "label": null,
+          "pts": [
+            [
+              6.0,
+              -10.392304845
+            ],
+            [
+              4.0,
+              -19.719683899
+            ]
+          ],
+          "role": "member",
+          "type": "polyline"
+        },
+        {
+          "depth": 3.0,
+          "label": null,
+          "pts": [
+            [
+              4.0,
+              -21.719683899
+            ],
+            [
+              -4.0,
+              -21.719683899
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": 3.0,
+          "label": null,
+          "pts": [
+            [
+              4.0,
+              -19.719683899
+            ],
+            [
+              -4.0,
+              -19.719683899
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": 3.0,
+          "label": null,
+          "pts": [
+            [
+              4.0,
+              -21.719683899
+            ],
+            [
+              4.0,
+              -19.719683899
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "depth": 3.0,
+          "label": null,
+          "pts": [
+            [
+              -4.0,
+              -21.719683899
+            ],
+            [
+              -4.0,
+              -19.719683899
+            ]
+          ],
+          "role": "load",
+          "type": "polyline"
+        },
+        {
+          "at": [
+            -4.0,
+            -19.719683899
+          ],
+          "depth": 3.0,
+          "label": "P1",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "at": [
+            4.0,
+            -19.719683899
+          ],
+          "depth": 3.0,
+          "label": "P3",
+          "role": "lug",
+          "type": "marker"
+        },
+        {
+          "from": [
+            -6.0,
+            -10.392304845
+          ],
+          "offset_ft": 1.0,
+          "text": "12 ft (assumed)",
+          "to": [
+            6.0,
+            -10.392304845
+          ],
+          "type": "dim"
+        },
+        {
+          "from": [
+            -4.0,
+            -19.719683899
+          ],
+          "offset_ft": 0.6,
+          "text": "8 ft (assumed)",
+          "to": [
+            4.0,
+            -19.719683899
+          ],
+          "type": "dim"
+        },
+        {
+          "from": [
+            0.0,
+            0.0
+          ],
+          "offset_ft": 1.2,
+          "text": "19.72 ft (assumed)",
+          "to": [
+            -4.0,
+            -19.719683899
+          ],
+          "type": "dim"
+        },
+        {
+          "at": [
+            -6.0,
+            -10.392304845
+          ],
+          "from_deg": 0.0,
+          "radius_ft": 1.5,
+          "text": "60° (assumed)",
+          "to_deg": 60.0,
+          "type": "arc"
+        }
+      ],
+      "kind": "Side"
+    }
+  }
+}

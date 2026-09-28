@@ -10,7 +10,7 @@ use uuid::Uuid;
 
 use crate::domain::Hitch;
 
-use super::body::{BarRating, Body, BodyKind};
+use super::body::{BarRating, Body, BodyKind, Placement, RotExpr};
 use super::component::{Adjust, Component};
 use super::id::{BodyId, MemberId, NodeId, ParamId};
 use super::member::{Member, Segment};
@@ -139,6 +139,24 @@ impl RigBuilder {
     pub fn set_cg(&mut self, body: BodyId, cg: Coord3) {
         if let Some(b) = self.bodies.get_mut(&body) {
             b.cg = cg;
+        }
+    }
+
+    pub fn pin(&mut self, body: BodyId, at: Coord3) {
+        if let Some(b) = self.bodies.get_mut(&body) {
+            b.placement = Some(Placement::Pinned { at });
+        }
+    }
+
+    pub fn pose(&mut self, body: BodyId, at: Coord3, rot: RotExpr) {
+        if let Some(b) = self.bodies.get_mut(&body) {
+            b.placement = Some(Placement::Posed { at, rot });
+        }
+    }
+
+    pub fn level(&mut self, body: BodyId, rot: RotExpr) {
+        if let Some(b) = self.bodies.get_mut(&body) {
+            b.placement = Some(Placement::Level { rot });
         }
     }
 
@@ -384,6 +402,18 @@ impl SegmentBuilder {
     pub fn roundsling(mut self, size: u8, hitch: Hitch, length_ft: f64) -> Self {
         self.components
             .push(Component::roundsling(size, hitch, length_ft));
+        self
+    }
+
+    pub fn roundsling_len(
+        mut self,
+        size: u8,
+        hitch: Hitch,
+        length: impl Into<crate::rig::param::Expr>,
+    ) -> Self {
+        let mut c = Component::roundsling(size, hitch, 0.0);
+        c.length = length.into();
+        self.components.push(c);
         self
     }
 

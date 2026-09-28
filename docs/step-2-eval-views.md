@@ -1,6 +1,6 @@
 # Step 2: Evaluation to 3D, and the view layer
 
-> **Status:** planned · **Owner:** AJ · **Applies to:** `bth-rigging` @ `bth-graph` branch
+> **Status:** implemented · verified 2026-09-26 (121 tests green headless) · **Owner:** AJ · **Applies to:** `bth-rigging` @ `bth-graph` branch
 > **Prerequisite:** Step 1 complete (`rig::{id,param,body,node,member,component,bearing,build,template,fixtures}`, `store::rig`, validation V1–V14, weight roll-up, Duplo10 fixture).
 > **Roadmap context:** Step 2 of 8. Fills the `rig::eval` and `rig::views` stubs. Step 1 described the rig; Step 2 **places** it and **draws** it. Step 3 hangs it and puts numbers on the legs.
 
@@ -40,20 +40,20 @@ Step 2 delivers:
 
 ### Definition of done
 
-- [ ] `EvalRig::evaluate(&rig)` returns world coordinates for every node, a pose for every body, and
+- [x] `EvalRig::evaluate(&rig)` returns world coordinates for every node, a pose for every body, and
       a polyline plus chord lengths for every member
-- [ ] `eval` reproduces `layers::geometry::resolve_geometry` for the Step 1 corpus: per-layer
+- [x] `eval` reproduces `layers::geometry::resolve_geometry` for the Step 1 corpus: per-layer
       `angle_deg`, `drops_ft`, `reaches_ft`, `unequal_drop_in` and `rigging_height_ft` match to 1e-9,
       and the GEOM / LEGS flags agree item for item
-- [ ] `duplo10()` evaluates with no errors and every bar lands at a plausible elevation; asserted
+- [x] `duplo10()` evaluates with no errors and every bar lands at a plausible elevation; asserted
       against the fixture's provisional numbers
-- [ ] Every residual has a test that triggers it: `Short`, `Slack`, `UnequalDrop`,
+- [x] Every residual has a test that triggers it: `Short`, `Slack`, `UnequalDrop`,
       `BearingSplitAssumed`, `Underconstrained`
-- [ ] `views::Scene::project(&eval, ViewKind::Side | End | Plan)` produces stable, bounded geometry;
+- [x] `views::Scene::project(&eval, ViewKind::Side | End | Plan)` produces stable, bounded geometry;
       `tests/fixtures/scene_v1.json` golden for the Duplo10 fixture and one 2-over-4 template
-- [ ] Tolerance sweep returns min/nominal/max for governing angle and hook height on the fixture
-- [ ] `cargo test --lib --no-default-features` green, rig tests still under 5 s
-- [ ] No change to any screen, PDF, saved layer JSON, or existing rig row (`schema_version` stays 1)
+- [x] Tolerance sweep returns min/nominal/max for governing angle and hook height on the fixture
+- [x] `cargo test --lib --no-default-features` green, rig tests still under 5 s
+- [x] No change to any screen, PDF, saved layer JSON, or existing rig row (`schema_version` stays 1)
 
 ---
 
@@ -361,7 +361,7 @@ are finite and contain every point; a scene has no NaN; item counts by role.
 | **D2-5** | Persist placement — new field or new space? | **Field on `Body`, `#[serde(default)]`.** `schema_version` stays 1; a v1 row loads as `Derived`. |
 | **D2-6** | Cache `EvalRig` on the rig? | **No.** It is a value, recomputed on demand, keyed by its bindings. Caching invalidation is not a problem worth owning yet. |
 | **D2-7** | `ViewKind::Auto` (pick the plane by the largest spread)? | **Not now.** The signature takes a `ViewKind`, so adding `Auto` later is additive. |
-| **D2-8** | Expression parser and parameter-table editor? | **Separate step (2.5).** Text input is a UI surface with its own error handling; folding it in doubles this step. |
+| **D2-8** | Expression parser and parameter-table editor? | **Separate step (2.5), scheduled after Step 3** (see roadmap). Text input is a UI surface with its own error handling; folding it in doubles this step. |
 | **D2-9** | Where does the `layers` equivalence test live? | **`tests/`**, not the lib, so `rig` keeps its clean import list. |
 
 ---

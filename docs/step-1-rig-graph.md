@@ -377,7 +377,7 @@ Fixture contents, asserted by test: 5 bodies (enclosure + 4 bars), 1 root, 14 lu
 | # | Question | Recommendation |
 |---|---|---|
 | D1 | Full `Expr` AST, or plain numbers with a parameter id? | **AST.** Pick spacing as `s12 + s23` shows up immediately, and Step 7's sweep needs the dependency graph. It's ~150 lines. |
-| D2 | Expression text input this step? | **No.** Builder API only. A parser (and the dimension table UI) lands with the Step 2 editor. |
+| D2 | Expression text input this step? | **No.** Builder API only. A parser (and the dimension table UI) lands with the Step 2 editor. → **Moved to Step 2.5** (Step 2 D2-8). |
 | D3 | UUID keys or slab indices? | **UUIDs**, matching the rest of the app and surviving merges. Build a name index on load. |
 | D4 | `f64` or the `kip` exact types? | **`f64` now**, behind a `Quantity` tag, so the swap is contained. |
 | D5 | Where do ratings live? | Component holds a `CatalogRef`; the numbers stay in `catalog/`. The check functions arrive in Step 3 (`checks/`). |
@@ -401,4 +401,4 @@ Fixture contents, asserted by test: 5 bodies (enclosure + 4 bars), 1 root, 14 lu
 
 ## 12. Hand-off to Step 2
 
-Step 2 gets: a validated graph, parameters that evaluate, and member paths with lengths. It adds body placement in 3D (where each bar hangs), projection to side / end / plan views, and the editor that shows the parameter table. No solver until Step 3.
+Step 2 gets: a validated graph, parameters that evaluate, and member paths with lengths. It adds body placement in 3D (where each bar hangs), projection to side / end / plan views, and the editor that shows the parameter table *(editor moved to Step 2.5, after Step 3 — see Step 2 D2-8 and the roadmap)*. No solver until Step 3.

@@ -1,11 +1,12 @@
-# Rig graph model (Step 1)
+# Rig graph model (Steps 1–3)
 
 This is the data model the rest of the solver, views and reports will use. It
 describes **any** rig — Duplo10, a basket under the unit, a plain 2-leg bridle —
 as a graph. Nothing on screen consumes it yet.
 
-Theory source: *Duplo10 Lift Readback* rev C, §3.1–3.4. Step 2 places bodies in
-3D; Step 3 hangs the rig and checks ratings.
+Theory source: *Duplo10 Lift Readback* rev C, §3.1–3.5. Step 2 places bodies in
+3D and projects side / end / plan scenes. Step 3 hangs the rig and checks ratings
+(`docs/step-3-solve-checks.md`).
 
 ## Concepts
 
@@ -133,3 +134,96 @@ parameter table changes.
 Asserted contents: 5 bodies (enclosure + 4 bars), 1 root, 14 load lugs
 (7 pick points × 2 faces), 8 bar-end bows, 4 basket straps, 6 strap-and-chain
 legs, 4 hook legs, 4 V legs, 2 hook-to-centre-bar legs.
+
+## Placement (Step 2)
+
+`Body.placement` is `Option<Placement>` with `#[serde(default)]`. A v1 row
+loads as derived; `schema_version` stays 1.
+
+| Variant | Origin | Rotation |
+|---|---|---|
+| `Derived` (default) | nominal descent | identity |
+| `Pinned { at }` | authored `Coord3` | identity |
+| `Posed { at, rot }` | authored | authored yaw-pitch-roll (deg) |
+| `Level { rot }` | descent | authored |
+
+The descent is one pass, no iteration: **least-squares in plan, tightest-leg
+in elevation.** A body becomes placeable when a member reaches it from an
+already-placed node. Gear (bars, frames) is placed before the load when both
+are ready, so a long centre hang cannot steal the pose before the side bars
+exist. Plan offset centres the attachment set under the support set. Each
+leg permits a `t_z`; the **shortest** (max `t_z`) binds. Other legs carry slack.
+
+A two-segment member through a bow splits evenly when the chords are
+plan-symmetric about the bow; otherwise the split is proportional to plan
+reach and `BearingSplitAssumed` is raised. `mu` is stored, not applied.
+
+## Evaluation snapshot
+
+`EvalRig::evaluate(&rig)` (or `evaluate_with` at a trial parameter table) is a
+value, not a cache. It carries world coordinates for every node, a pose and
+world CG for every body, a polyline and chord/reach/drop/angle for every
+member, the Step 1 weight roll-up, hook-to-pick / hook-to-load-top /
+hook-to-lowest heights, and a residual list.
+
+Residuals (Warn unless noted):
+
+| Kind | Meaning | Layer flag |
+|---|---|---|
+| `Short` | segment shorter than the gap it must span | GEOM |
+| `Slack` | a longer leg hangs because a shorter one binds | — |
+| `UnequalDrop` | max−min theoretical drop across a support group, in | LEGS (> 1 in) |
+| `BearingSplitAssumed` | strap split at a bow was assumed, not solved | — |
+| `Underconstrained` | pose (yaw) is not determined by the supports | — |
+| `CgOffset` | plan distance CG → support centroid (swing hint) | — |
+
+A legacy `sling_length_ft = 0` is a missing input (`NO LEN`), not `Short`.
+`param::sweep` can wrap `evaluate_with` for governing angle, hook height, or
+`max_short_ft`.
+
+Template graphs match `layers::geometry::resolve_geometry` to 1e-9 on reach,
+drop, governing angle, unequal-drop and hook-to-pick height (test lives in
+`tests/eval_geometry.rs`).
+
+## Views
+
+`views::Scene` is renderer-agnostic 2D geometry in **feet**. `ViewKind` is
+`Side` (x–z), `End` (y–z) or `Plan` (x–y). Items carry a `Role` (Load, Bar,
+Hook, Member, SlackMember, ShortMember, …) not a color. `fit(w, h, margin)`
+is the only scale. Automatic dimensions cover spreader spans, pick spacing,
+hook height, the governing-angle arc, and (in plan) the CG-to-support offset.
+Assumed inputs suffix dim text with `(assumed)`.
+
+Golden: `tests/fixtures/scene_v1.json` (Duplo10 and one 2-over-4 template,
+three views each). Nothing in `ui/` consumes `Scene` yet.
+
+## Solve (Step 3)
+
+`rig::solve::solve(&rig)` hangs the rig under gravity and returns a
+`SolvedRig`: the hung `EvalRig`, a `MemberForce` per member (tension, taut,
+force on every path stop, chord angles, wrap), hook load, held-body reactions,
+tilt per body, and two `Determinacy` records (`determinacy` for the carrying
+set, `topology` for every member taut).
+
+| Piece | Rule |
+|---|---|
+| Free | every body except hook / `Pinned` / `Posed` (6 DOF); free knots (3 DOF) |
+| Tension member | one T along the whole path, μ = 0; force `T·Σ unit vectors` per stop |
+| Link | two stops, hardware only, length ≤ 1e-6 ft → ball joint, 3 force components |
+| Self-weight | each segment's weight lumped at its lower stop |
+| Rank | `s = m − r`, `k = dof − r`; physical tolerance 1e-6 (`MECH_RTOL`) |
+| Split | multipliers regularised by compliance `Σ L/EA`; rigid default `EA = 1e9·W` |
+| Legacy NO LEN | solve refuses (`EmptySegment`) |
+
+`statics_at(&rig, &eval)` is the small-displacement split at a fixed pose
+(the equivalence gate). `bounds::envelope` gives each member's tension range
+over every tension-only equilibrium at the pose (LP); `bounds::named_cases`
+re-hangs with chains or baskets slack. `inverse::level` / `take_up` compute
+adjuster settings. `rate::rate` / `with_bounds` stamp `checks` (sling, chain,
+shackle, lug, bar) OK / WARN / OVER. `Scene::project_solved` draws the hung
+pose with tension labels and `Role::Overloaded`.
+
+Tension gate (`tests/solve_layers.rs`): statics at the descent pose match
+`layers::calculate_pick` per sling to 1e-9 relative, the hang to 1e-6; hook
+load always. Skips are named: NO LEN, GEOM, unequal angles, basket drawn as
+single legs, tare hung at one pick.

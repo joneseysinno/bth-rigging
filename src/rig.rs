@@ -27,9 +27,13 @@ pub mod solve;
 pub mod template;
 pub mod views;
 
-pub use body::{BarRating, Body, BodyKind};
+pub use body::{BarRating, Body, BodyKind, Placement, RotExpr};
 pub use build::RigBuilder;
 pub use component::{Adjust, CatalogKind, CatalogRef, Component, ComponentKind};
+pub use eval::{
+    BodyEval, EvalRig, Frame, HeightSummary, ItemRef, MemberEval, PlacementUsed, Residual,
+    ResidualKind, Rot, Severity,
+};
 pub use fixtures::{duplo10, two_leg_bridle};
 pub use id::{BodyId, MemberId, NodeId, ParamId};
 pub use member::{Member, MinRating, Segment};
@@ -38,6 +42,7 @@ pub use param::{
     Coord3, Expr, Param, ParamSource, ParamTable, Quantity, SweepResult, check_param_cycles, sweep,
 };
 pub use template::from_layers;
+pub use views::{Item, Rect, Role, Scene, Transform, ViewKind};
 
 /// Current rig document schema. Loading a newer version is `DbError::SchemaTooNew`.
 pub const SCHEMA_VERSION: u16 = 1;
@@ -533,6 +538,27 @@ impl Rig {
                     out.push(height);
                 }
                 BodyKind::Hook | BodyKind::Frame => {}
+            }
+            match &body.placement {
+                Some(Placement::Pinned { at }) => {
+                    out.push(&at.x);
+                    out.push(&at.y);
+                    out.push(&at.z);
+                }
+                Some(Placement::Posed { at, rot }) => {
+                    out.push(&at.x);
+                    out.push(&at.y);
+                    out.push(&at.z);
+                    out.push(&rot.yaw);
+                    out.push(&rot.pitch);
+                    out.push(&rot.roll);
+                }
+                Some(Placement::Level { rot }) => {
+                    out.push(&rot.yaw);
+                    out.push(&rot.pitch);
+                    out.push(&rot.roll);
+                }
+                Some(Placement::Derived) | None => {}
             }
         }
         for node in self.nodes.values() {

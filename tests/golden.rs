@@ -370,3 +370,94 @@ fn calc_package_v1_golden() {
     let path = fixtures_dir().join("calc_package_v1.json");
     read_or_write(&path, &json);
 }
+
+// --- scene_v1: Duplo10 + one 2-over-4 template, three views each ---
+
+use bth_rigging::rig::duplo10;
+use bth_rigging::rig::eval::EvalRig;
+use bth_rigging::rig::template::from_layers;
+use bth_rigging::rig::views::{Scene, ViewKind};
+
+fn round_json(v: &mut serde_json::Value) {
+    match v {
+        serde_json::Value::Number(n) => {
+            if let Some(f) = n.as_f64() {
+                let r = (f * 1e9).round() / 1e9;
+                *n = serde_json::Number::from_f64(r).unwrap_or_else(|| n.clone());
+            }
+        }
+        serde_json::Value::Array(a) => a.iter_mut().for_each(round_json),
+        serde_json::Value::Object(m) => m.values_mut().for_each(round_json),
+        _ => {}
+    }
+}
+
+fn scene_json(scene: &Scene) -> serde_json::Value {
+    let mut v = serde_json::to_value(scene).expect("scene json");
+    round_json(&mut v);
+    v
+}
+
+fn three_views(eval: &EvalRig, rig: &bth_rigging::rig::Rig) -> serde_json::Value {
+    serde_json::json!({
+        "side": scene_json(&Scene::project_rig(eval, Some(rig), ViewKind::Side)),
+        "end": scene_json(&Scene::project_rig(eval, Some(rig), ViewKind::End)),
+        "plan": scene_json(&Scene::project_rig(eval, Some(rig), ViewKind::Plan)),
+    })
+}
+
+fn two_over_four_template() -> bth_rigging::rig::Rig {
+    let mut bar = SavedSpreader::new("Test", "Bar", 40_000, 200.0);
+    bar.id = Uuid::parse_str("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb").unwrap();
+    bar.span_ft = Some(12.0);
+    let l1 = SlingLayer {
+        pick_id: Uuid::nil(),
+        layer_index: 0,
+        size: 7,
+        hitch: Hitch::Vertical,
+        angle_deg: 60.0,
+        sling_count: 2,
+        sling_length_ft: 12.0,
+        pick_spacing_ft: None,
+        pick_width_ft: None,
+        spreader_span_ft: Some(12.0),
+        apex_shackle: None,
+        leg_shackle: None,
+        spreader_id: Some(bar.id),
+        spreader_wll_lbs: None,
+        tare_lbs: 0.0,
+    };
+    let mut l2 = l1.clone();
+    l2.layer_index = 1;
+    l2.size = 5;
+    l2.sling_count = 4;
+    l2.sling_length_ft = 10.0;
+    l2.pick_spacing_ft = Some(8.0);
+    l2.pick_width_ft = Some(6.0);
+    l2.spreader_id = None;
+    l2.spreader_span_ft = None;
+    let pick = Pick {
+        id: Uuid::parse_str("cccccccc-cccc-4ccc-8ccc-ccccccccccc4").unwrap(),
+        project_id: Uuid::nil(),
+        name: "2-over-4".into(),
+        weight_lbs: 10_000.0,
+    };
+    from_layers(&pick, &[l1, l2], &[bar])
+}
+
+#[test]
+fn scene_v1_golden() {
+    let duplo = duplo10();
+    let ev_d = EvalRig::evaluate(&duplo).expect("duplo eval");
+    let two = two_over_four_template();
+    two.validate().expect("2-over-4 valid");
+    let ev_t = EvalRig::evaluate(&two).expect("2-over-4 eval");
+
+    let fixture = serde_json::json!({
+        "duplo10": three_views(&ev_d, &duplo),
+        "two_over_four": three_views(&ev_t, &two),
+    });
+    let json = pretty(&fixture);
+    let path = fixtures_dir().join("scene_v1.json");
+    read_or_write(&path, &json);
+}

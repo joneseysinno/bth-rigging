@@ -8,4 +8,7 @@ pub mod shackle;
 pub use roundsling::{POLYESTER_ROUNDSLINGS, RoundSlingRating, find_by_size};
 pub use shackle::{SHACKLES, ShackleRating, find_shackle};
 
+pub mod chain;
 pub mod connection_hardware;
+
+pub use chain::{CHAINS, ChainRating, find_chain};

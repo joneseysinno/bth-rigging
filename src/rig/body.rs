@@ -62,6 +62,60 @@ impl BodyKind {
     }
 }
 
+/// Authored yaw-pitch-roll in degrees (expressions, so a parameter can drive them).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct RotExpr {
+    pub yaw: Expr,
+    pub pitch: Expr,
+    pub roll: Expr,
+}
+
+impl RotExpr {
+    pub fn identity() -> Self {
+        Self {
+            yaw: Expr::c(0.0),
+            pitch: Expr::c(0.0),
+            roll: Expr::c(0.0),
+        }
+    }
+
+    pub fn degrees(yaw: f64, pitch: f64, roll: f64) -> Self {
+        Self {
+            yaw: Expr::c(yaw),
+            pitch: Expr::c(pitch),
+            roll: Expr::c(roll),
+        }
+    }
+
+    pub fn eval(&self, params: &ParamTable) -> Result<[f64; 3], RigError> {
+        Ok([
+            self.yaw.eval(params)?,
+            self.pitch.eval(params)?,
+            self.roll.eval(params)?,
+        ])
+    }
+}
+
+/// Optional author override for where a body sits. `None` / `Derived` means the
+/// nominal descent places it. `#[serde(default)]` so a v1 row loads as derived.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
+pub enum Placement {
+    #[default]
+    Derived,
+    /// Origin fixed by expression (load on the ground, a set piece).
+    Pinned { at: Coord3 },
+    /// Origin and rotation both authored.
+    Posed { at: Coord3, rot: RotExpr },
+    /// Descent picks the origin; the author fixes the rotation.
+    Level { rot: RotExpr },
+}
+
+impl Placement {
+    pub fn is_derived(&self) -> bool {
+        matches!(self, Self::Derived)
+    }
+}
+
 /// One rigid body: mass properties in a body-local frame.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Body {
@@ -72,6 +126,9 @@ pub struct Body {
     pub weight: Expr,
     /// Body-local CG, ft.
     pub cg: Coord3,
+    /// Author override; omitted on v1 rows.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub placement: Option<Placement>,
 }
 
 impl Body {
@@ -82,7 +139,12 @@ impl Body {
             kind,
             weight: weight.into(),
             cg: Coord3::origin(),
+            placement: None,
         }
+    }
+
+    pub fn placement(&self) -> Placement {
+        self.placement.clone().unwrap_or(Placement::Derived)
     }
 
     pub fn with_cg(mut self, cg: Coord3) -> Self {
@@ -135,5 +197,21 @@ mod tests {
         assert!((cg[1] - 2.0).abs() < 1e-12);
         assert!((cg[2] - 3.0).abs() < 1e-12);
         assert!((body.eval_weight(&table).unwrap() - 117_300.0).abs() < 1e-12);
+    }
+
+    #[test]
+    fn v1_body_json_without_placement_deserializes_as_derived() {
+        let json = r#"{
+            "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+            "label": "Load",
+            "kind": {"Load": {"length": {"Const": 10.0}, "width": {"Const": 4.0}, "height": {"Const": 2.0}}},
+            "weight": {"Const": 1000.0},
+            "cg": {"x": {"Const": 0.0}, "y": {"Const": 0.0}, "z": {"Const": 1.0}}
+        }"#;
+        let body: Body = serde_json::from_str(json).expect("v1 body");
+        assert!(body.placement.is_none());
+        assert!(matches!(body.placement(), Placement::Derived));
+        let again = serde_json::to_value(&body).unwrap();
+        assert!(again.get("placement").is_none());
     }
 }
