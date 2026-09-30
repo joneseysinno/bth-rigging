@@ -6,16 +6,6 @@
 //! Outputs: keyed parameter editor and live evaluation/solve/rating details.
 //! Must not depend on: layer calculation or solver internals beyond snapshots.
 
-use std::future::Future;
-use std::pin::Pin;
-use std::sync::{
-    Arc,
-    atomic::{AtomicBool, Ordering},
-};
-use std::task::{Context, Poll};
-use std::thread;
-use std::time::Duration;
-
 use dioxus::prelude::*;
 use uuid::Uuid;
 
@@ -37,7 +27,6 @@ pub fn RigEditorPage(project_id: Uuid, rig_id: Uuid) -> Element {
     let mut load_error = use_signal(|| None::<String>);
     let mut loaded = use_signal(|| false);
     let mut show_leave_confirm = use_signal(|| false);
-    let poller_active = use_signal(|| false);
 
     {
         let ctx = ctx.clone();
@@ -71,40 +60,15 @@ pub fn RigEditorPage(project_id: Uuid, rig_id: Uuid) -> Element {
         });
     }
 
-    {
-        let mut poller_active = poller_active;
-        use_effect(move || {
-            if session.read().as_ref().is_some_and(RigSession::is_solving) && !poller_active() {
-                poller_active.set(true);
-                let mut session = session;
-                let mut poller_active = poller_active;
-                spawn(async move {
-                    loop {
-                        Delay::new(Duration::from_millis(16)).await;
-                        let finished = session.write().as_mut().is_none_or(|current| {
-                            current.poll();
-                            !current.is_solving()
-                        });
-                        if finished {
-                            break;
-                        }
-                    }
-                    poller_active.set(false);
-                });
-            }
-        });
-    }
-
     let view = session.read().as_ref().map(|current| {
         (
             current.rig().clone(),
             current.snapshot().clone(),
             current.delta(),
             current.is_dirty(),
-            current.is_solving(),
         )
     });
-    let Some((rig, snapshot, delta, dirty, solving)) = view else {
+    let Some((rig, snapshot, delta, dirty)) = view else {
         if let Some(error) = load_error() {
             return rsx! {
                 div { class: "page-shell",
@@ -155,10 +119,7 @@ pub fn RigEditorPage(project_id: Uuid, rig_id: Uuid) -> Element {
         .ok()
         .map(|evaluation| evaluation.weights.clone());
     let on_edit = move |edit: ParamEdit| {
-        let result = session
-            .write()
-            .as_mut()
-            .map(|current| current.apply_async(edit));
+        let result = session.write().as_mut().map(|current| current.apply(edit));
         match result {
             Some(Ok(())) => status_message.set(String::new()),
             Some(Err(error)) => status_message.set(error.message),
@@ -252,7 +213,6 @@ pub fn RigEditorPage(project_id: Uuid, rig_id: Uuid) -> Element {
                     headline_is_last_good: snapshot.headline_is_last_good,
                     weight_breakdown,
                     delta,
-                    solving,
                 }
             }
             if show_leave_confirm() {
@@ -292,15 +252,11 @@ fn ResultsPanel(
     headline_is_last_good: bool,
     weight_breakdown: Option<bth_rigging::rig::RigWeights>,
     delta: Option<HeadlineDelta>,
-    solving: bool,
 ) -> Element {
     rsx! {
         section { class: "results-panel",
             div { class: "results-heading",
                 h2 { class: "panel-title", "Live results" }
-                if solving {
-                    span { class: "solving-indicator", "Solving…" }
-                }
             }
             if headline.assumed_count > 0 {
                 div { class: "provisional-banner",
@@ -510,42 +466,4 @@ fn rated_for_member(rated: &[Rated], member: bth_rigging::rig::MemberId) -> Stat
         .map(|item| item.check.status)
         .max()
         .unwrap_or(Status::Ok)
-}
-
-struct Delay {
-    duration: Duration,
-    complete: Arc<AtomicBool>,
-    started: bool,
-}
-
-impl Delay {
-    fn new(duration: Duration) -> Self {
-        Self {
-            duration,
-            complete: Arc::new(AtomicBool::new(false)),
-            started: false,
-        }
-    }
-}
-
-impl Future for Delay {
-    type Output = ();
-
-    fn poll(mut self: Pin<&mut Self>, context: &mut Context<'_>) -> Poll<Self::Output> {
-        if self.complete.load(Ordering::Acquire) {
-            return Poll::Ready(());
-        }
-        if !self.started {
-            self.started = true;
-            let complete = Arc::clone(&self.complete);
-            let duration = self.duration;
-            let waker = context.waker().clone();
-            thread::spawn(move || {
-                thread::sleep(duration);
-                complete.store(true, Ordering::Release);
-                waker.wake();
-            });
-        }
-        Poll::Pending
-    }
 }

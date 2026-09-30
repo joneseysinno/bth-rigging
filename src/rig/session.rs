@@ -6,8 +6,6 @@
 //! Outputs: evaluation, solve, rating, headline deltas, and undo history.
 //! Must not depend on: UI, dioxus, store.
 
-use std::sync::mpsc::{self, Receiver, TryRecvError};
-use std::thread;
 use std::time::{Duration, Instant};
 
 use crate::checks::Status;
@@ -58,15 +56,7 @@ pub struct Snapshot {
     pub rated: Option<Vec<Rated>>,
     pub headline: Headline,
     pub headline_is_last_good: bool,
-    pub solving: bool,
     pub elapsed: Duration,
-}
-
-struct RecomputeResult {
-    generation: u64,
-    snapshot: Snapshot,
-    good: Option<Headline>,
-    previous_good: Option<Headline>,
 }
 
 pub struct RigSession {
@@ -78,8 +68,6 @@ pub struct RigSession {
     last_good: Option<Headline>,
     delta: Option<HeadlineDelta>,
     dirty: bool,
-    generation: u64,
-    pending: Option<Receiver<RecomputeResult>>,
 }
 
 impl RigSession {
@@ -95,48 +83,16 @@ impl RigSession {
             last_good,
             delta: None,
             dirty: false,
-            generation: 0,
-            pending: None,
         }
     }
 
     #[allow(clippy::result_large_err)]
     pub fn apply(&mut self, edit: ParamEdit) -> Result<(), EditError> {
         self.accept_edit(edit)?;
-        self.invalidate_pending();
         let previous_good = self.last_good;
         let (snapshot, good) = recompute(&self.rig, previous_good);
         self.finish_recompute(snapshot, good, previous_good);
         Ok(())
-    }
-
-    #[allow(clippy::result_large_err)]
-    pub fn apply_async(&mut self, edit: ParamEdit) -> Result<(), EditError> {
-        self.accept_edit(edit)?;
-        self.schedule_recompute();
-        Ok(())
-    }
-
-    pub fn poll(&mut self) -> bool {
-        let result = match self.pending.as_ref().map(Receiver::try_recv) {
-            Some(Ok(result)) => result,
-            Some(Err(TryRecvError::Empty)) | None => return false,
-            Some(Err(TryRecvError::Disconnected)) => {
-                self.pending = None;
-                self.snapshot.solving = false;
-                return false;
-            }
-        };
-        self.pending = None;
-        if result.generation != self.generation {
-            return false;
-        }
-        self.finish_recompute(result.snapshot, result.good, result.previous_good);
-        true
-    }
-
-    pub fn is_solving(&self) -> bool {
-        self.snapshot.solving
     }
 
     pub fn undo(&mut self) -> bool {
@@ -181,7 +137,6 @@ impl RigSession {
     }
 
     fn recompute_after_history_change(&mut self) {
-        self.invalidate_pending();
         let previous_good = self.last_good;
         let (snapshot, good) = recompute(&self.rig, previous_good);
         self.finish_recompute(snapshot, good, previous_good);
@@ -198,38 +153,12 @@ impl RigSession {
         Ok(())
     }
 
-    fn schedule_recompute(&mut self) {
-        self.generation = self.generation.wrapping_add(1);
-        let generation = self.generation;
-        let rig = self.rig.clone();
-        let previous_good = self.last_good;
-        let (sender, receiver) = mpsc::channel();
-        self.pending = Some(receiver);
-        self.snapshot.solving = true;
-        thread::spawn(move || {
-            let (snapshot, good) = recompute(&rig, previous_good);
-            let _ = sender.send(RecomputeResult {
-                generation,
-                snapshot,
-                good,
-                previous_good,
-            });
-        });
-    }
-
-    fn invalidate_pending(&mut self) {
-        self.generation = self.generation.wrapping_add(1);
-        self.pending = None;
-        self.snapshot.solving = false;
-    }
-
     fn finish_recompute(
         &mut self,
-        mut snapshot: Snapshot,
+        snapshot: Snapshot,
         good: Option<Headline>,
         previous_good: Option<Headline>,
     ) {
-        snapshot.solving = false;
         self.snapshot = snapshot;
         self.delta = good.zip(previous_good).map(|(new, old)| HeadlineDelta {
             hook_load_lbs: new.hook_load_lbs - old.hook_load_lbs,
@@ -268,7 +197,6 @@ fn recompute(rig: &Rig, previous_good: Option<Headline>) -> (Snapshot, Option<He
         rated,
         headline,
         headline_is_last_good: current_good.is_none() && previous_good.is_some(),
-        solving: false,
         elapsed: start.elapsed(),
     };
     (snapshot, current_good)
@@ -427,55 +355,6 @@ mod tests {
         assert_eq!(session.snapshot().headline, headline);
     }
 
-    #[test]
-    fn async_recompute_accepts_only_the_latest_generation() {
-        let mut session = RigSession::new(duplo10());
-        let baseline = session.snapshot().headline.hook_load_lbs;
-        let s12 = session.rig().param_named("s12").unwrap().id;
-        let load_weight = session.rig().param_named("load_weight").unwrap().id;
-
-        session
-            .apply_async(ParamEdit::SetValue {
-                id: s12,
-                text: "9 ft".into(),
-            })
-            .unwrap();
-        assert!(session.is_solving());
-        session
-            .apply_async(ParamEdit::SetValue {
-                id: load_weight,
-                text: "118300 lb".into(),
-            })
-            .unwrap();
-        assert!(session.is_solving());
-        wait_for_result(&mut session);
-
-        assert!(!session.is_solving());
-        assert!((session.snapshot().headline.hook_load_lbs - baseline - 1000.0).abs() < 1e-6);
-        assert_eq!(session.rig().params[&s12].nominal, 9.0);
-        assert_eq!(session.rig().params[&load_weight].nominal, 118300.0);
-        assert!(session.delta().is_some());
-    }
-
-    #[test]
-    fn history_navigation_cancels_pending_recompute() {
-        let original = duplo10();
-        let mut session = RigSession::new(original.clone());
-        let s12 = session.rig().param_named("s12").unwrap().id;
-        session
-            .apply_async(ParamEdit::SetValue {
-                id: s12,
-                text: "9 ft".into(),
-            })
-            .unwrap();
-        assert!(session.is_solving());
-        assert!(session.undo());
-        assert!(!session.is_solving());
-        assert_eq!(session.rig(), &original);
-        assert!(!session.poll());
-        assert_eq!(session.rig(), &original);
-    }
-
     /// Recorded in 2.5.14a from the solver before the phase-A stall exit
     /// (302 iterations): the `load_weight` edit right after `s12 = 9'-0"` in
     /// `duplo10_edit_latency`.
@@ -543,15 +422,6 @@ mod tests {
                 "{label}: {tension} vs {expected}"
             );
         }
-    }
-
-    fn wait_for_result(session: &mut RigSession) {
-        let deadline = Instant::now() + Duration::from_secs(10);
-        while session.is_solving() && Instant::now() < deadline {
-            session.poll();
-            thread::yield_now();
-        }
-        assert!(!session.is_solving(), "background recompute did not finish");
     }
 
     #[test]
