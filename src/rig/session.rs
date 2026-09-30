@@ -495,12 +495,23 @@ mod tests {
         let mut elapsed = Vec::with_capacity(20);
         for index in 0..20 {
             let (id, text) = if index % 2 == 0 {
-                (s12, format!("{} ft", 8 + index / 2))
+                let step = index / 2;
+                let inches = 3 * if step <= 5 { step } else { 10 - step };
+                (s12, format!("{}'-{}\"", 8 + inches / 12, inches % 12))
             } else {
                 (load_weight, format!("{} lb", 117_300 + index * 100))
             };
+            let start = Instant::now();
             session.apply(ParamEdit::SetValue { id, text }).unwrap();
-            elapsed.push(session.snapshot().elapsed.as_secs_f64() * 1000.0);
+            elapsed.push(start.elapsed().as_secs_f64() * 1000.0);
+            let solved = session
+                .snapshot()
+                .solved
+                .as_ref()
+                .unwrap()
+                .as_ref()
+                .unwrap();
+            assert!(solved.converged, "edit {index} did not converge");
         }
         elapsed.sort_by(f64::total_cmp);
         let median = (elapsed[9] + elapsed[10]) / 2.0;

@@ -241,7 +241,7 @@ fn soft_relax(model: &Model, state: &mut State, allowed: &[bool]) -> usize {
     for it in 0..300 {
         let g = soft_grad(model, state, allowed);
         let gmax = g.iter().fold(0.0_f64, |m, v| m.max(v.abs()));
-        if gmax <= 1e-9 * w {
+        if gmax <= 1e-6 * w {
             return it;
         }
         let h_step = 1e-6 * lchar;

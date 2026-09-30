@@ -472,7 +472,11 @@ Implementation notes and remaining validation are recorded here. The desktop bui
 
 | Item | Value |
 |---|---|
-| Duplo10 edit latency, release (median / max) | 170.171 ms / 262.467 ms (20 edits; over the 50 ms budget) |
+| Duplo10 edit latency, release (median / max) | 11.5 ms / 205 ms after 2.5.13 (was 170.171 ms / 262.467 ms under the old 8–17 ft sweep) |
+| Duplo10 edit latency, debug (median / max) | ~205 ms / ~3.85 s after 2.5.13 |
+| Latency benchmark (2.5.13) | 20 edits, wall clock around `session.apply(..)`; `s12` swept `8'-0"` → `9'-3"` → `8'-3"` in 3″ steps, alternating with `load_weight`; every solve asserts `converged`. The max is one edit: `load_weight` right after `s12 = 9'-0"`, where phase A hits its 300-iteration cap (302 total) and phase B still converges. Every other edit takes 4–28 iterations (release 3–18 ms). Before the stop-test change, the same benchmark gave 14.0 ms / 207 ms release. |
+| 2.5.12 | Committed the `project.rs` repair (HEAD didn't build with `--features desktop`) and the rated-items key-by-index fix. |
+| 2.5.13 | `hang::soft_relax` stop test `1e-9 * w` → `1e-6 * w` (only solver edit). Benchmark rewritten as above. All solve tests unchanged. |
 | Tests after 2.5 (lib / eval_geometry / golden / solve_layers) | 172 passed + 1 ignored / 10 / 3 / 8 |
 | Deviations from this plan | Inline recompute exceeds §7.3's budget, so recompute uses `std::thread` with generation-guarded results. `Snapshot::solving` drives the editor's solving indicator. The where-used visitor includes additional `BodyGeometry` and `ComponentKind` sites for expression-bearing fields found during the required field inventory. Right-nested equal-precedence operators are parenthesized to preserve structural AST round-trips. Baseline clippy warnings remain; no new findings were introduced. AJ's manual §8.4 checklist is pending. |
 
