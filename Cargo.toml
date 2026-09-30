@@ -35,6 +35,12 @@ desktop = ["dep:dioxus", "dioxus/desktop", "dep:rfd"]
 
 [profile]
 
+[profile.dev]
+opt-level = 1
+
+[profile.dev.package."*"]
+opt-level = 3
+
 [profile.wasm-dev]
 inherits = "dev"
 opt-level = 1
