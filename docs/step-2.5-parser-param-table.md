@@ -35,7 +35,7 @@ Step 2.5 delivers:
 - [x] Quantity errors point at the operator that failed (`span_A + load_weight` → column of `+`)
 - [x] `RigSession` on Duplo10: editing `s12` changes node positions and governing angle; editing `load_weight` changes hook load by exactly Δ; undo restores the original `Rig`
 - [x] The where-used walker agrees with a serde-JSON scan of the rig (completeness test, §6.3)
-- [ ] Edit latency on Duplo10 (apply + eval + solve + rate) is measured in release and recorded in §13, and it is under budget (§7.3). Measurement is recorded; the 50 ms budget is exceeded.
+- [x] Edit latency on Duplo10 (apply + eval + solve + rate) is measured in release and recorded in §13, and it is under budget (§7.3). Release 11.2 ms median / 22.6 ms max after 2.5.14c; recompute is inline.
 - [ ] `RigEditor` route builds (`cargo check --features desktop`), and the manual checklist in §8.4 passes. Route build passes; AJ's manual checklist is pending.
 - [ ] `cargo test --no-default-features` green; `cargo fmt --check` clean; 0 warnings; no new clippy findings. Tests and fmt pass; no new clippy findings, but baseline clippy warnings remain.
 - [x] No change to any golden (`tests/fixtures/*.json`), rig row shape, layer JSON, or the pick editor
@@ -364,6 +364,8 @@ Add to `assets/app.css`, reusing existing classes (`page-shell`, `page-main`, `t
 
 ### 8.4 Manual checklist (AJ runs `dx serve`)
 
+*Run under `dx serve` (debug build), since debug-only assertions caught the key crash.* The same steps run headless in `tests/param_editor_flow.rs`.
+
 1. On a project, "Add Duplo10 demo rig" → Open → the table lists 22 params, and the panel shows hook load 122,983 lb and "Provisional".
 2. Set `s12` to `8'-6"` → the `=` column shows 8.5 / 8'-6", the governing angle changes, and a Δ chip appears.
 3. Set `s12` to `s23 + 6 in` → an fx tag appears and the value re-prints as `s23 + 0.5`.
@@ -373,6 +375,9 @@ Add to `assets/app.css`, reusing existing classes (`page-shell`, `page-main`, `t
 7. Delete `lug_gauge_G` → refused, listing the node coordinates that use it.
 8. Undo ×3 → back to the original values. Save, leave, reopen → the values persist.
 9. "Rig from pick…" on an existing pick → the hook load equals the pick editor's hook load.
+10. Set `s12` to `8'-6 1/2"` → the `=` column shows 8.54 / 8'-6 1/2".
+11. Set `s12` to `17 ft` → "Solve failed: solver did not converge (N iterations) …", and the headline is greyed as "Last good results". Undo → the headline is live again and the error is gone.
+12. After any edit, Undo → the Value box shows the old text again (not what you typed); Esc in a box restores the current committed text.
 
 ---
 
@@ -473,7 +478,7 @@ UI items also run `cargo check --features desktop`.
 
 ## 13. As-built notes
 
-Implementation notes and remaining validation are recorded here. The desktop build and automated gates pass. AJ should run §8.4 manually before considering the UI workflow verified.
+Implementation notes and remaining validation are recorded here. After the close-out (2.5.12–2.5.19) the desktop build and automated gates pass, recompute is inline, and §8.4 also runs headless in `tests/param_editor_flow.rs`. AJ should run §8.4 manually under `dx serve` before considering the UI workflow verified.
 
 | Item | Value |
 |---|---|
@@ -491,7 +496,12 @@ Implementation notes and remaining validation are recorded here. The desktop bui
 | 2.5.17 | `ParamRow` drafts resync when the committed text changes: the value draft goes through `use_effect(use_reactive!(|initial| ..))`, which also clears the parse error and edit message. Name, −tol, +tol and note use a small `use_draft_resync(committed, draft)` hook built the same way. No signal is written during render. A refused commit leaves the rig unchanged, so the bad text and red outline stay. Escape now reads a `committed_value` signal kept current by the same effect. **Checked manually under `dx serve` (debug build)**, driven through Windows UI Automation on an existing Duplo10 rig in project "test 5" (not saved): `s12 = 8'-6"` → box re-prints `8.50`; Undo → `8`; `s12 = s23 + 6 in` → `s23 + 0.5`; `s23 +` → refused, text kept with caret tooltip and "unexpected end of expression"; Escape → `s23 + 0.5` (the current committed text, not the mount-time `8`); Undo → clean. |
 | 2.5.18 | `EditError.message` is built from `RigError.message` (the human text) at all eight `error.to_string()` sites in `edit.rs`; `RigError`'s `Display` is unchanged. `rig_editor.rs` renders `.message` for validation errors and warnings, eval errors and solve errors, and a short label for residual kinds ("Unequal drop", "CG offset", …) instead of `{kind:?}`. The cycle test also asserts the message doesn't contain `ParamCycle`. |
 | 2.5.19 | `tests/param_editor_flow.rs`: §8.4 as 11 headless tests on the public lib API (`RigSession`, `ParamEdit`, `template`, `store`). Step 8 does a **real store save/reload** (`RiggingStore::open` on a temp directory), not a serde round-trip. Step 9 reuses `template::tensions_match_layers` on the session's solved template rig instead of duplicating `solve_layers`. **Lib fix:** step 2 exposed that `make_headline` took the **maximum** member angle, so Duplo10's headline sat at ~90° (a vertical member) and moved by 0.0003° after `s12 = 8'-6"`. The project convention (`EvalRig::governing_angle_deg`, Step 2 doc) is the **minimum** angle from horizontal. It now uses the minimum over taut, non-link members, and step 2 asserts a change > 0.1°. **Doc fix:** §8.4 step 1 said 21 params; the Duplo10 fixture (and the editor's "22 inputs") has 22, so the doc and the test use 22. |
-| Tests after 2.5 (lib / eval_geometry / golden / solve_layers) | 172 passed + 1 ignored / 10 / 3 / 8 |
+| Round-1 latency root cause | The **benchmark sweep**, not the stop test. The old 170 ms release median came from sweeping `s12` up to 17 ft, where the rig doesn't converge. On the realistic 8'-0"–9'-3" sweep the numbers were already 14.0 / 207 ms before the 2.5.13 stop-test change, and 11.5 / 205 ms after it. The remaining max was one edit stuck on the phase-A kink plateau (2.5.14a). |
+| Latency, step by step (median / max, ms) | Release: 11.5 / 205 after 2.5.13 → 11.2 / 22.6 after 2.5.14c (2.5.14b doesn't touch release). Debug, worst of 3 runs: ~205 / ~3,850 after 2.5.13 → 14.4 / 258.1 after 2.5.14b (dev profile optimization; the median drops ~14×, but the outlier's 302 iterations stay) → 14.2 / 29.3 after 2.5.14c (stall exit; the outlier drops to 35 iterations). |
+| Threading decision | **Inline** (2.5.14d). Release median 11.2 ms ≤ 50 ms and debug max 29.3 ms ≤ 250 ms. The threaded path is removed. |
+| Tests after close-out (lib / eval_geometry / golden / param_editor_flow / solve_layers) | 173 passed + 1 ignored / 10 / 3 / 11 / 8 |
+| Duplo10 rated items not OK (report only, not fixed) | 24 items: **20 shackle checks Over** and **4 bar checks Warn**. The review's "24 shackles" counted the 4 bars as shackles. For each shackle row, the check runs once per end shackle, so each hook leg and V leg appears twice. Owner · catalog pick · WLL · demand: **Hook leg LF / LB / RF / RB** (×2 each) · shackle 1-1/2″ · 34,000 lb · 36,054 lb. **V leg L front / L back / R front / R back** (×2 each) · shackle 1-1/4″ · 24,000 lb · 29,978 lb. **Basket strap P1–P3 front / back, P5–P7 front / back** (×1 each) · shackle 1-1/4″ · 24,000 lb · 29,444 lb (strap tension 23,369 lb × the bearing stop factor). **Bar top** · bar · no WLL entered · 119,911 lb (axial compression 38,308 lb). **Bar L**, **Bar R** · bar · no WLL entered · 58,888 lb. **Bar C** · bar · no WLL entered · 0 lb (axial compression 229 lb). At the drawing's nominal load, hook-leg shackles are 6% over, V-leg shackles 25% over and basket-strap shackles 23% over. AJ to decide whether this is a catalog assignment problem or real. |
+| Other observations (report only) | The four zero-WLL bars make `max_utilization` = demand / 0 = ∞, so the headline shows "inf%" and its Δ chip shows "−NaN %". |
 | Deviations from this plan | The where-used visitor includes additional `BodyGeometry` and `ComponentKind` sites for expression-bearing fields found during the required field inventory. Right-nested equal-precedence operators are parenthesized to preserve structural AST round-trips. Baseline clippy warnings remain; no new findings were introduced. AJ's manual §8.4 checklist is pending. |
 
 ---
