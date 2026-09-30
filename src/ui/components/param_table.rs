@@ -72,11 +72,22 @@ fn ParamRow(
     let mut value_draft = use_signal(|| initial.clone());
     let mut value_error = use_signal(|| None::<ParseError>);
     let mut edit_message = use_signal(String::new);
+    let mut committed_value = use_signal(|| initial.clone());
+    use_effect(use_reactive!(|initial| {
+        committed_value.set(initial.clone());
+        value_draft.set(initial);
+        value_error.set(None);
+        edit_message.set(String::new());
+    }));
     let mut expanded = use_signal(|| false);
     let mut name_draft = use_signal(|| param.name.clone());
     let mut minus_draft = use_signal(|| tolerance_text(param.minus, param.quantity));
     let mut plus_draft = use_signal(|| tolerance_text(param.plus, param.quantity));
     let mut note_draft = use_signal(|| param.note.clone());
+    use_draft_resync(param.name.clone(), name_draft);
+    use_draft_resync(tolerance_text(param.minus, param.quantity), minus_draft);
+    use_draft_resync(tolerance_text(param.plus, param.quantity), plus_draft);
+    use_draft_resync(param.note.clone(), note_draft);
     let derived = param.source == ParamSource::Derived;
 
     rsx! {
@@ -133,13 +144,10 @@ fn ParamRow(
                                 }
                             }
                         },
-                        onkeydown: {
-                            let default_text = initial.clone();
-                            move |event| {
-                                if event.key() == Key::Escape {
-                                    value_draft.set(default_text.clone());
-                                    value_error.set(None);
-                                }
+                        onkeydown: move |event| {
+                            if event.key() == Key::Escape {
+                                value_draft.set(committed_value());
+                                value_error.set(None);
                             }
                         },
                     }
@@ -337,6 +345,13 @@ fn AddParamRow(rig: Rig, on_edit: EventHandler<ParamEdit>) -> Element {
             }
         }
     }
+}
+
+/// Resets `draft` whenever the committed text changes (undo, redo, or an
+/// accepted edit that re-prints). A refused commit leaves the rig, and so the
+/// draft, unchanged.
+fn use_draft_resync(committed: String, mut draft: Signal<String>) {
+    use_effect(use_reactive!(|committed| draft.set(committed)));
 }
 
 fn value_text(param: &Param, table: &ParamTable) -> String {
