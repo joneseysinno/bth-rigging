@@ -83,6 +83,7 @@ pub enum RigErrorKind {
     UnsupportedBody,
     SelfMember,
     BadValue,
+    SolveNotConverged,
 }
 
 /// Errors block the solve; warnings surface in the report.

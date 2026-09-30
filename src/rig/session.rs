@@ -12,7 +12,7 @@ use crate::checks::Status;
 use crate::rig::edit::{EditError, ParamEdit, apply};
 use crate::rig::eval::EvalRig;
 use crate::rig::solve::SolvedRig;
-use crate::rig::{Rig, RigError, ValidationReport};
+use crate::rig::{Rig, RigError, RigErrorKind, ValidationReport};
 
 use super::solve;
 use super::solve::rate::Rated;
@@ -53,6 +53,9 @@ pub struct Snapshot {
     pub validation: ValidationReport,
     pub eval: Result<EvalRig, Vec<RigError>>,
     pub solved: Option<Result<SolvedRig, Vec<RigError>>>,
+    /// The solver's last iterate when it did not converge; `solved` then holds
+    /// a `SolveNotConverged` error.
+    pub unconverged: Option<SolvedRig>,
     pub rated: Option<Vec<Rated>>,
     pub headline: Headline,
     pub headline_is_last_good: bool,
@@ -180,6 +183,19 @@ fn recompute(rig: &Rig, previous_good: Option<Headline>) -> (Snapshot, Option<He
         .as_ref()
         .ok()
         .map(|evaluation| solve::solve_eval(rig, evaluation));
+    let (solved, unconverged) = match solved {
+        Some(Ok(result)) if !result.converged => {
+            let error = RigError::new(
+                RigErrorKind::SolveNotConverged,
+                format!(
+                    "solver did not converge ({} iterations) — geometry may be infeasible; check lengths and spans",
+                    result.iterations
+                ),
+            );
+            (Some(Err(vec![error])), Some(result))
+        }
+        other => (other, None),
+    };
     let rated = solved
         .as_ref()
         .and_then(|result| result.as_ref().ok())
@@ -194,6 +210,7 @@ fn recompute(rig: &Rig, previous_good: Option<Headline>) -> (Snapshot, Option<He
         validation,
         eval,
         solved,
+        unconverged,
         rated,
         headline,
         headline_is_last_good: current_good.is_none() && previous_good.is_some(),
@@ -353,6 +370,40 @@ mod tests {
         assert!(session.snapshot().eval.is_err());
         assert!(session.snapshot().headline_is_last_good);
         assert_eq!(session.snapshot().headline, headline);
+    }
+
+    #[test]
+    fn non_converged_solve_is_not_a_result() {
+        let mut session = RigSession::new(duplo10());
+        let headline = session.snapshot().headline;
+        let s12 = session.rig().param_named("s12").unwrap().id;
+        session
+            .apply(ParamEdit::SetValue {
+                id: s12,
+                text: "17 ft".into(),
+            })
+            .unwrap();
+        let snapshot = session.snapshot();
+        assert!(snapshot.headline_is_last_good);
+        assert_eq!(snapshot.headline, headline);
+        assert!(snapshot.rated.is_none());
+        assert!(!snapshot.unconverged.as_ref().unwrap().converged);
+        let errors = snapshot.solved.as_ref().unwrap().as_ref().unwrap_err();
+        assert_eq!(errors[0].code, RigErrorKind::SolveNotConverged);
+        assert!(errors[0].message.starts_with("solver did not converge ("));
+        assert!(
+            errors[0]
+                .message
+                .ends_with("iterations) — geometry may be infeasible; check lengths and spans")
+        );
+
+        assert!(session.undo());
+        let snapshot = session.snapshot();
+        assert!(!snapshot.headline_is_last_good);
+        assert!(snapshot.solved.as_ref().unwrap().is_ok());
+        assert!(snapshot.unconverged.is_none());
+        assert!(snapshot.rated.is_some());
+        assert_eq!(snapshot.headline, headline);
     }
 
     /// Recorded in 2.5.14a from the solver before the phase-A stall exit
