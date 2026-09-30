@@ -223,9 +223,10 @@ fn make_headline(rig: &Rig, solved: &SolvedRig, rated: &[Rated]) -> Headline {
     let governing_angle_deg = solved
         .members
         .values()
+        .filter(|member| member.taut && !member.is_link)
         .flat_map(|member| member.angle_deg.iter().copied())
         .map(f64::abs)
-        .fold(0.0, f64::max);
+        .fold(90.0, f64::min);
     let max_utilization = rated
         .iter()
         .map(|item| item.check.utilization())
