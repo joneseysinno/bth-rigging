@@ -238,10 +238,20 @@ fn soft_relax(model: &Model, state: &mut State, allowed: &[bool]) -> usize {
     let lchar = model.l_char;
     let w = model.w_total;
     let mut mu = 1e-6 * w / lchar;
+    let mut best = f64::INFINITY;
+    let mut best_it = 0;
     for it in 0..300 {
         let g = soft_grad(model, state, allowed);
         let gmax = g.iter().fold(0.0_f64, |m, v| m.max(v.abs()));
+        if gmax < 0.5 * best {
+            best = gmax;
+            best_it = it;
+        }
         if gmax <= 1e-6 * w {
+            return it;
+        }
+        // Close but no longer halving: leave the polish to phase B's KKT Newton.
+        if it - best_it >= 10 && gmax <= 1e-3 * w {
             return it;
         }
         let h_step = 1e-6 * lchar;

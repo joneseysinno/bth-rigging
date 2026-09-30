@@ -476,6 +476,75 @@ mod tests {
         assert_eq!(session.rig(), &original);
     }
 
+    /// Recorded in 2.5.14a from the solver before the phase-A stall exit
+    /// (302 iterations): the `load_weight` edit right after `s12 = 9'-0"` in
+    /// `duplo10_edit_latency`.
+    const OUTLIER_HOOK_LOAD_LBS: f64 = 123_882.760;
+    const OUTLIER_TENSIONS_LBS: [(&str, f64); 20] = [
+        ("Basket strap P1–P3 (front)", 23_369.032_715_953),
+        ("Basket strap P1–P3 (back)", 23_369.032_715_883),
+        ("Basket strap P5–P7 (front)", 23_369.032_715_883),
+        ("Basket strap P5–P7 (back)", 23_369.032_715_953),
+        ("Chain leg P2 front", 0.0),
+        ("Chain leg P2 back", 0.0),
+        ("Chain leg P4 front", 0.0),
+        ("Chain leg P4 back", 0.0),
+        ("Chain leg P6 front", 0.0),
+        ("Chain leg P6 back", 0.0),
+        ("Hook leg LF", 36_320.577_060_447),
+        ("Hook leg LB", 36_320.563_306_673),
+        ("Hook leg RF", 36_320.563_306_673),
+        ("Hook leg RB", 36_320.577_060_447),
+        ("Hook to Bar C front", 610.986_883_358),
+        ("Hook to Bar C back", 610.986_883_358),
+        ("V leg L front", 30_207.748_274_873),
+        ("V leg L back", 30_207.748_274_784),
+        ("V leg R front", 30_207.748_274_784),
+        ("V leg R back", 30_207.748_274_873),
+    ];
+
+    #[test]
+    fn stall_exit_keeps_outlier_edit_answer() {
+        let rig = duplo10();
+        let s12 = rig.param_named("s12").unwrap().id;
+        let load_weight = rig.param_named("load_weight").unwrap().id;
+        let mut session = RigSession::new(rig);
+        session
+            .apply(ParamEdit::SetValue {
+                id: s12,
+                text: "9'-0\"".into(),
+            })
+            .unwrap();
+        session
+            .apply(ParamEdit::SetValue {
+                id: load_weight,
+                text: "118200 lb".into(),
+            })
+            .unwrap();
+        let solved = session
+            .snapshot()
+            .solved
+            .as_ref()
+            .unwrap()
+            .as_ref()
+            .unwrap();
+        assert!(solved.converged);
+        assert!(
+            solved.iterations < 100,
+            "outlier took {} iterations",
+            solved.iterations
+        );
+        assert!((solved.hook_load_lbs - OUTLIER_HOOK_LOAD_LBS).abs() < 0.5);
+        let tolerance = 1e-6 * OUTLIER_HOOK_LOAD_LBS;
+        for (label, expected) in OUTLIER_TENSIONS_LBS {
+            let tension = solved.tension_of(session.rig(), label).unwrap();
+            assert!(
+                (tension - expected).abs() < tolerance,
+                "{label}: {tension} vs {expected}"
+            );
+        }
+    }
+
     fn wait_for_result(session: &mut RigSession) {
         let deadline = Instant::now() + Duration::from_secs(10);
         while session.is_solving() && Instant::now() < deadline {
