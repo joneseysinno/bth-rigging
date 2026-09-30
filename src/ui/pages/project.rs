@@ -164,8 +164,7 @@ pub fn ProjectPage(id: Uuid) -> Element {
                                                     .push(Route::PickEditor {
                                                         project_id: id,
                                                         pick_id,
-                                                    }
-                                                    button {
+                                                    });
                                             },
                                             span { class: "pick-name", "{name}" }
                                             span { class: "muted", "{weight as u64} lb" }
@@ -274,8 +273,7 @@ pub fn ProjectPage(id: Uuid) -> Element {
                                                     .push(Route::RigEditor {
                                                         project_id: id,
                                                         rig_id,
-                                                    }
-                                                    }
+                                                    });
                                             },
                                             span { class: "pick-name", "{name}" }
                                             span { class: "muted", "Open" }
@@ -309,8 +307,7 @@ pub fn ProjectPage(id: Uuid) -> Element {
                                                     .push(Route::MatEditor {
                                                         project_id: id,
                                                         analysis_id,
-                                                    }
-                                                    button {
+                                                    });
                                             },
                                             span { class: "pick-name", "{name}" }
                                             span { class: "muted", "{format_lbs(load)} lb outrigger" }
@@ -365,7 +362,7 @@ fn debug_demo_rig_button(
                             .push(Route::RigEditor {
                                 project_id,
                                 rig_id: rig.id,
-                            }
+                            });
                     }
                     Err(error) => status.set(error.to_string()),
                 }

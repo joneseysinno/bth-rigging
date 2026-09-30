@@ -441,8 +441,8 @@ fn ResultsPanel(
                     rsx! {
                         section { class: "results-section rating-list",
                             h3 { "Rated items to review" }
-                            for item in failures {
-                                article { class: "rated-item", key: "{item.owner}-{item.check.item}",
+                            for (index, item) in failures.into_iter().enumerate() {
+                                article { class: "rated-item", key: "{index}",
                                     div { class: "rated-item-heading",
                                         strong { "{item.owner}" }
                                         span { class: status_class(item.check.status), "{item.check.status.label()}" }
