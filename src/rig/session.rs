@@ -357,7 +357,7 @@ mod tests {
             .values_mut()
             .find(|body| matches!(body.kind, super::super::body::BodyKind::Load { .. }))
             .unwrap();
-        load.cg.x = crate::rig::Expr::c(1.0) / s12;
+        load.cg.x = crate::rig::Expr::c(1.0) / (crate::rig::Expr::Param(s12) / s12);
         let mut session = RigSession::new(rig);
         assert!(session.snapshot().eval.is_ok());
         let headline = session.snapshot().headline;

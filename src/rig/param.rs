@@ -294,7 +294,17 @@ pub(super) fn merge_div(
     match (a, b) {
         (q, None) => Ok(q),
         (None, Some(Quantity::Ratio) | Some(Quantity::Count)) => Ok(None),
-        (None, Some(_)) => Ok(None),
+        (None, Some(q @ (Quantity::Length | Quantity::Weight | Quantity::Angle))) => {
+            let quantity = match q {
+                Quantity::Length => "a length",
+                Quantity::Weight => "a weight",
+                _ => "an angle",
+            };
+            Err(RigError::new(
+                RigErrorKind::QuantityMismatch,
+                format!("cannot divide a plain number by {quantity}"),
+            ))
+        }
         (Some(x), Some(y)) if x == y => Ok(Some(Quantity::Ratio)),
         (Some(q), Some(Quantity::Ratio) | Some(Quantity::Count)) => Ok(Some(q)),
         (Some(x), Some(y)) => Err(RigError::new(

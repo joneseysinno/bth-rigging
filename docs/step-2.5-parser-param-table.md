@@ -49,8 +49,11 @@ expr     := term  (('+' | '-') term)*            left-assoc
 term     := unary (('*' | '/') unary)*           left-assoc
 unary    := '-' unary | atom
 atom     := literal | ident | '(' expr ')'
-literal  := number unit?  |  ft_in
-ft_in    := number "'" '-'? number '"'           NO whitespace inside
+literal  := number unit?  |  fraction unit  |  mixed unit  |  ft_in
+fraction := digits '/' digits                    NO whitespace around '/'
+mixed    := digits ' ' fraction                  exactly one space
+ft_in    := number "'" '-'? inches '"'           NO whitespace inside, except the one space of `mixed`
+inches   := number | fraction | mixed
 number   := digits ('.' digits?)? exp? | '.' digits exp?
 exp      := ('e'|'E') ('+'|'-')? digits
 unit     := ft | ' | in | " | lb | lbs | kip | deg | ° | %
@@ -70,6 +73,8 @@ ident    := [A-Za-z_][A-Za-z0-9_]*               case-sensitive
 
 - A unit may be separated from its number by spaces (`6 in`, `6in`). A unit word is recognised **only directly after a number**. Anywhere else, `in` is an identifier. It is still disallowed as a parameter name (§6.4).
 - **Feet-inches gotcha:** `8'-6"` (no spaces) is one literal, 8.5 ft. `8' - 6"` (spaces) is a subtraction, 7.5 ft. Both need a test, and the UI hint text shows both.
+- **Tape-measure fractions:** `N/D` folds into one literal (value `N/D`) **only when a unit follows**: `1/4"`, `3/8 in`, `1/2'`. Without a unit, `/` is division, so `12/2`, `s12/2` and `a/b` are unchanged. Mixed numbers: `6 1/2"` = 6.5 in. Inside ft-in: `8'-6 1/2"`, `8'-0 3/4"`, `8'-1/2"`. `D = 0` is `DivideByZero` pointing at the fraction.
+- Dividing a plain number by a Length, Weight or Angle (`1/(4 in)`) is a `QuantityMismatch` at the `/`: "cannot divide a plain number by a length". Dividing by a Ratio or Count stays plain.
 - `ton`, `kips`, `mm`, `m`, `kg` → `UnknownUnit`. `ton` gets a specific help message: "short or metric? use kip or lb".
 - **Reserved, rejected with a clear error:** `name(` (function call), `^`, `**`, `%` used as an operator, and implicit multiplication (`2G`, `2(a)`). Help text: "functions aren't supported yet". See D2.5-6 for why this is more than a parser change.
 
@@ -482,6 +487,7 @@ Implementation notes and remaining validation are recorded here. The desktop bui
 | 2.5.14c | Phase-A stall exit in `soft_relax`: track the best `gmax` (only a halving counts) and return once `it − best_it ≥ 10` and `gmax ≤ 1e-3·w`. The 300 cap, `HangOptions`, `soft_forces`/`soft_energy`, phase B and damping are unchanged. Every golden, `eval_geometry`, `solve_layers` and solve test passes unchanged. The outlier edit now takes **35** total iterations (was 302) and gives the 2.5.14a answer within `1e-6·w` per member and 0.5 lb on the hook (`session.rs::stall_exit_keeps_outlier_edit_answer`; the hook load stands in for `w_total`, since for Duplo10 everything hangs from the hook). Release 11.220 / 22.632 ms; debug 13.824 / 29.338, 13.927 / 27.827, 14.152 / 27.924 ms. |
 | 2.5.14d | Threading decision: release median 11.2 ms ≤ 50 ms and worst debug max 29.3 ms ≤ 250 ms, so recompute is **inline**. Removed `apply_async`, `schedule_recompute`, `poll`, `is_solving`, `pending`, `generation`, `RecomputeResult`, `Snapshot::solving`, `invalidate_pending` (nothing needed it), their two tests, and in `rig_editor.rs` the 16 ms poller, `poller_active`, the hand-written `Delay` future and the "Solving…" indicator. The editor calls `session.apply(edit)` inline, so the page no longer re-renders every 16 ms. The `.solving-indicator` rule in `assets/app.css` is now unused and was left in place. |
 | 2.5.15 | `recompute` treats `Ok(SolvedRig)` with `converged == false` as a failed solve: `Snapshot.solved` is `Err(vec![RigError { code: SolveNotConverged, .. }])` with "solver did not converge (N iterations) — geometry may be infeasible; check lengths and spans", `rated` is `None`, and the headline falls back to last-good with `headline_is_last_good` set. No existing `RigErrorKind` fit, so `SolveNotConverged` was added (not serialized). The iterate is kept in the new `Snapshot.unconverged: Option<SolvedRig>` field for a later drawing. The editor shows it under the existing "Solve failed" block. Solver untouched. Test: `s12 = 17 ft`, then Undo. |
+| 2.5.16 | Fractional inches. Lexer: `N/D` + unit folds to one `Number` literal; mixed `W N/D` + unit; ft-in accepts ` N/D` before `"`; `D = 0` → `DivideByZero` at the fraction. `merge_div(None, Length/Weight/Angle)` → `QuantityMismatch`. **Deviations:** (1) ft-in also accepts a bare fraction, `8'-1/2"` = 8 ft ½ in. Without it, fraction folding would turn that text into `8' − 1/2"` = 7.958 ft silently, which is the hazard this item removes. (2) The message uses the right article: "…by a length", "…by a weight", "…by an angle". (3) `session.rs::failed_solve_preserves_last_good_headline` built `load.cg.x = 1 / s12` by hand to force an eval failure at `s12 = 0`; that is now a type error, so it uses `1 / (s12 / s12)` (still untyped, still divides by zero at `s12 = 0`). No fixture or template expression changed; the 10,000-tree round-trip and fixture round-trip pass. |
 | Tests after 2.5 (lib / eval_geometry / golden / solve_layers) | 172 passed + 1 ignored / 10 / 3 / 8 |
 | Deviations from this plan | The where-used visitor includes additional `BodyGeometry` and `ComponentKind` sites for expression-bearing fields found during the required field inventory. Right-nested equal-precedence operators are parenthesized to preserve structural AST round-trips. Baseline clippy warnings remain; no new findings were introduced. AJ's manual §8.4 checklist is pending. |
 

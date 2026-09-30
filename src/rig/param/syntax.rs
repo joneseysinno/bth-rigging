@@ -277,9 +277,30 @@ fn scan_number(src: &str, offset: &mut usize) -> Result<TokenKind, LexError> {
         },
     })?;
 
-    if let Some((feet, inches, compound_end)) = scan_feet_inches(src, number_end, value) {
+    if let Some((feet, inches, compound_end)) = scan_feet_inches(src, number_end, value)? {
         *offset = compound_end;
         return Ok(TokenKind::FeetInches { feet, inches });
+    }
+
+    // Tape-measure fractions (`1/4"`) and mixed numbers (`6 1/2"`) fold into
+    // one literal only when a unit follows; otherwise `/` stays division.
+    if bytes[start..number_end].iter().all(u8::is_ascii_digit) {
+        let (fraction_start, whole) = if bytes.get(number_end) == Some(&b' ') {
+            (number_end + 1, value)
+        } else {
+            (start, 0.0)
+        };
+        if let Some((numerator, denominator, fraction_end)) = scan_fraction(src, fraction_start)
+            && let (Some(unit), unit_span, unit_end) = scan_unit_suffix(src, fraction_end)
+        {
+            let fraction = fraction_value(numerator, denominator, fraction_start, fraction_end)?;
+            *offset = unit_end;
+            return Ok(TokenKind::Number {
+                value: whole + fraction,
+                unit: Some(unit),
+                unit_span,
+            });
+        }
     }
 
     let (unit, unit_span, unit_end) = scan_unit_suffix(src, number_end);
@@ -291,16 +312,65 @@ fn scan_number(src: &str, offset: &mut usize) -> Result<TokenKind, LexError> {
     })
 }
 
-fn scan_feet_inches(src: &str, start: usize, feet: f64) -> Option<(f64, f64, usize)> {
+/// `N/D` starting at `start`: two digit runs with no whitespace around `/`.
+fn scan_fraction(src: &str, start: usize) -> Option<(f64, f64, usize)> {
+    let bytes = src.as_bytes();
+    let digits_end = |from: usize| {
+        let mut end = from;
+        while bytes.get(end).is_some_and(u8::is_ascii_digit) {
+            end += 1;
+        }
+        end
+    };
+    let numerator_end = digits_end(start);
+    if numerator_end == start || bytes.get(numerator_end) != Some(&b'/') {
+        return None;
+    }
+    let denominator_start = numerator_end + 1;
+    let end = digits_end(denominator_start);
+    if end == denominator_start {
+        return None;
+    }
+    let numerator = f64::from_str(&src[start..numerator_end]).ok()?;
+    let denominator = f64::from_str(&src[denominator_start..end]).ok()?;
+    Some((numerator, denominator, end))
+}
+
+fn fraction_value(
+    numerator: f64,
+    denominator: f64,
+    start: usize,
+    end: usize,
+) -> Result<f64, LexError> {
+    if denominator == 0.0 {
+        return Err(LexError {
+            kind: ParseErrorKind::DivideByZero,
+            span: Span { start, end },
+        });
+    }
+    Ok(numerator / denominator)
+}
+
+fn scan_feet_inches(
+    src: &str,
+    start: usize,
+    feet: f64,
+) -> Result<Option<(f64, f64, usize)>, LexError> {
     let bytes = src.as_bytes();
     if bytes.get(start) != Some(&b'\'') {
-        return None;
+        return Ok(None);
     }
     let mut offset = start + 1;
     if bytes.get(offset) == Some(&b'-') {
         offset += 1;
     }
     let inches_start = offset;
+    if let Some((numerator, denominator, end)) = scan_fraction(src, inches_start)
+        && bytes.get(end) == Some(&b'"')
+    {
+        let inches = fraction_value(numerator, denominator, inches_start, end)?;
+        return Ok(Some((feet, inches, end + 1)));
+    }
     while bytes.get(offset).is_some_and(u8::is_ascii_digit) {
         offset += 1;
     }
@@ -310,11 +380,24 @@ fn scan_feet_inches(src: &str, start: usize, feet: f64) -> Option<(f64, f64, usi
             offset += 1;
         }
     }
-    if offset == inches_start || bytes.get(offset) != Some(&b'"') {
-        return None;
+    if offset == inches_start {
+        return Ok(None);
     }
-    let inches = f64::from_str(&src[inches_start..offset]).ok()?;
-    Some((feet, inches, offset + 1))
+    let Ok(mut inches) = f64::from_str(&src[inches_start..offset]) else {
+        return Ok(None);
+    };
+    if bytes[inches_start..offset].iter().all(u8::is_ascii_digit)
+        && bytes.get(offset) == Some(&b' ')
+        && let Some((numerator, denominator, end)) = scan_fraction(src, offset + 1)
+        && bytes.get(end) == Some(&b'"')
+    {
+        inches += fraction_value(numerator, denominator, offset + 1, end)?;
+        offset = end;
+    }
+    if bytes.get(offset) != Some(&b'"') {
+        return Ok(None);
+    }
+    Ok(Some((feet, inches, offset + 1)))
 }
 
 fn scan_unit_suffix(src: &str, number_end: usize) -> (Option<Unit>, Option<Span>, usize) {
@@ -413,6 +496,7 @@ fn parse_syntax(src: &str) -> Result<SpannedExpr, ParseError> {
         message: match error.kind {
             ParseErrorKind::UnexpectedChar => "unexpected character".into(),
             ParseErrorKind::BadNumber => "invalid number".into(),
+            ParseErrorKind::DivideByZero => "division by zero".into(),
             _ => unreachable!(),
         },
         help: None,
@@ -1302,5 +1386,59 @@ mod tests {
         assert_eq!(zero.column, 2);
         let non_finite = parse_expr("1e999", &table).unwrap_err();
         assert_eq!(non_finite.kind, ParseErrorKind::NonFinite);
+    }
+
+    #[test]
+    fn tape_measure_fractions_fold_only_before_a_unit() {
+        let table = ParamTable::new();
+        for (source, feet) in [
+            ("1/4\"", 0.25 / 12.0),
+            ("6 1/2\"", 6.5 / 12.0),
+            ("8'-6 1/2\"", 8.0 + 6.5 / 12.0),
+            ("8'-0 3/4\"", 8.0 + 0.75 / 12.0),
+            ("8'-1/2\"", 8.0 + 0.5 / 12.0),
+            ("3/8 in", 0.375 / 12.0),
+        ] {
+            let parsed = parse_expr(source, &table).unwrap();
+            assert!(
+                matches!(parsed.expr, Expr::Const(value) if (value - feet).abs() < 1e-12),
+                "source: {source}, got {:?}",
+                parsed.expr
+            );
+            assert_eq!(parsed.quantity, Some(Quantity::Length), "source: {source}");
+        }
+
+        let plain = parse_expr("12/2", &table).unwrap();
+        assert_eq!(
+            plain.expr,
+            Expr::Div(Box::new(Expr::Const(12.0)), Box::new(Expr::Const(2.0)))
+        );
+        assert_eq!(plain.expr.eval(&table).unwrap(), 6.0);
+        assert_eq!(plain.quantity, None);
+
+        let rig = crate::rig::duplo10();
+        let s12 = rig.param_named("s12").unwrap().id;
+        let halved = parse_expr("s12/2", &rig.params).unwrap();
+        assert_eq!(halved.expr, Expr::Param(s12) / 2.0);
+        assert_eq!(halved.quantity, Some(Quantity::Length));
+
+        let sum = parse_expr("s12 + 1/4\"", &rig.params).unwrap();
+        assert!(matches!(
+            &sum.expr,
+            Expr::Add(left, right)
+                if **left == Expr::Param(s12)
+                    && matches!(**right, Expr::Const(value) if (value - 0.25 / 12.0).abs() < 1e-12)
+        ));
+        assert_eq!(sum.quantity, Some(Quantity::Length));
+
+        let zero = parse_expr("1/0\"", &table).unwrap_err();
+        assert_eq!(zero.kind, ParseErrorKind::DivideByZero);
+        assert_eq!(zero.span, Span { start: 0, end: 3 });
+
+        let per_length = "1/(4 in)";
+        let error = parse_expr(per_length, &table).unwrap_err();
+        assert_eq!(error.kind, ParseErrorKind::QuantityMismatch);
+        assert_eq!(&per_length[error.span.start..error.span.end], "/");
+        assert_eq!(error.message, "cannot divide a plain number by a length");
     }
 }
