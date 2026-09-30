@@ -16,7 +16,7 @@ use bth_rigging::format::{format_lbs, format_num};
 use bth_rigging::rig::edit::ParamEdit;
 use bth_rigging::rig::session::{HeadlineDelta, RigSession};
 use bth_rigging::rig::solve::{MemberForce, rate::Rated};
-use bth_rigging::rig::{EvalRig, ItemRef, MemberId, RigError, ValidationReport};
+use bth_rigging::rig::{EvalRig, ItemRef, MemberId, ResidualKind, RigError, ValidationReport};
 
 #[component]
 pub fn RigEditorPage(project_id: Uuid, rig_id: Uuid) -> Element {
@@ -268,10 +268,10 @@ fn ResultsPanel(
                 section { class: "results-section validation-list",
                     h3 { "Validation" }
                     for error in validation.errors.iter() {
-                        p { class: "validation-error", "{error}" }
+                        p { class: "validation-error", "{error.message}" }
                     }
                     for warning in validation.warnings.iter() {
-                        p { class: "validation-warning", "{warning}" }
+                        p { class: "validation-warning", "{warning.message}" }
                     }
                 }
             }
@@ -279,7 +279,7 @@ fn ResultsPanel(
                 div { class: "results-error",
                     h3 { "Evaluation failed" }
                     for error in errors {
-                        p { "{error}" }
+                        p { "{error.message}" }
                     }
                 }
             }
@@ -287,7 +287,7 @@ fn ResultsPanel(
                 div { class: "results-error",
                     h3 { "Solve failed" }
                     for error in errors {
-                        p { "{error}" }
+                        p { "{error.message}" }
                     }
                 }
             }
@@ -382,7 +382,7 @@ fn ResultsPanel(
                     }
                     for residual in &eval.residuals {
                         p { class: "residual-item",
-                            strong { "{residual.kind:?}" }
+                            strong { "{residual_label(residual.kind)}" }
                             span { "{residual.message}" }
                         }
                     }
@@ -449,6 +449,17 @@ fn format_delta(value: f64, unit: &str) -> String {
         format_num(value.abs())
     };
     format!("{sign}{number} {unit}")
+}
+
+fn residual_label(kind: ResidualKind) -> &'static str {
+    match kind {
+        ResidualKind::Short => "Short",
+        ResidualKind::Slack => "Slack",
+        ResidualKind::UnequalDrop => "Unequal drop",
+        ResidualKind::BearingSplitAssumed => "Bearing split assumed",
+        ResidualKind::Underconstrained => "Underconstrained",
+        ResidualKind::CgOffset => "CG offset",
+    }
 }
 
 fn status_class(status: Status) -> &'static str {

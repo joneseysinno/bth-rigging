@@ -84,7 +84,7 @@ pub fn apply(rig: &Rig, edit: &ParamEdit) -> Result<Rig, EditError> {
                 param.nominal = parsed
                     .expr
                     .eval(&trial.params)
-                    .map_err(|error| edit_error(ParamField::Value, error.to_string()))?;
+                    .map_err(|error| edit_error(ParamField::Value, error.message))?;
             } else {
                 param.source = ParamSource::Derived;
                 param.expr = Some(parsed.expr);
@@ -96,7 +96,7 @@ pub fn apply(rig: &Rig, edit: &ParamEdit) -> Result<Rig, EditError> {
                 )?;
                 param.nominal = Expr::Param(param.id)
                     .eval(&trial.params)
-                    .map_err(|error| edit_error(ParamField::Value, error.to_string()))?;
+                    .map_err(|error| edit_error(ParamField::Value, error.message))?;
             }
             trial.params.insert(param.id, param);
         }
@@ -125,7 +125,7 @@ pub fn apply(rig: &Rig, edit: &ParamEdit) -> Result<Rig, EditError> {
             updated.nominal = parsed
                 .expr
                 .eval(&trial.params)
-                .map_err(|error| edit_error(ParamField::Value, error.to_string()))?;
+                .map_err(|error| edit_error(ParamField::Value, error.message))?;
             trial.params.insert(*id, updated);
             check_edited_param(&trial.params, *id, ParamField::Value)?;
         }
@@ -163,7 +163,7 @@ pub fn apply(rig: &Rig, edit: &ParamEdit) -> Result<Rig, EditError> {
                 if let Some(expr) = &updated.expr {
                     updated.nominal = expr
                         .eval(&trial.params)
-                        .map_err(|error| edit_error(ParamField::Source, error.to_string()))?;
+                        .map_err(|error| edit_error(ParamField::Source, error.message))?;
                 }
                 updated.expr = None;
             }
@@ -215,7 +215,7 @@ fn parse_tolerance(
     let value = parsed
         .expr
         .eval(table)
-        .map_err(|error| edit_error(field, error.to_string()))?;
+        .map_err(|error| edit_error(field, error.message))?;
     if value < 0.0 {
         return Err(edit_error(field, "tolerance must be non-negative"));
     }
@@ -232,7 +232,7 @@ fn insert_then_evaluate(
     table.insert(id, param);
     let nominal = Expr::Param(id)
         .eval(table)
-        .map_err(|error| edit_error(field, error.to_string()))?;
+        .map_err(|error| edit_error(field, error.message))?;
     table.get_mut(&id).expect("inserted row").nominal = nominal;
     check_edited_param(table, id, field)
 }
@@ -241,9 +241,9 @@ fn insert_then_evaluate(
 fn check_edited_param(table: &ParamTable, id: ParamId, field: ParamField) -> Result<(), EditError> {
     Expr::Param(id)
         .eval(table)
-        .map_err(|error| edit_error(field, error.to_string()))?;
+        .map_err(|error| edit_error(field, error.message))?;
     if let Err(error) = check_param_cycles(table) {
-        return Err(edit_error(field, error.to_string()));
+        return Err(edit_error(field, error.message));
     }
     Ok(())
 }
@@ -820,6 +820,7 @@ mod tests {
             "{}",
             error.message
         );
+        assert!(!error.message.contains("ParamCycle"), "{}", error.message);
     }
 
     #[test]
