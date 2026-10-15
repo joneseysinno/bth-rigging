@@ -7,6 +7,7 @@
 //! Must not depend on: UI, dioxus, store, layers.
 
 mod annotate;
+pub mod orbit;
 
 use serde::{Deserialize, Serialize};
 
@@ -244,17 +245,7 @@ impl Scene {
     }
 
     pub fn fit(&self, w: f64, h: f64, margin: f64) -> Transform {
-        let bw = self.bounds.width().max(1e-9);
-        let bh = self.bounds.height().max(1e-9);
-        let inner_w = (w - 2.0 * margin).max(1e-9);
-        let inner_h = (h - 2.0 * margin).max(1e-9);
-        let scale = (inner_w / bw).min(inner_h / bh);
-        let cx = (self.bounds.min[0] + self.bounds.max[0]) * 0.5;
-        let cy = (self.bounds.min[1] + self.bounds.max[1]) * 0.5;
-        Transform {
-            scale,
-            offset: [w * 0.5 - cx * scale, h * 0.5 - cy * scale],
-        }
+        fit_rect(&self.bounds, w, h, margin)
     }
 
     pub fn has_nan(&self) -> bool {
@@ -286,6 +277,24 @@ impl Scene {
             .count()
     }
 }
+
+/// Uniform scale that fits `bounds` in a `w × h` canvas, centred.
+pub(crate) fn fit_rect(bounds: &Rect, w: f64, h: f64, margin: f64) -> Transform {
+    let bw = bounds.width().max(1e-9);
+    let bh = bounds.height().max(1e-9);
+    let inner_w = (w - 2.0 * margin).max(1e-9);
+    let inner_h = (h - 2.0 * margin).max(1e-9);
+    let scale = (inner_w / bw).min(inner_h / bh);
+    let cx = (bounds.min[0] + bounds.max[0]) * 0.5;
+    let cy = (bounds.min[1] + bounds.max[1]) * 0.5;
+    Transform {
+        scale,
+        offset: [w * 0.5 - cx * scale, h * 0.5 - cy * scale],
+    }
+}
+
+/// World point → (2D point, depth).
+pub(crate) type Projector<'a> = &'a dyn Fn([f64; 3]) -> ([f64; 2], f64);
 
 pub(crate) fn project_pt(p: [f64; 3], kind: ViewKind) -> ([f64; 2], f64) {
     match kind {
@@ -331,11 +340,15 @@ fn draw_members(
 }
 
 fn draw_nodes(eval: &EvalRig, rig: &Rig, kind: ViewKind, items: &mut Vec<Item>) {
+    draw_nodes_with(eval, rig, &|p| project_pt(p, kind), items);
+}
+
+pub(crate) fn draw_nodes_with(eval: &EvalRig, rig: &Rig, proj: Projector, items: &mut Vec<Item>) {
     for (id, p) in &eval.nodes {
         let Some(node) = rig.nodes.get(id) else {
             continue;
         };
-        let (at, depth) = project_pt(*p, kind);
+        let (at, depth) = proj(*p);
         let role = match node.kind {
             NodeKind::Root => Role::Hook,
             NodeKind::Bow { .. } => Role::Bow,
@@ -365,6 +378,36 @@ fn draw_nodes_only(eval: &EvalRig, kind: ViewKind, items: &mut Vec<Item>) {
 }
 
 fn draw_bodies(eval: &EvalRig, rig: &Rig, kind: ViewKind, items: &mut Vec<Item>) {
+    let tick_dir = match kind {
+        ViewKind::Plan => [0.0, 0.0, 0.4],
+        _ => [0.0, 0.4, 0.0],
+    };
+    draw_bodies_with(
+        eval,
+        rig,
+        &|p| project_pt(p, kind),
+        farthest_pair,
+        Some(tick_dir),
+        kind == ViewKind::Plan,
+        items,
+    );
+}
+
+/// Picks a bar's two drawn ends from its node positions.
+pub(crate) type BarEnds = fn(&mut [[f64; 3]]) -> ([f64; 3], [f64; 3]);
+
+/// Bodies through any projector. `bar_ends` picks where a bar is drawn;
+/// `tick_dir` draws a depth tick at bar mid-span; `cg_markers` adds CG and
+/// support-centroid markers.
+pub(crate) fn draw_bodies_with(
+    eval: &EvalRig,
+    rig: &Rig,
+    proj: Projector,
+    bar_ends: BarEnds,
+    tick_dir: Option<[f64; 3]>,
+    cg_markers: bool,
+    items: &mut Vec<Item>,
+) {
     for (id, body) in &rig.bodies {
         let Some(be) = eval.bodies.get(id) else {
             continue;
@@ -410,8 +453,8 @@ fn draw_bodies(eval: &EvalRig, rig: &Rig, kind: ViewKind, items: &mut Vec<Item>)
                     (3, 7),
                 ];
                 for (a, b) in edges {
-                    let pa = project_pt(world[a], kind);
-                    let pb = project_pt(world[b], kind);
+                    let pa = proj(world[a]);
+                    let pb = proj(world[b]);
                     items.push(Item::Polyline {
                         pts: vec![pa.0, pb.0],
                         role: Role::Load,
@@ -430,65 +473,42 @@ fn draw_bodies(eval: &EvalRig, rig: &Rig, kind: ViewKind, items: &mut Vec<Item>)
                 if pts.len() < 2 {
                     continue;
                 }
-                pts.sort_by(|a, b| {
-                    let da = a[0] * a[0] + a[1] * a[1];
-                    let db = b[0] * b[0] + b[1] * b[1];
-                    // span ends: extreme along the longest plan axis
-                    da.partial_cmp(&db).unwrap_or(std::cmp::Ordering::Equal)
-                });
-                // Pick the two furthest-apart nodes.
-                let mut best = (0usize, 1usize, 0.0_f64);
-                for i in 0..pts.len() {
-                    for j in (i + 1)..pts.len() {
-                        let d = dist3(pts[i], pts[j]);
-                        if d > best.2 {
-                            best = (i, j, d);
-                        }
-                    }
-                }
-                let a = project_pt(pts[best.0], kind);
-                let b = project_pt(pts[best.1], kind);
+                let (end_a, end_b) = bar_ends(&mut pts);
+                let a = proj(end_a);
+                let b = proj(end_b);
                 items.push(Item::Polyline {
                     pts: vec![a.0, b.0],
                     role: Role::Bar,
                     depth: a.1.min(b.1),
                     label: Some(body.label.clone()),
                 });
-                // Depth tick at mid-span.
-                let mid = [
-                    (pts[best.0][0] + pts[best.1][0]) * 0.5,
-                    (pts[best.0][1] + pts[best.1][1]) * 0.5,
-                    (pts[best.0][2] + pts[best.1][2]) * 0.5,
-                ];
-                let tick_dir = match kind {
-                    ViewKind::Plan => [0.0, 0.0, 0.4],
-                    _ => [0.0, 0.4, 0.0],
-                };
-                let t0 = project_pt(
-                    [
+                if let Some(tick_dir) = tick_dir {
+                    // Depth tick at mid-span.
+                    let mid = [
+                        (end_a[0] + end_b[0]) * 0.5,
+                        (end_a[1] + end_b[1]) * 0.5,
+                        (end_a[2] + end_b[2]) * 0.5,
+                    ];
+                    let t0 = proj([
                         mid[0] - tick_dir[0],
                         mid[1] - tick_dir[1],
                         mid[2] - tick_dir[2],
-                    ],
-                    kind,
-                );
-                let t1 = project_pt(
-                    [
+                    ]);
+                    let t1 = proj([
                         mid[0] + tick_dir[0],
                         mid[1] + tick_dir[1],
                         mid[2] + tick_dir[2],
-                    ],
-                    kind,
-                );
-                items.push(Item::Polyline {
-                    pts: vec![t0.0, t1.0],
-                    role: Role::Bar,
-                    depth: t0.1.min(t1.1),
-                    label: None,
-                });
+                    ]);
+                    items.push(Item::Polyline {
+                        pts: vec![t0.0, t1.0],
+                        role: Role::Bar,
+                        depth: t0.1.min(t1.1),
+                        label: None,
+                    });
+                }
             }
             BodyKind::Hook => {
-                let (at, depth) = project_pt(be.frame.origin, kind);
+                let (at, depth) = proj(be.frame.origin);
                 items.push(Item::Marker {
                     at,
                     role: Role::Hook,
@@ -497,7 +517,7 @@ fn draw_bodies(eval: &EvalRig, rig: &Rig, kind: ViewKind, items: &mut Vec<Item>)
                 });
             }
             BodyKind::Frame => {
-                let (at, depth) = project_pt(be.frame.origin, kind);
+                let (at, depth) = proj(be.frame.origin);
                 items.push(Item::Marker {
                     at,
                     role: Role::Bar,
@@ -506,8 +526,8 @@ fn draw_bodies(eval: &EvalRig, rig: &Rig, kind: ViewKind, items: &mut Vec<Item>)
                 });
             }
         }
-        if kind == ViewKind::Plan {
-            let (cg, depth) = project_pt(be.cg_world, kind);
+        if cg_markers {
+            let (cg, depth) = proj(be.cg_world);
             items.push(Item::Marker {
                 at: cg,
                 role: Role::Cg,
@@ -515,7 +535,7 @@ fn draw_bodies(eval: &EvalRig, rig: &Rig, kind: ViewKind, items: &mut Vec<Item>)
                 label: Some(format!("{} CG", body.label)),
             });
             if let Some(s) = be.support_centroid {
-                let (sc, d2) = project_pt(s, kind);
+                let (sc, d2) = proj(s);
                 items.push(Item::Marker {
                     at: sc,
                     role: Role::Cg,
@@ -525,6 +545,26 @@ fn draw_bodies(eval: &EvalRig, rig: &Rig, kind: ViewKind, items: &mut Vec<Item>)
             }
         }
     }
+}
+
+/// The two furthest-apart nodes (flat views; golden scenes depend on it).
+pub(crate) fn farthest_pair(pts: &mut [[f64; 3]]) -> ([f64; 3], [f64; 3]) {
+    pts.sort_by(|a, b| {
+        let da = a[0] * a[0] + a[1] * a[1];
+        let db = b[0] * b[0] + b[1] * b[1];
+        // span ends: extreme along the longest plan axis
+        da.partial_cmp(&db).unwrap_or(std::cmp::Ordering::Equal)
+    });
+    let mut best = (0usize, 1usize, 0.0_f64);
+    for i in 0..pts.len() {
+        for j in (i + 1)..pts.len() {
+            let d = dist3(pts[i], pts[j]);
+            if d > best.2 {
+                best = (i, j, d);
+            }
+        }
+    }
+    (pts[best.0], pts[best.1])
 }
 
 fn bounds_of(items: &[Item]) -> Rect {

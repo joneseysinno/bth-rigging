@@ -12,6 +12,7 @@ use crate::checks::Status;
 use crate::rig::edit::{EditError, ParamEdit, apply};
 use crate::rig::eval::EvalRig;
 use crate::rig::solve::SolvedRig;
+use crate::rig::views::orbit::PoseSource;
 use crate::rig::{Rig, RigError, RigErrorKind, ValidationReport};
 
 use super::solve;
@@ -60,6 +61,23 @@ pub struct Snapshot {
     pub headline: Headline,
     pub headline_is_last_good: bool,
     pub elapsed: Duration,
+}
+
+impl Snapshot {
+    /// Geometry to draw: the hung pose, else the unconverged iterate, else
+    /// the nominal descent. `None` when evaluation failed.
+    pub fn draw_pose(&self) -> Option<(&EvalRig, Option<&SolvedRig>, PoseSource)> {
+        if let Some(Ok(solved)) = &self.solved {
+            return Some((&solved.eval, Some(solved), PoseSource::Hung));
+        }
+        if let Some(solved) = &self.unconverged {
+            return Some((&solved.eval, Some(solved), PoseSource::Unconverged));
+        }
+        self.eval
+            .as_ref()
+            .ok()
+            .map(|eval| (eval, None, PoseSource::Descent))
+    }
 }
 
 pub struct RigSession {

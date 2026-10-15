@@ -7,16 +7,19 @@
 //! Must not depend on: layer calculation or solver internals beyond snapshots.
 
 use dioxus::prelude::*;
+use indexmap::IndexMap;
 use uuid::Uuid;
 
 use crate::app::{AppCtx, Route};
-use crate::ui::components::ParamTableView;
+use crate::ui::components::{ParamTableView, RigTreeView};
 use bth_rigging::checks::Status;
 use bth_rigging::format::{format_lbs, format_num};
 use bth_rigging::rig::edit::ParamEdit;
 use bth_rigging::rig::session::{HeadlineDelta, RigSession};
 use bth_rigging::rig::solve::{MemberForce, rate::Rated};
-use bth_rigging::rig::{EvalRig, ItemRef, MemberId, ResidualKind, RigError, ValidationReport};
+use bth_rigging::rig::{
+    EvalRig, ItemRef, MemberId, MemberShape, ResidualKind, Rig, RigError, RigTree, ValidationReport,
+};
 
 #[component]
 pub fn RigEditorPage(project_id: Uuid, rig_id: Uuid) -> Element {
@@ -27,6 +30,8 @@ pub fn RigEditorPage(project_id: Uuid, rig_id: Uuid) -> Element {
     let mut load_error = use_signal(|| None::<String>);
     let mut loaded = use_signal(|| false);
     let mut show_leave_confirm = use_signal(|| false);
+    let selected = use_signal(|| None::<MemberId>);
+    let hovered = use_signal(|| None::<MemberId>);
 
     {
         let ctx = ctx.clone();
@@ -93,22 +98,21 @@ pub fn RigEditorPage(project_id: Uuid, rig_id: Uuid) -> Element {
     };
 
     let title = rig.name.clone();
-    let solved_members = snapshot
+    let tree = RigTree::build(&rig);
+    let forces: IndexMap<MemberId, MemberForce> = snapshot
         .solved
         .as_ref()
         .and_then(|result| result.as_ref().ok())
-        .map(|solved| {
-            rig.members
-                .iter()
-                .filter_map(|(id, member)| {
-                    solved
-                        .members
-                        .get(id)
-                        .map(|force| (member.label.clone(), *id, force.clone()))
-                })
-                .collect()
-        })
+        .map(|solved| solved.members.clone())
         .unwrap_or_default();
+    let draw_pose = snapshot.draw_pose().map(|(eval, solved, source)| {
+        (
+            eval.clone(),
+            solved.map(|solved| solved.members.clone()),
+            source,
+        )
+    });
+    let rated = snapshot.rated.clone().unwrap_or_default();
     let solve_errors = snapshot
         .solved
         .as_ref()
@@ -193,6 +197,26 @@ pub fn RigEditorPage(project_id: Uuid, rig_id: Uuid) -> Element {
                 }
             }
             main { class: "editor-grid rig-editor-grid",
+                section { class: "panel rig-tree-panel",
+                    div { class: "layer-toolbar",
+                        h2 { class: "panel-title", "Rig" }
+                        span { class: "muted", "{tree.members.len()} members" }
+                    }
+                    if let Some((eval, pose_forces, source)) = draw_pose {
+                        RigTreeView {
+                            rig: rig.clone(),
+                            tree: tree.clone(),
+                            eval,
+                            forces: pose_forces,
+                            pose: source,
+                            rated: rated.clone(),
+                            selected,
+                            hovered,
+                        }
+                    } else {
+                        p { class: "muted", "The rig can't be drawn until it evaluates. See the errors under Live results." }
+                    }
+                }
                 section { class: "panel param-panel",
                     div { class: "layer-toolbar",
                         h2 { class: "panel-title", "Parameters" }
@@ -207,8 +231,12 @@ pub fn RigEditorPage(project_id: Uuid, rig_id: Uuid) -> Element {
                     validation: snapshot.validation,
                     eval: snapshot.eval,
                     solve_errors,
-                    solved_members,
-                    rated: snapshot.rated.unwrap_or_default(),
+                    rig: rig.clone(),
+                    tree,
+                    forces,
+                    selected,
+                    hovered,
+                    rated,
                     headline: snapshot.headline,
                     headline_is_last_good: snapshot.headline_is_last_good,
                     weight_breakdown,
@@ -246,7 +274,11 @@ fn ResultsPanel(
     validation: ValidationReport,
     eval: Result<EvalRig, Vec<RigError>>,
     solve_errors: Option<Vec<RigError>>,
-    solved_members: Vec<(String, MemberId, MemberForce)>,
+    rig: Rig,
+    tree: RigTree,
+    forces: IndexMap<MemberId, MemberForce>,
+    selected: Signal<Option<MemberId>>,
+    hovered: Signal<Option<MemberId>>,
     rated: Vec<Rated>,
     headline: bth_rigging::rig::session::Headline,
     headline_is_last_good: bool,
@@ -331,42 +363,33 @@ fn ResultsPanel(
                     span { class: status_class(headline.worst_status), "{headline.worst_status.label()}" }
                 }
             }
-            if !solved_members.is_empty() {
-                section { class: "results-section",
+            if !tree.members.is_empty() {
+                section { class: "results-section member-tree",
                     h3 { "Members" }
-                    div { class: "result-table-wrap",
-                        table { class: "result-table",
-                            thead {
-                                tr {
-                                    th { "Member" }
-                                    th { "Tension" }
-                                    th { "Angle" }
-                                    th { "State" }
-                                    th { "Status" }
-                                }
+                    for (group_index , group) in tree.groups.iter().enumerate() {
+                        div { class: "member-group", key: "group-{group_index}",
+                            p { class: "member-group-heading",
+                                span { "From {group.label}" }
+                                span { "{group.members.len()}" }
                             }
-                            tbody {
-                                for (label , member_id , force) in &solved_members {
-                                    {
-                                        let member_status = rated_for_member(&rated, *member_id);
-                                        let angle = force.angle_deg.iter().copied().fold(0.0, f64::max);
-                                        rsx! {
-                                            tr { key: "{member_id}",
-                                                td { "{label}" }
-                                                td { "{format_lbs(force.tension_lbs)} lb" }
-                                                td { "{format_num(angle)}°" }
-                                                td {
-                                                    if force.taut {
-                                                        "Taut"
-                                                    } else {
-                                                        "Slack"
-                                                    }
-                                                }
-                                                td {
-                                                    span { class: status_class(member_status), "{member_status.label()}" }
-                                                }
-                                            }
-                                        }
+                            for member_id in group.members.iter().copied() {
+                                if let Some(member) = tree.get(member_id) {
+                                    MemberRow {
+                                        key: "{member_id}",
+                                        tag: member.tag.clone(),
+                                        label: member.label.clone(),
+                                        route: member.route(),
+                                        hardware: member.hardware.clone(),
+                                        is_link: member.shape == MemberShape::Link,
+                                        force: forces.get(&member_id).cloned(),
+                                        checks: rated
+                                            .iter()
+                                            .filter(|item| matches!(item.at, ItemRef::Member { id, .. } if id == member_id))
+                                            .cloned()
+                                            .collect::<Vec<_>>(),
+                                        member_id,
+                                        selected,
+                                        hovered,
                                     }
                                 }
                             }
@@ -400,7 +423,14 @@ fn ResultsPanel(
                             for (index, item) in failures.into_iter().enumerate() {
                                 article { class: "rated-item", key: "{index}",
                                     div { class: "rated-item-heading",
-                                        strong { "{item.owner}" }
+                                        span {
+                                            span { class: "rated-item-tags",
+                                                for tag in tree.tags_for(&rig, &item.at) {
+                                                    span { class: "tag-pill", "{tag}" }
+                                                }
+                                            }
+                                            strong { "{item.owner}" }
+                                        }
                                         span { class: status_class(item.check.status), "{item.check.status.label()}" }
                                     }
                                     p {
@@ -415,6 +445,76 @@ fn ResultsPanel(
                     }
                 } else {
                     rsx! {}
+                }
+            }
+        }
+    }
+}
+
+#[component]
+fn MemberRow(
+    member_id: MemberId,
+    tag: String,
+    label: String,
+    route: String,
+    hardware: String,
+    is_link: bool,
+    force: Option<MemberForce>,
+    checks: Vec<Rated>,
+    selected: Signal<Option<MemberId>>,
+    hovered: Signal<Option<MemberId>>,
+) -> Element {
+    let is_selected = selected() == Some(member_id);
+    let hot = is_selected || hovered() == Some(member_id);
+    let status = rated_for_member(&checks, member_id);
+    let mut class = String::from("member-row");
+    if hot {
+        class.push_str(" is-hot");
+    }
+    if is_link {
+        class.push_str(" is-link");
+    }
+    rsx! {
+        div {
+            class: "{class}",
+            onmouseenter: move |_| hovered.set(Some(member_id)),
+            onmouseleave: move |_| hovered.set(None),
+            onclick: move |_| {
+                selected.set(if is_selected { None } else { Some(member_id) });
+            },
+            div { class: "member-row-main",
+                span { class: if hot { "tag-pill is-hot" } else { "tag-pill" }, "{tag}" }
+                span { class: "member-name", title: "{label}", "{label}" }
+                span { class: "member-numbers",
+                    if let Some(force) = &force {
+                        span { "{format_lbs(force.tension_lbs)} lb" }
+                        span {
+                            "{format_num(force.angle_deg.iter().copied().fold(0.0, f64::max))}°"
+                        }
+                        if !force.taut && !force.is_link {
+                            span { class: "muted", "Slack" }
+                        }
+                    } else {
+                        span { class: "muted", "—" }
+                    }
+                    span { class: status_class(status), "{status.label()}" }
+                }
+            }
+            p { class: "member-route", "{route}" }
+            if !hardware.is_empty() {
+                p { class: "member-hardware", "{hardware}" }
+            }
+            if is_selected && !checks.is_empty() {
+                ul { class: "member-checks",
+                    for (index , item) in checks.iter().enumerate() {
+                        li { key: "{index}",
+                            span { "{item.check.item}" }
+                            span {
+                                "{format_lbs(item.check.demand_lbs)} / {format_lbs(item.check.capacity_lbs)} lb "
+                                span { class: status_class(item.check.status), "{item.check.status.label()}" }
+                            }
+                        }
+                    }
                 }
             }
         }

@@ -27,6 +27,7 @@ pub mod param;
 pub mod session;
 pub mod solve;
 pub mod template;
+pub mod tree;
 pub mod views;
 
 pub use body::{BarRating, Body, BodyKind, Placement, RotExpr};
@@ -44,6 +45,8 @@ pub use param::{
     Coord3, Expr, Param, ParamSource, ParamTable, Quantity, SweepResult, check_param_cycles, sweep,
 };
 pub use template::from_layers;
+pub use tree::{MemberShape, RigTree, TreeGroup, TreeMember, TreeVertex};
+pub use views::orbit::{Camera, LabelBox, OrbitMember, OrbitScene, PoseSource};
 pub use views::{Item, Rect, Role, Scene, Transform, ViewKind};
 
 /// Current rig document schema. Loading a newer version is `DbError::SchemaTooNew`.

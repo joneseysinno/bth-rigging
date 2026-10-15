@@ -238,7 +238,39 @@ hook height, the governing-angle arc, and (in plan) the CG-to-support offset.
 Assumed inputs suffix dim text with `(assumed)`.
 
 Golden: `tests/fixtures/scene_v1.json` (Duplo10 and one 2-over-4 template,
-three views each). Nothing in `ui/` consumes `Scene` yet.
+three views each). Nothing in `ui/` consumes `Scene` yet; the rig editor
+draws through `OrbitScene` (see "Rig tree and tags").
+
+## Rig tree and tags
+
+`RigTree::build(&rig)` (`rig::tree`) turns the graph into a tree rooted at the
+hook so every member can be named on screen.
+
+- **Search order.** Breadth-first from `Rig::root`. A vertex is a body (all
+  its nodes are reached together) or a `Free` node. A member hangs from the
+  first reached vertex on its path; its other bodies become reachable one
+  tier lower.
+- **Tier.** Hops from the hook: hook legs are tier 1. In Duplo10, the V legs
+  and the Bar C chain legs are tier 2; the baskets and the Bar L / Bar R chain
+  legs are tier 3.
+- **Tags.** `M1`, `M2`, … in search order, then member insertion order within
+  a vertex. Tags are **derived, not stored**: no schema change, parameter
+  edits keep them, topology edits may renumber them.
+- **Text.** Each member gets `from` (upper stop), `via` (interior bearings
+  other than `from`), `to` (lower end stops, grouped by body), a shape (leg,
+  basket, choker, link) and a hardware line built from `ComponentKind::label`
+  plus evaluated lengths. A two-stop member of length ≤ 1e-6 ft is a link.
+- **Rated items.** `tags_for(&ItemRef)` gives a member its own tag and a lug
+  the tags of every member touching it. Bodies return none, because they are
+  drawn by name.
+
+`views::orbit::OrbitScene` draws the evaluated (or hung) pose through a yaw /
+pitch `Camera`, in screen orientation (y down), with a `MemberId` and tag on
+every member. Its `SIDE` / `END` / `PLAN` presets match `project_pt`. Bars are
+drawn along the principal axis of their nodes; the flat `Scene` keeps the
+farthest-pair rule its goldens were recorded with. `layout_labels` places one
+tag pill per non-link member without overlaps. `Snapshot::draw_pose` picks the
+hung pose, then the unconverged iterate, then the descent.
 
 ## Solve (Step 3)
 
