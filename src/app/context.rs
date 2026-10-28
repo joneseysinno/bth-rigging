@@ -6,6 +6,7 @@
 
 use bth_rigging::store::RiggingStore;
 use dioxus::prelude::*;
+use uuid::Uuid;
 
 /// The database, opened on first use. `None` when the data directory is unavailable.
 pub static STORE: GlobalSignal<Option<RiggingStore>> =
@@ -13,6 +14,9 @@ pub static STORE: GlobalSignal<Option<RiggingStore>> =
 
 /// Bumped after every save or delete so lists re-fetch.
 pub static REVISION: GlobalSignal<u64> = Signal::global(|| 0);
+
+/// The project shown in the Project and Details nav panes.
+pub static CURRENT_PROJECT: GlobalSignal<Option<Uuid>> = Signal::global(|| None);
 
 pub fn store() -> Option<RiggingStore> {
     STORE.peek().clone()

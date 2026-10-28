@@ -13,7 +13,6 @@ use uuid::Uuid;
 
 pub mod mat;
 pub mod pick;
-pub mod project;
 pub mod projects;
 pub mod rig;
 
@@ -62,7 +61,6 @@ pub fn discard(shell: Shell, id: Uuid) {
     pick::forget(id);
     mat::forget(id);
     rig::forget(id);
-    project::forget(id);
 }
 
 /// Every command from every document type lands here (after the shell has
@@ -80,8 +78,6 @@ pub fn on_command(shell: Shell, ev: &CommandEvent) {
         mat::handle(shell, id, ev.id);
     } else if ev.id.starts_with("rig.") {
         rig::handle(shell, id, ev.id);
-    } else if ev.id.starts_with("prj.") {
-        project::handle(shell, id, ev.id);
     }
 }
 

@@ -1,11 +1,11 @@
 //! Projects home: every project as a card, plus the "New project" form.
-//! Opening a card opens that project's page (`docs::project`).
+//! Opening a card shows that project in the nav pane (`panes::project`).
 
 use app_shell::prelude::*;
 use dioxus::prelude::*;
 
-use crate::app::{REVISION, bump_revision, store};
-use crate::docs;
+use crate::app::{CURRENT_PROJECT, REVISION, bump_revision, store};
+use crate::panes;
 use bth_rigging::domain::Project;
 use bth_rigging::format::format_updated;
 use bth_rigging::store::ProjectCounts;
@@ -138,14 +138,15 @@ fn matches(project: &Project, needle: &str) -> bool {
 #[component]
 fn ProjectCard(shell: Shell, project: Project, counts: ProjectCounts) -> Element {
     let id = project.id;
-    let name = project.name.clone();
+    let is_open = CURRENT_PROJECT() == Some(id);
     let picks = plural(counts.picks, "pick", "picks");
     let rigs = plural(counts.rigs, "rig", "rigs");
     let mats = plural(counts.mats, "mat analysis", "mat analyses");
     rsx! {
         button {
-            class: "app-project-card",
-            onclick: move |_| docs::open(shell, docs::project::ID, id, name.clone()),
+            class: if is_open { "app-project-card is-open" } else { "app-project-card" },
+            "aria-current": if is_open { Some("true") } else { None },
+            onclick: move |_| panes::open_project(shell, id),
             div { class: "app-project-card-head",
                 Ico { icon: icons::FOLDER, size: 18 }
                 h3 { class: "as-ellipsis", "{project.name}" }
@@ -205,7 +206,7 @@ fn NewProjectForm(shell: Shell, show_form: Signal<bool>, status: Signal<String>)
                 status.set(String::new());
                 show_form.set(false);
                 bump_revision();
-                docs::open(shell, docs::project::ID, project.id, project.name);
+                panes::open_project(shell, project.id);
             }
             Err(e) => status.set(e.to_string()),
         }

@@ -1,11 +1,12 @@
 //! Desktop binary entry point: launches the Dioxus app (`desktop` feature).
 //!
 //! The layout (title bar, rails, panels, palette) comes from `app-shell`.
-//! Everything app-specific lives in `app::spec()` and `docs`.
+//! Everything app-specific lives in `app::spec()`, `docs` and `panes`.
 #![allow(non_snake_case)]
 
 mod app;
 mod docs;
+mod panes;
 mod ui;
 
 use app::App;

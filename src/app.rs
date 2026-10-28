@@ -4,12 +4,12 @@
 
 pub mod context;
 
-pub use context::{REVISION, bump_revision, store};
+pub use context::{CURRENT_PROJECT, REVISION, bump_revision, store};
 
 use app_shell::prelude::*;
 use dioxus::prelude::*;
 
-use crate::docs;
+use crate::{docs, panes};
 
 const TAILWIND: Asset = asset!("/assets/tailwind.css");
 const APP_CSS: Asset = asset!("/assets/app.css");
@@ -35,13 +35,24 @@ fn spec() -> ShellSpec {
     s.theme = Theme::Light;
     s.nav_rail = vec![
         RailItem::command(docs::NAV_HOME, "Projects", icons::HOME),
+        RailItem::panel(
+            panes::NAV_PROJECT,
+            "Project",
+            icons::FOLDER,
+            panes::ProjectPane,
+        ),
+        RailItem::panel(
+            panes::NAV_DETAILS,
+            "Details",
+            icons::INFO,
+            panes::DetailsPane,
+        ),
         RailItem::panel("nav.docs", "Open documents", icons::FILES, DocumentsPane),
         RailItem::panel("nav.settings", "Settings", icons::SLIDERS, SettingsPane).at_end(),
     ];
     s.default_nav = None;
     s.doc_types = vec![
         docs::projects::doc_type(),
-        docs::project::doc_type(),
         docs::pick::doc_type(),
         docs::mat::doc_type(),
         docs::rig::doc_type(),
