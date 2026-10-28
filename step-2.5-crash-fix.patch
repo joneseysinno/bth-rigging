@@ -1,0 +1,54 @@
+--- a/src/ui/pages/project.rs	2026-09-28 14:02:23.034681647 -0600
++++ b/src/ui/pages/project.rs	2026-09-28 14:02:23.041390321 -0600
+@@ -164,8 +164,7 @@
+                                                     .push(Route::PickEditor {
+                                                         project_id: id,
+                                                         pick_id,
+-                                                    }
+-                                                    button {
++                                                    });
+                                             },
+                                             span { class: "pick-name", "{name}" }
+                                             span { class: "muted", "{weight as u64} lb" }
+@@ -274,8 +273,7 @@
+                                                     .push(Route::RigEditor {
+                                                         project_id: id,
+                                                         rig_id,
+-                                                    }
+-                                                    }
++                                                    });
+                                             },
+                                             span { class: "pick-name", "{name}" }
+                                             span { class: "muted", "Open" }
+@@ -309,8 +307,7 @@
+                                                     .push(Route::MatEditor {
+                                                         project_id: id,
+                                                         analysis_id,
+-                                                    }
+-                                                    button {
++                                                    });
+                                             },
+                                             span { class: "pick-name", "{name}" }
+                                             span { class: "muted", "{format_lbs(load)} lb outrigger" }
+@@ -365,7 +362,7 @@
+                             .push(Route::RigEditor {
+                                 project_id,
+                                 rig_id: rig.id,
+-                            }
++                            });
+                     }
+                     Err(error) => status.set(error.to_string()),
+                 }
+--- a/src/ui/pages/rig_editor.rs	2026-09-28 14:02:23.037558560 -0600
++++ b/src/ui/pages/rig_editor.rs	2026-09-28 14:02:23.041635235 -0600
+@@ -441,8 +441,8 @@
+                     rsx! {
+                         section { class: "results-section rating-list",
+                             h3 { "Rated items to review" }
+-                            for item in failures {
+-                                article { class: "rated-item", key: "{item.owner}-{item.check.item}",
++                            for (index, item) in failures.into_iter().enumerate() {
++                                article { class: "rated-item", key: "{index}",
+                                     div { class: "rated-item-heading",
+                                         strong { "{item.owner}" }
+                                         span { class: status_class(item.check.status), "{item.check.status.label()}" }
