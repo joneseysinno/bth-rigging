@@ -18,6 +18,7 @@ use std::sync::Arc;
 use infinite_db::InfiniteDb;
 use thiserror::Error;
 
+pub use projects::ProjectCounts;
 pub use spaces::{
     SPACE_CATALOG, SPACE_HARDWARE, SPACE_LAYERS, SPACE_MAT_ANALYSES, SPACE_PICKS, SPACE_PROJECTS,
     SPACE_RIG_BODIES, SPACE_RIG_MEMBERS, SPACE_RIG_NODES, SPACE_RIG_PARAMS, SPACE_RIGS,
@@ -77,6 +78,7 @@ mod tests {
     use super::*;
     use crate::domain::{Hitch, MatAnalysis, Pick, Project, SavedMat, SavedSpreader, SlingLayer};
     use std::time::{SystemTime, UNIX_EPOCH};
+    use uuid::Uuid;
 
     #[test]
     fn project_pick_save_reload() {
@@ -177,6 +179,54 @@ mod tests {
         );
         // Catalog mats are global — not deleted with the project.
         assert_eq!(store2.list_mats().unwrap().len(), 1);
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn project_details_and_counts() {
+        let nanos = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        let dir = std::env::temp_dir().join(format!("bth-rigging-counts-{nanos}"));
+        let _ = std::fs::remove_dir_all(&dir);
+
+        let store = RiggingStore::open(&dir).expect("open");
+        let mut project = Project::new("Job Counts");
+        project.job_number = "24-117".into();
+        project.client = "Acme".into();
+        project.location = "Houston, TX".into();
+        store.save_project(&project).expect("project");
+        assert_eq!(
+            store.project_counts(project.id).unwrap(),
+            ProjectCounts::default()
+        );
+
+        store
+            .save_pick(&Pick::new(project.id, "P1", 1_000.0), &[])
+            .expect("pick 1");
+        store
+            .save_pick(&Pick::new(project.id, "P2", 2_000.0), &[])
+            .expect("pick 2");
+        store
+            .save_mat_analysis(&MatAnalysis::new(project.id, "Pad", Uuid::nil()))
+            .expect("analysis");
+
+        let store2 = RiggingStore::open(&dir).expect("reopen");
+        let counts = store2.project_counts(project.id).unwrap();
+        assert_eq!(
+            counts,
+            ProjectCounts {
+                picks: 2,
+                rigs: 0,
+                mats: 1
+            }
+        );
+        let loaded = store2.load_project(project.id).unwrap().unwrap();
+        assert_eq!(loaded.job_number, "24-117");
+        assert_eq!(loaded.client, "Acme");
+        assert_eq!(loaded.location, "Houston, TX");
 
         let _ = std::fs::remove_dir_all(&dir);
     }

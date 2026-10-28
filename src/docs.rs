@@ -13,7 +13,12 @@ use uuid::Uuid;
 
 pub mod mat;
 pub mod pick;
+pub mod project;
+pub mod projects;
 pub mod rig;
+
+/// Nav rail command that opens the Projects home tab.
+pub const NAV_HOME: &str = "nav.home";
 
 /// Open the record `id` as a document of `kind`, or switch to it if it is
 /// already open.
@@ -21,7 +26,10 @@ pub fn open(mut shell: Shell, kind: &'static str, id: Uuid, name: impl Into<Stri
     let id = id.to_string();
     let is_open = shell.documents.peek().iter().any(|d| d.id == id);
     if !is_open {
-        shell.documents.write().push(Document::new(id.clone(), name, kind));
+        shell
+            .documents
+            .write()
+            .push(Document::new(id.clone(), name, kind));
     }
     shell.activate(&id);
 }
@@ -36,7 +44,11 @@ pub fn close_if_open(mut shell: Shell, id: Uuid) {
 
 /// Keep the title bar and Documents pane in step with a saved name.
 pub fn rename(mut shell: Shell, id: &str, name: &str) {
-    let stale = shell.documents.peek().iter().any(|d| d.id == id && d.name != name);
+    let stale = shell
+        .documents
+        .peek()
+        .iter()
+        .any(|d| d.id == id && d.name != name);
     if stale {
         if let Some(doc) = shell.documents.write().iter_mut().find(|d| d.id == id) {
             doc.name = name.to_string();
@@ -50,11 +62,16 @@ pub fn discard(shell: Shell, id: Uuid) {
     pick::forget(id);
     mat::forget(id);
     rig::forget(id);
+    project::forget(id);
 }
 
 /// Every command from every document type lands here (after the shell has
 /// handled its own built-ins). Routed by the id prefix of each doc type.
 pub fn on_command(shell: Shell, ev: &CommandEvent) {
+    if ev.id == NAV_HOME {
+        projects::open_home(shell);
+        return;
+    }
     let Some(doc) = ev.doc.as_deref() else { return };
     let Ok(id) = Uuid::parse_str(doc) else { return };
     if ev.id.starts_with("pk.") {
@@ -63,6 +80,8 @@ pub fn on_command(shell: Shell, ev: &CommandEvent) {
         mat::handle(shell, id, ev.id);
     } else if ev.id.starts_with("rig.") {
         rig::handle(shell, id, ev.id);
+    } else if ev.id.starts_with("prj.") {
+        project::handle(shell, id, ev.id);
     }
 }
 
@@ -85,10 +104,16 @@ pub struct Registry<T: Copy + 'static> {
 
 impl<T: Copy + 'static> Registry<T> {
     pub fn new() -> Self {
-        Self { map: RefCell::new(HashMap::new()) }
+        Self {
+            map: RefCell::new(HashMap::new()),
+        }
     }
 
-    pub fn get_or_load(&self, id: Uuid, load: impl FnOnce() -> Result<T, String>) -> Result<T, String> {
+    pub fn get_or_load(
+        &self,
+        id: Uuid,
+        load: impl FnOnce() -> Result<T, String>,
+    ) -> Result<T, String> {
         if let Some(state) = self.map.borrow().get(&id).copied() {
             return Ok(state);
         }
@@ -109,13 +134,13 @@ pub fn NotARecord(label: &'static str) -> Element {
     let id = use_document().map(|d| d.id).unwrap_or_default();
     rsx! {
         div { class: "app-empty",
-            h2 { "Not linked to a project" }
-            p { "Create a {label} from the Projects pane so it is saved with a job." }
+            h2 { "Not a saved record" }
+            p { "Open or create a {label} from the Projects page so it is saved with a job." }
             button {
                 class: "btn btn-primary",
                 onclick: move |_| {
+                    projects::open_home(shell);
                     shell.close_document(&id);
-                    shell.set_panel(Placement::Nav, Some("nav.projects"));
                 },
                 "Close and open Projects"
             }

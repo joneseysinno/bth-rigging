@@ -9,7 +9,7 @@ pub use context::{REVISION, bump_revision, store};
 use app_shell::prelude::*;
 use dioxus::prelude::*;
 
-use crate::{docs, panes};
+use crate::docs;
 
 const TAILWIND: Asset = asset!("/assets/tailwind.css");
 const APP_CSS: Asset = asset!("/assets/app.css");
@@ -34,12 +34,20 @@ fn spec() -> ShellSpec {
     let mut s = ShellSpec::new("BTH Rigging");
     s.theme = Theme::Light;
     s.nav_rail = vec![
-        RailItem::panel("nav.projects", "Projects", icons::FOLDER, panes::ProjectsPane),
+        RailItem::command(docs::NAV_HOME, "Projects", icons::HOME),
         RailItem::panel("nav.docs", "Open documents", icons::FILES, DocumentsPane),
         RailItem::panel("nav.settings", "Settings", icons::SLIDERS, SettingsPane).at_end(),
     ];
-    s.default_nav = Some("nav.projects");
-    s.doc_types = vec![docs::pick::doc_type(), docs::mat::doc_type(), docs::rig::doc_type()];
+    s.default_nav = None;
+    s.doc_types = vec![
+        docs::projects::doc_type(),
+        docs::project::doc_type(),
+        docs::pick::doc_type(),
+        docs::mat::doc_type(),
+        docs::rig::doc_type(),
+    ];
+    s.documents = vec![docs::projects::home_document()];
+    s.active_document = Some(docs::projects::HOME_ID.into());
     s.on_command = Some(docs::on_command);
     s
 }

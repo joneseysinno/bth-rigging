@@ -56,7 +56,19 @@ impl RiggingStore {
         Ok(())
     }
 
-    pub fn pick_count(&self, project_id: Uuid) -> Result<usize, DbError> {
-        Ok(self.list_picks_for_project(project_id)?.len())
+    pub fn project_counts(&self, project_id: Uuid) -> Result<ProjectCounts, DbError> {
+        Ok(ProjectCounts {
+            picks: self.list_picks_for_project(project_id)?.len(),
+            rigs: self.list_rigs_for_project(project_id)?.len(),
+            mats: self.list_mat_analyses_for_project(project_id)?.len(),
+        })
     }
+}
+
+/// How many records a project holds, for summary cards.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub struct ProjectCounts {
+    pub picks: usize,
+    pub rigs: usize,
+    pub mats: usize,
 }
