@@ -1,42 +1,21 @@
-//! App shell: routes, root component, and shared context.
+//! App shell: root component and the app described as data.
 //!
-//! Bin / UI only. Roadmap: Step 0 foundation.
+//! Bin / UI only. Layout comes from `app-shell`; document types live in `docs`.
 
 pub mod context;
 
-pub use context::AppCtx;
+pub use context::{REVISION, bump_revision, store};
 
+use app_shell::prelude::*;
 use dioxus::prelude::*;
-use uuid::Uuid;
 
-use crate::ui::pages::{Home, MatEditor, PickEditor, ProjectPage, RigEditorPage};
-use bth_rigging::store::RiggingStore;
+use crate::{docs, panes};
 
 const TAILWIND: Asset = asset!("/assets/tailwind.css");
 const APP_CSS: Asset = asset!("/assets/app.css");
 
-#[derive(Clone, Routable, Debug, PartialEq)]
-#[rustfmt::skip]
-pub enum Route {
-    #[route("/")]
-    Home {},
-    #[route("/project/:id")]
-    Project { id: Uuid },
-    #[route("/project/:project_id/pick/:pick_id")]
-    PickEditor { project_id: Uuid, pick_id: Uuid },
-    #[route("/project/:project_id/mat/:analysis_id")]
-    MatEditor { project_id: Uuid, analysis_id: Uuid },
-    #[route("/project/:project_id/rig/:rig_id")]
-    RigEditor { project_id: Uuid, rig_id: Uuid },
-}
-
 #[component]
 pub fn App() -> Element {
-    let store = use_hook(|| RiggingStore::open_default().ok());
-    use_context_provider(|| AppCtx {
-        store: store.clone(),
-    });
-
     rsx! {
         document::Stylesheet { href: TAILWIND }
         document::Stylesheet { href: APP_CSS }
@@ -46,20 +25,21 @@ pub fn App() -> Element {
         }
         document::Title { "BTH Rigging" }
 
-        Router::<Route> {}
+        AppShell { spec }
     }
 }
 
-#[component]
-fn Project(id: Uuid) -> Element {
-    rsx! {
-        ProjectPage { id }
-    }
-}
-
-#[component]
-fn RigEditor(project_id: Uuid, rig_id: Uuid) -> Element {
-    rsx! {
-        RigEditorPage { project_id, rig_id }
-    }
+/// The whole app, described as data.
+fn spec() -> ShellSpec {
+    let mut s = ShellSpec::new("BTH Rigging");
+    s.theme = Theme::Light;
+    s.nav_rail = vec![
+        RailItem::panel("nav.projects", "Projects", icons::FOLDER, panes::ProjectsPane),
+        RailItem::panel("nav.docs", "Open documents", icons::FILES, DocumentsPane),
+        RailItem::panel("nav.settings", "Settings", icons::SLIDERS, SettingsPane).at_end(),
+    ];
+    s.default_nav = Some("nav.projects");
+    s.doc_types = vec![docs::pick::doc_type(), docs::mat::doc_type(), docs::rig::doc_type()];
+    s.on_command = Some(docs::on_command);
+    s
 }

@@ -10,10 +10,16 @@ dx serve --desktop
 
 ## Flow
 
-1. **Projects** home — create / open / delete job folders  
-2. **Project** — list picks and mat analyses for that job  
-3. **Pick editor** — input layers (slings, angle, shackles, spreader) on the left; PDF-ready **Lift Report** with diagram on the right  
-4. **Mat bearing editor** — select/create a mat, enter outrigger load, pad size, allowable GBP, and spread angle; **Mat Bearing Report** shows effective area and pressure vs allowable  
+The UI is built on the [JoInn Template](https://github.com/joneseysinno/JoInn-Template) `app-shell`: a nav rail with panes on the far left, and open documents with a per-type toolbar, side and bottom panels, and a status readout. `Ctrl+K` opens the command palette; `Alt+[` / `Alt+]` switch documents.
+
+1. **Projects** pane — create / delete job folders; expand one to add picks, mat analyses and rigs, open them, or print the project calc package  
+2. **Pick** document — **Input** panel (layers: slings, angle, shackles, spreader) on the left; PDF-ready **Lift Report** with diagram in the viewport  
+3. **Mat analysis** document — **Input** panel (select/create a mat, outrigger load, pad size, allowable GBP); **Mat Bearing Report** shows effective area and pressure vs allowable  
+4. **Rig** document — rotatable 3D rig tree in the viewport, **Live results** on the right, **Checks** on the left and the **Parameters** table in the bottom panel; Save / Undo / Redo in the toolbar  
+
+Unsaved edits stay with a document after it is closed, until the app exits.
+
+`Cargo.toml` patches `app-shell` to the local `D:/Rust/Dioxus/JoInn Template` checkout so the shell and app can change together; remove the `[patch]` section to build from the pinned git tag.
 
 ## Tests
 
