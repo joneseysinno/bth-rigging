@@ -12,6 +12,7 @@ use crate::checks::Status;
 use crate::rig::edit::{EditError, ParamEdit, apply};
 use crate::rig::eval::EvalRig;
 use crate::rig::solve::SolvedRig;
+use crate::rig::topo::{TopoEdit, TopoError};
 use crate::rig::views::orbit::PoseSource;
 use crate::rig::{Rig, RigError, RigErrorKind, ValidationReport};
 
@@ -80,6 +81,41 @@ impl Snapshot {
     }
 }
 
+/// Any edit the session can apply: a parameter value or a change to the graph.
+#[derive(Debug, Clone, PartialEq)]
+#[allow(clippy::large_enum_variant)]
+pub enum RigEdit {
+    Param(ParamEdit),
+    Topo(TopoEdit),
+}
+
+impl From<ParamEdit> for RigEdit {
+    fn from(edit: ParamEdit) -> Self {
+        Self::Param(edit)
+    }
+}
+
+impl From<TopoEdit> for RigEdit {
+    fn from(edit: TopoEdit) -> Self {
+        Self::Topo(edit)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum RigEditError {
+    Param(EditError),
+    Topo(TopoError),
+}
+
+impl RigEditError {
+    pub fn message(&self) -> &str {
+        match self {
+            Self::Param(error) => &error.message,
+            Self::Topo(error) => &error.message,
+        }
+    }
+}
+
 pub struct RigSession {
     rig: Rig,
     saved_rig: Rig,
@@ -107,13 +143,60 @@ impl RigSession {
         }
     }
 
+    /// Apply a parameter or topology edit as one undo step, then recompute.
+    /// A refused edit changes nothing.
+    #[allow(clippy::result_large_err)]
+    pub fn apply_edit(&mut self, edit: impl Into<RigEdit>) -> Result<(), RigEditError> {
+        let updated = match edit.into() {
+            RigEdit::Param(edit) => apply(&self.rig, &edit).map_err(RigEditError::Param)?,
+            RigEdit::Topo(edit) => {
+                super::topo::apply(&self.rig, &edit).map_err(RigEditError::Topo)?
+            }
+        };
+        self.commit(updated);
+        Ok(())
+    }
+
     #[allow(clippy::result_large_err)]
     pub fn apply(&mut self, edit: ParamEdit) -> Result<(), EditError> {
-        self.accept_edit(edit)?;
+        self.apply_edit(edit).map_err(|error| match error {
+            RigEditError::Param(error) => error,
+            RigEditError::Topo(_) => unreachable!("a parameter edit"),
+        })
+    }
+
+    pub fn apply_topo(&mut self, edit: TopoEdit) -> Result<(), TopoError> {
+        self.apply_edit(edit).map_err(|error| match error {
+            RigEditError::Topo(error) => error,
+            RigEditError::Param(_) => unreachable!("a topology edit"),
+        })
+    }
+
+    /// Rename the rig itself (part of the undo history, like any edit).
+    pub fn rename(&mut self, name: &str) {
+        let mut updated = self.rig.clone();
+        updated.name = name.to_owned();
+        self.commit(updated);
+    }
+
+    pub fn can_undo(&self) -> bool {
+        !self.undo.is_empty()
+    }
+
+    pub fn can_redo(&self) -> bool {
+        !self.redo.is_empty()
+    }
+
+    fn commit(&mut self, updated: Rig) {
+        if updated == self.rig {
+            return;
+        }
+        self.undo.push(std::mem::replace(&mut self.rig, updated));
+        self.redo.clear();
+        self.dirty = self.rig != self.saved_rig;
         let previous_good = self.last_good;
         let (snapshot, good) = recompute(&self.rig, previous_good);
         self.finish_recompute(snapshot, good, previous_good);
-        Ok(())
     }
 
     pub fn undo(&mut self) -> bool {
@@ -162,16 +245,6 @@ impl RigSession {
         let (snapshot, good) = recompute(&self.rig, previous_good);
         self.finish_recompute(snapshot, good, previous_good);
         self.dirty = self.rig != self.saved_rig;
-    }
-
-    #[allow(clippy::result_large_err)]
-    fn accept_edit(&mut self, edit: ParamEdit) -> Result<(), EditError> {
-        let updated = apply(&self.rig, &edit)?;
-        self.undo.push(self.rig.clone());
-        self.redo.clear();
-        self.rig = updated;
-        self.dirty = self.rig != self.saved_rig;
-        Ok(())
     }
 
     fn finish_recompute(
@@ -335,6 +408,52 @@ mod tests {
             session.rig().params[&load_weight].source,
             ParamSource::Drawing
         );
+    }
+
+    #[test]
+    fn topology_edits_recompute_and_undo_exactly() {
+        use crate::rig::preset;
+        use crate::rig::topo::TopoEdit;
+        let blank = preset::blank_rig("blank", uuid::Uuid::nil());
+        let picks: Vec<_> = blank
+            .nodes
+            .values()
+            .filter(|n| !n.kind.is_root())
+            .map(|n| n.id)
+            .collect();
+        let mut session = RigSession::new(blank.clone());
+        assert!(session.snapshot().solved.is_none());
+        let mut history = vec![session.rig().clone()];
+        for pick in &picks {
+            let edit = preset::connect(session.rig(), vec![session.rig().root, *pick]);
+            session.apply_topo(edit).unwrap();
+            history.push(session.rig().clone());
+        }
+        assert!(session.snapshot().solved.as_ref().unwrap().is_ok());
+        let bar = preset::add_body(session.rig(), preset::BodyPreset::SpreaderBar);
+        session.apply_topo(bar).unwrap();
+        history.push(session.rig().clone());
+        let first = *session.rig().members.keys().next().unwrap();
+        session
+            .apply_topo(TopoEdit::RemoveMember { id: first })
+            .unwrap();
+        history.push(session.rig().clone());
+
+        let refused = session.apply_topo(TopoEdit::RemoveMember { id: first });
+        assert!(refused.is_err());
+        assert_eq!(session.rig(), history.last().unwrap());
+
+        for expected in history.iter().rev().skip(1) {
+            assert!(session.undo());
+            assert_eq!(session.rig(), expected);
+        }
+        assert!(!session.can_undo());
+        assert!(!session.is_dirty());
+        for expected in history.iter().skip(1) {
+            assert!(session.redo());
+            assert_eq!(session.rig(), expected);
+        }
+        assert!(session.is_dirty());
     }
 
     #[test]

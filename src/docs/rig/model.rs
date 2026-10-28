@@ -1,13 +1,15 @@
-//! Rig viewport: the rotatable 3D rig tree.
+//! Rig viewport: the node-graph canvas for building the rig and the
+//! rotatable 3D rig tree, alone or side by side.
 
 use app_shell::prelude::*;
 use dioxus::prelude::*;
 
-use super::state::state;
+use super::state::{ViewMode, state};
 use super::{ID, PARAMS_PANEL};
 use crate::docs::{self, LoadError, NotARecord};
-use crate::ui::components::RigTreeView;
+use crate::ui::components::{RigCanvas, RigTreeView};
 use bth_rigging::rig::RigTree;
+use bth_rigging::rig::topo::TopoEdit;
 
 #[allow(non_snake_case)]
 pub fn Model() -> Element {
@@ -29,6 +31,8 @@ pub fn Model() -> Element {
         Err(message) => return rsx! { LoadError { message } },
     };
     let view = st.view();
+    let mut mode = st.view_mode;
+    let current = mode();
     let tree = RigTree::build(&view.rig);
     let rated = view.snapshot.rated.clone().unwrap_or_default();
     let draw_pose = view.snapshot.draw_pose().map(|(eval, solved, source)| {
@@ -38,6 +42,11 @@ pub fn Model() -> Element {
             source,
         )
     });
+    let modes = [
+        ("Diagram", ViewMode::Diagram),
+        ("3D", ViewMode::ThreeD),
+        ("Split", ViewMode::Split),
+    ];
 
     rsx! {
         div { class: "app-rig-model",
@@ -50,20 +59,49 @@ pub fn Model() -> Element {
                     }
                 }
                 span { class: "muted", "{tree.members.len()} members" }
-            }
-            if let Some((eval, pose_forces, source)) = draw_pose {
-                RigTreeView {
-                    rig: view.rig.clone(),
-                    tree,
-                    eval,
-                    forces: pose_forces,
-                    pose: source,
-                    rated,
-                    selected: st.selected,
-                    hovered: st.hovered,
+                div { class: "rig-view-modes",
+                    for (label , value) in modes {
+                        button {
+                            key: "{label}",
+                            class: if current == value { "btn btn-ghost sm is-active" } else { "btn btn-ghost sm" },
+                            onclick: move |_| mode.set(value),
+                            "{label}"
+                        }
+                    }
                 }
-            } else {
-                p { class: "muted", "The rig can't be drawn until it evaluates. See the errors under Checks." }
+            }
+            div { class: if current == ViewMode::Split { "rig-views is-split" } else { "rig-views" },
+                if current != ViewMode::ThreeD {
+                    RigCanvas {
+                        session: st.session,
+                        layout: st.layout,
+                        selected: st.selected,
+                        hovered: st.hovered,
+                        armed: st.armed,
+                        on_edit: move |edit: TopoEdit| st.edit(edit),
+                        on_move: move |(key, at)| st.move_block(rig_id, key, at),
+                    }
+                }
+                if current != ViewMode::Diagram {
+                    if let Some((eval, pose_forces, source)) = draw_pose {
+                        RigTreeView {
+                            rig: view.rig.clone(),
+                            tree,
+                            eval,
+                            forces: pose_forces,
+                            pose: source,
+                            rated,
+                            selected: st.selected,
+                            hovered: st.hovered,
+                        }
+                    } else {
+                        div { class: "rig-3d-empty",
+                            p { class: "muted",
+                                "The 3D view appears once the rig evaluates. Hang the load from the hook in the diagram; open Checks to see what is missing."
+                            }
+                        }
+                    }
+                }
             }
         }
     }

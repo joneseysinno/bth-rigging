@@ -157,6 +157,20 @@ fn ProjectTree(id: Uuid) -> Element {
 
             h3 { class: "app-tree-heading", "Rigs" }
             div { class: "app-tree-actions",
+                button {
+                    class: "btn btn-ghost sm",
+                    title: "Start a rig from a hook and a load, then build it on the diagram",
+                    onclick: move |_| match blank_rig(id, rigs().len() + 1) {
+                        Ok((rig_id, rig_name)) => {
+                            bump_revision();
+                            docs::open(shell, docs::rig::ID, rig_id, rig_name);
+                        }
+                        Err(e) => status.set(e),
+                    },
+                    "New blank rig"
+                }
+            }
+            div { class: "app-tree-actions",
                 select {
                     class: "field-input sm",
                     "aria-label": "Pick to build a rig from",
@@ -275,6 +289,14 @@ pub fn project_record_ids(project_id: Uuid) -> Vec<Uuid> {
             .map(|a| a.id),
     );
     ids
+}
+
+/// Save a new rig holding a hook and an unrigged load. Returns its id and name.
+fn blank_rig(project_id: Uuid, number: usize) -> Result<(Uuid, String), String> {
+    let store = store().ok_or("Database not available.")?;
+    let rig = rig::preset::blank_rig(&format!("Rig {number}"), project_id);
+    store.save_rig(&rig).map_err(|e| e.to_string())?;
+    Ok((rig.id, rig.name))
 }
 
 /// Build and save a rig from a pick's layers. Returns the new rig's id and name.

@@ -9,6 +9,7 @@
 use dioxus::prelude::*;
 use indexmap::IndexMap;
 
+use crate::ui::selection::Selection;
 use bth_rigging::format::format_lbs;
 use bth_rigging::rig::solve::MemberForce;
 use bth_rigging::rig::solve::rate::Rated;
@@ -34,8 +35,8 @@ pub fn RigTreeView(
     forces: Option<IndexMap<MemberId, MemberForce>>,
     pose: PoseSource,
     rated: Vec<Rated>,
-    selected: Signal<Option<MemberId>>,
-    hovered: Signal<Option<MemberId>>,
+    selected: Signal<Option<Selection>>,
+    hovered: Signal<Option<Selection>>,
 ) -> Element {
     let mut camera = use_signal(Camera::default);
     let mut drag_from = use_signal(|| None::<(f64, f64)>);
@@ -44,7 +45,10 @@ pub fn RigTreeView(
     let scene = OrbitScene::project(&eval, &rig, &tree, camera(), forces.as_ref(), &rated);
     let t = scene.fit(VIEW_W, VIEW_H, MARGIN);
     let labels = scene.layout_labels(&t, PILL_W, PILL_H);
-    let hot = |id: MemberId| selected() == Some(id) || hovered() == Some(id);
+    let hot = |id: MemberId| {
+        selected().and_then(Selection::member) == Some(id)
+            || hovered().and_then(Selection::member) == Some(id)
+    };
 
     let presets = [
         ("Iso", Camera::ISO),
@@ -118,11 +122,15 @@ pub fn RigTreeView(
                                 polyline {
                                     class: "rt-hit",
                                     points: "{points}",
-                                    onmouseenter: move |_| hovered.set(Some(id)),
+                                    onmouseenter: move |_| hovered.set(Some(Selection::Member(id))),
                                     onmouseleave: move |_| hovered.set(None),
                                     onclick: move |_| {
                                         if drag_travel() <= CLICK_SLOP_PX {
-                                            let next = if selected() == Some(id) { None } else { Some(id) };
+                                            let next = if selected() == Some(Selection::Member(id)) {
+                                                None
+                                            } else {
+                                                Some(Selection::Member(id))
+                                            };
                                             selected.set(next);
                                         }
                                     },
@@ -152,11 +160,15 @@ pub fn RigTreeView(
                             g {
                                 key: "pill-{id}",
                                 class: "{class}",
-                                onmouseenter: move |_| hovered.set(Some(id)),
+                                onmouseenter: move |_| hovered.set(Some(Selection::Member(id))),
                                 onmouseleave: move |_| hovered.set(None),
                                 onclick: move |_| {
                                     if drag_travel() <= CLICK_SLOP_PX {
-                                        let next = if selected() == Some(id) { None } else { Some(id) };
+                                        let next = if selected() == Some(Selection::Member(id)) {
+                                                None
+                                            } else {
+                                                Some(Selection::Member(id))
+                                            };
                                         selected.set(next);
                                     }
                                 },

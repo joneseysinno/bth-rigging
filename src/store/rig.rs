@@ -16,12 +16,13 @@ use infinite_db::infinitedb_core::hyperedge::{
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
+use crate::rig::layout::CanvasLayout;
 use crate::rig::{Body, Member, Node, NodeId, Param, Rig, SCHEMA_VERSION};
 
 use super::keys::{member_edge_id, rig_item_point, rig_point};
 use super::spaces::{
-    KIND_RIG_MEMBER_PATH, SPACE_RIG_BODIES, SPACE_RIG_MEMBERS, SPACE_RIG_NODES, SPACE_RIG_PARAMS,
-    SPACE_RIGS, SPACE_TOPOLOGY,
+    KIND_RIG_MEMBER_PATH, SPACE_RIG_BODIES, SPACE_RIG_LAYOUT, SPACE_RIG_MEMBERS, SPACE_RIG_NODES,
+    SPACE_RIG_PARAMS, SPACE_RIGS, SPACE_TOPOLOGY,
 };
 use super::{DbError, RiggingStore};
 
@@ -168,6 +169,35 @@ impl RiggingStore {
 
     pub fn delete_rig(&self, id: Uuid) -> Result<(), DbError> {
         self.clear_rig_rows(id)?;
+        self.db.delete(SPACE_RIG_LAYOUT, rig_point(id))?;
+        self.db.sync()?;
+        Ok(())
+    }
+
+    /// Canvas positions for a rig; empty when none were saved.
+    pub fn load_rig_layout(&self, rig_id: Uuid) -> Result<CanvasLayout, DbError> {
+        let (hi, lo) = super::keys::uuid_coords(rig_id);
+        for row in self.db.query(SPACE_RIG_LAYOUT, None)? {
+            let coords = &row.address.point.coords;
+            if row.tombstone || coords.len() != 2 || coords[0] != hi || coords[1] != lo {
+                continue;
+            }
+            if let Ok(layout) = serde_json::from_slice::<CanvasLayout>(&row.data) {
+                return Ok(layout);
+            }
+        }
+        Ok(CanvasLayout::default())
+    }
+
+    /// Saved independently of the rig document, so moving a block never
+    /// marks the rig unsaved.
+    pub fn save_rig_layout(&self, rig_id: Uuid, layout: &CanvasLayout) -> Result<(), DbError> {
+        self.db.delete(SPACE_RIG_LAYOUT, rig_point(rig_id))?;
+        self.db.insert(
+            SPACE_RIG_LAYOUT,
+            rig_point(rig_id),
+            serde_json::to_vec(layout)?,
+        )?;
         self.db.sync()?;
         Ok(())
     }
@@ -409,6 +439,35 @@ mod tests {
                 member.label
             );
         }
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn canvas_layout_round_trips_survives_rig_saves_and_dies_with_the_rig() {
+        let dir = tmp("rig-layout");
+        let store = RiggingStore::open(&dir).expect("open");
+        let rig = crate::rig::preset::blank_rig("blank", Uuid::nil());
+        store.save_rig(&rig).unwrap();
+        assert_eq!(
+            store.load_rig_layout(rig.id).unwrap(),
+            CanvasLayout::default()
+        );
+
+        let load = rig.bodies.values().find(|b| b.kind.is_load()).unwrap().id;
+        let mut layout = CanvasLayout::default();
+        layout.set(load.0, [10.0, 20.0]);
+        store.save_rig_layout(rig.id, &layout).unwrap();
+        layout.set(load.0, [30.0, 40.0]);
+        store.save_rig_layout(rig.id, &layout).unwrap();
+        store.save_rig(&rig).unwrap();
+
+        let reopened = RiggingStore::open(&dir).expect("reopen");
+        assert_eq!(reopened.load_rig_layout(rig.id).unwrap(), layout);
+        reopened.delete_rig(rig.id).unwrap();
+        assert_eq!(
+            reopened.load_rig_layout(rig.id).unwrap(),
+            CanvasLayout::default()
+        );
         let _ = std::fs::remove_dir_all(&dir);
     }
 

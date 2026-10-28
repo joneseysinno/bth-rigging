@@ -5,6 +5,7 @@ use dioxus::prelude::*;
 use super::state::state;
 use super::status_class;
 use crate::docs;
+use crate::ui::selection::Selection;
 use bth_rigging::checks::Status;
 use bth_rigging::format::{format_lbs, format_num};
 use bth_rigging::rig::solve::{MemberForce, rate::Rated};
@@ -130,11 +131,11 @@ fn MemberRow(
     is_link: bool,
     force: Option<MemberForce>,
     checks: Vec<Rated>,
-    selected: Signal<Option<MemberId>>,
-    hovered: Signal<Option<MemberId>>,
+    selected: Signal<Option<Selection>>,
+    hovered: Signal<Option<Selection>>,
 ) -> Element {
-    let is_selected = selected() == Some(member_id);
-    let hot = is_selected || hovered() == Some(member_id);
+    let is_selected = selected().and_then(Selection::member) == Some(member_id);
+    let hot = is_selected || hovered().and_then(Selection::member) == Some(member_id);
     let status = rated_for_member(&checks, member_id);
     let mut class = String::from("member-row");
     if hot {
@@ -146,10 +147,10 @@ fn MemberRow(
     rsx! {
         div {
             class: "{class}",
-            onmouseenter: move |_| hovered.set(Some(member_id)),
+            onmouseenter: move |_| hovered.set(Some(Selection::Member(member_id))),
             onmouseleave: move |_| hovered.set(None),
             onclick: move |_| {
-                selected.set(if is_selected { None } else { Some(member_id) });
+                selected.set(if is_selected { None } else { Some(Selection::Member(member_id)) });
             },
             div { class: "member-row-main",
                 span { class: if hot { "tag-pill is-hot" } else { "tag-pill" }, "{tag}" }

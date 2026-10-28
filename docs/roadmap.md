@@ -12,12 +12,13 @@ Step 0 reorganized the crate. Steps 1–7 build the rigging graph from the lugs 
 | **3** | ✅ done | Solver + shared checks | `rig::solve::{rank,hang,elastic,bounds,inverse}`, `checks::{sling,chain,shackle,lug,bar}` | §3.5 determinacy (`s = m − r`, `k = dof − r`); tension-only | Rank/hang/elastic on template graphs; checks stamp OK/OVER |
 | **2.5** | 🟡 awaiting AJ §8.4 | Expression parser + parameter-table editor | `rig::param::{syntax,print}`, `rig::{edit,session}`, `ui` parameter table | Step 1 D2; Step 2 D2-8 (split out of Step 2) | Typed expressions parse to builder-equivalent ASTs; canonical print round-trips; edits recompute and rate the rig |
 | **D2-1** | 🟡 awaiting AJ check | Screen work: labeled 3D rigging tree in the rig editor | `rig::tree`, `rig::views::orbit`, `ui::components::rig_tree_view`, `ui::pages::rig_editor` | Step 2 D2-1; `docs/rig-model.md` "Rig tree and tags" | Every member tagged `M1…` top-down from the hook with from / via / to and hardware text; rotatable 3D view (Iso / Side / End / Plan) with tags matching a members list grouped by what each member hangs from; rated items carry tags |
+| **G** | ✅ done | Rig graph builder: build and rewire the rig on a node-graph canvas | `rig::{topo,preset,layout}`, `rig::session` (`RigEdit`), `store::rig` (space 13), `ui::components::rig_canvas`, `ui::selection`, `docs::rig::inspector` | `docs/step-g-graph-builder.md`; `docs/rig-model.md` "Topology edits" | A spreader-bar rig built from a blank rig on the canvas solves the same as the equivalent `from_layers` rig; undo/redo covers every topology edit |
 | **4** | — | Crane config, chart, reeving | `crane::{config,chart,reeving}` | Readback crane capacity / reeving | Conservative chart lookup + line pull for a sample crane |
 | **5** | — | Pose and clearance | `crane::{pose,clearance}` | Loaded radius → β; boom envelope | Head/hook height; clearance sweep vs graph |
 | **6** | — | Crane statics → mats | `crane::statics` (+ existing `mats`) | Slew sweep; outrigger reactions | Reactions feed mat bearing analysis |
 | **7** | — | Wind + tolerance envelope | `crane::wind`, `rig::solve::envelope` | Side load; tolerance sweep | Worst-case utilization per item |
 
-**Order:** 0 → 1 → 2 → 3 → **2.5** → screen work (Step 2 D2-1) → 4 → 5 → 6 → 7.
+**Order:** 0 → 1 → 2 → 3 → **2.5** → screen work (Step 2 D2-1) → **G** (graph builder) → 4 → 5 → 6 → 7.
 Step 3 goes before 2.5. Step 2's residual list and taut/slack classification hand straight to the tension-only
 solve, and fixtures plus the builder API are enough to test it. The parameter-table editor matters once a screen
 shows the graph, and D2-1 holds screens until tensions exist. So 2.5 lands just before the first screen that uses the graph.
@@ -36,7 +37,7 @@ shows the graph, and D2-1 holds screens until tensions exist. So 2.5 lands just 
 rig/          Steps 1–3, 7
 crane/        Steps 4–7
 checks/       Step 3
-store/rig     Step 1 persistence
+store/rig     Step 1 persistence; Step G canvas layout (space 13)
 catalog/connection_hardware  Steps 1/3
 layers/       kept as template oracle (D3)
 ```

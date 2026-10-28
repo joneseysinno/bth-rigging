@@ -21,12 +21,15 @@ pub mod edit;
 pub mod eval;
 pub mod fixtures;
 pub mod id;
+pub mod layout;
 pub mod member;
 pub mod node;
 pub mod param;
+pub mod preset;
 pub mod session;
 pub mod solve;
 pub mod template;
+pub mod topo;
 pub mod tree;
 pub mod views;
 

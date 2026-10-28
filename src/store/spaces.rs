@@ -1,7 +1,8 @@
 //! Space IDs, kind strings, and space registration.
 //!
 //! Spaces 1–7 are frozen (Step 0 stored layout). Spaces 8–12 are the Step 1
-//! rig graph; an older build ignores those rows.
+//! rig graph; space 13 holds graph-builder canvas positions. An older build
+//! ignores those rows.
 //! Roadmap: Step 0 foundation; Step 1 rig persistence.
 
 use infinite_db::infinitedb_core::address::SpaceId;
@@ -21,6 +22,8 @@ pub const SPACE_RIG_PARAMS: SpaceId = SpaceId(9);
 pub const SPACE_RIG_BODIES: SpaceId = SpaceId(10);
 pub const SPACE_RIG_NODES: SpaceId = SpaceId(11);
 pub const SPACE_RIG_MEMBERS: SpaceId = SpaceId(12);
+/// Canvas block positions per rig (graph builder); not part of the rig document.
+pub const SPACE_RIG_LAYOUT: SpaceId = SpaceId(13);
 
 pub(super) const KIND_PICK_HAS_LAYER: &str = "PickHasLayer";
 pub(super) const KIND_RIG_MEMBER_PATH: &str = "RigMemberPath";
@@ -43,6 +46,7 @@ impl RiggingStore {
             (SPACE_RIG_BODIES, "rig_bodies", 3),
             (SPACE_RIG_NODES, "rig_nodes", 3),
             (SPACE_RIG_MEMBERS, "rig_members", 3),
+            (SPACE_RIG_LAYOUT, "rig_layout", 2),
         ];
         for (id, name, dims) in spaces {
             if let Err(err) = self.db.register_space(SpaceConfig::new(id, name, dims)) {

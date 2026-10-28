@@ -2,7 +2,8 @@
 
 This is the data model the rest of the solver, views and reports will use. It
 describes **any** rig — Duplo10, a basket under the unit, a plain 2-leg bridle —
-as a graph. Nothing on screen consumes it yet.
+as a graph. The Rig document builds it on a node-graph canvas (see "Topology
+edits") and draws it in 3D.
 
 Theory source: *Duplo10 Lift Readback* rev C, §3.1–3.5. Step 2 places bodies in
 3D and projects side / end / plan scenes. Step 3 hangs the rig and checks ratings
@@ -163,6 +164,7 @@ folder keeps working and an older build ignores the new rows.
 | `SPACE_RIG_NODES` | 11 | One row per node |
 | `SPACE_RIG_MEMBERS` | 12 | Member header + segments + components as one JSON payload |
 | `SPACE_TOPOLOGY` | 4 | One hyperedge per member: kind `RigMemberPath`, roles `end` / `bearing` |
+| `SPACE_RIG_LAYOUT` | 13 | Graph-builder canvas positions, one JSON row per rig (not part of the rig document) |
 
 The member path lives twice: payload is the source of truth; the hyperedge
 makes the graph queryable. Loading `schema_version` newer than the build
@@ -271,6 +273,31 @@ drawn along the principal axis of their nodes; the flat `Scene` keeps the
 farthest-pair rule its goldens were recorded with. `layout_labels` places one
 tag pill per non-link member without overlaps. `Snapshot::draw_pose` picks the
 hung pose, then the unconverged iterate, then the descent.
+
+## Topology edits
+
+`rig::topo::apply(&rig, &TopoEdit)` is the graph counterpart of
+`edit::apply(&rig, &ParamEdit)`: pure, returns a new rig or a `TopoError`, and
+leaves the input unchanged. Edits add, remove, rename and rewire bodies,
+nodes (ports and free master links), members and the components inside each
+segment. Full list and rules: `docs/step-g-graph-builder.md` §3.1.
+
+- **Drafts are valid.** Edits refuse only structural damage (dangling
+  references, path shape, a non-bearing interior stop, an end on a bearing,
+  a second hook, bad expression text). A body with no member yet, or a load
+  not hung from the hook, is accepted and reported by `validate_full`.
+- **Cascade.** `RemoveBody` removes its nodes and every member touching them.
+  `RemoveNode` is refused while a member uses the node and names the members.
+- **Re-split.** `Reroute` to a different stop count re-splits segments so the
+  member's total length and weight are unchanged.
+- **Presets.** `rig::preset` turns a palette choice into an `AddBody` with
+  uniquely named `Assumed` parameters (`bar1_span`, `load_weight`, …), a
+  default run (shackle · RS-5 10 ft · shackle), and `blank_rig` (hook + load).
+- **Session.** `RigSession::apply_edit` takes either kind of edit as one
+  undo step and recomputes.
+- **Canvas layout.** `rig::layout::Schematic` places one block per body or
+  master link by tier from the hook; dragged positions persist in store space
+  13 (`SPACE_RIG_LAYOUT`), outside the rig document and its undo history.
 
 ## Solve (Step 3)
 

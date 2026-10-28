@@ -15,7 +15,7 @@ The UI is built on the [JoInn Template](https://github.com/joneseysinno/JoInn-Te
 1. **Projects** pane — create / delete job folders; expand one to add picks, mat analyses and rigs, open them, or print the project calc package  
 2. **Pick** document — **Input** panel (layers: slings, angle, shackles, spreader) on the left; PDF-ready **Lift Report** with diagram in the viewport  
 3. **Mat analysis** document — **Input** panel (select/create a mat, outrigger load, pad size, allowable GBP); **Mat Bearing Report** shows effective area and pressure vs allowable  
-4. **Rig** document — rotatable 3D rig tree in the viewport, **Live results** on the right, **Checks** on the left and the **Parameters** table in the bottom panel; Save / Undo / Redo in the toolbar  
+4. **Rig** document — build the rig on a node-graph **Diagram**: place the hook, spreader bars, lifting beams, master links and the load as blocks, drag from port to port to hang members, and drop shackles, slings, straps, chain and other hardware onto them. The rotatable **3D** rig tree sits beside it (Diagram / 3D / Split). **Inspector** and **Live results** on the right, **Checks** on the left, the **Parameters** table in the bottom panel; Save / Undo / Redo, Insert and Hardware tools in the toolbar. Start one with **New blank rig** or **Rig from pick** in the Projects pane  
 
 Unsaved edits stay with a document after it is closed, until the app exits.
 

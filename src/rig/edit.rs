@@ -663,7 +663,38 @@ fn fixture_rigs() -> Vec<Rig> {
         tare_lbs: 0.0,
     };
     rigs.push(super::from_layers(&pick, &[top, bottom], &[bar]));
+    rigs.push(preset_built_rig());
     rigs
+}
+
+/// A rig assembled only from palette presets and topology edits.
+#[cfg(test)]
+fn preset_built_rig() -> Rig {
+    use super::preset::{self, BodyPreset, PickPattern};
+    use super::topo::apply;
+    let mut rig = preset::blank_rig("preset", uuid::Uuid::nil());
+    for body in [
+        BodyPreset::SpreaderBar,
+        BodyPreset::LiftingBeam,
+        BodyPreset::Frame,
+        BodyPreset::Load {
+            pattern: PickPattern::FourCorners,
+        },
+    ] {
+        rig = apply(&rig, &preset::add_body(&rig, body)).unwrap();
+    }
+    let bar = rig.bodies.values().find(|b| b.kind.is_gear()).unwrap().id;
+    rig = apply(&rig, &preset::port(&rig, bar, preset::PortKind::Bow)).unwrap();
+    let lugs: Vec<_> = rig
+        .nodes
+        .values()
+        .filter(|n| n.body == Some(bar) && n.label.starts_with("Top"))
+        .map(|n| n.id)
+        .collect();
+    for lug in lugs {
+        rig = apply(&rig, &preset::connect(&rig, vec![rig.root, lug])).unwrap();
+    }
+    rig
 }
 
 #[cfg(test)]
