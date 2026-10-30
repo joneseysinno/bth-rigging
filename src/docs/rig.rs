@@ -1,7 +1,8 @@
 //! Rig document: the rig diagram (node-graph builder) and 3D rig tree in the
-//! viewport, the inspector and live results on the right, checks on the left
+//! viewport, the load-up Build panel, the inspector and live results on the right, checks on the left
 //! and the parameter table in the bottom panel.
 
+mod build;
 mod checks;
 mod inspector;
 mod model;
@@ -26,6 +27,7 @@ use state::{ViewMode, state};
 pub const ID: &str = "rig";
 const PARAMS_PANEL: &str = "rig.params";
 const INSPECTOR_PANEL: &str = "rig.inspector";
+const BUILD_PANEL: &str = "rig.build";
 
 /// Toolbar command → body preset.
 const ADD_BODY: [(&str, BodyPreset); 5] = [
@@ -115,6 +117,7 @@ pub fn doc_type() -> DocType {
         checks::Checks,
     )];
     t.right_rail = vec![
+        RailItem::panel(BUILD_PANEL, "Build", icons::LAYERS, build::Build),
         RailItem::panel(
             INSPECTOR_PANEL,
             "Inspector",
@@ -134,7 +137,7 @@ pub fn doc_type() -> DocType {
         icons::TABLE,
         params::Params,
     )];
-    t.default_right = Some(INSPECTOR_PANEL);
+    t.default_right = Some(BUILD_PANEL);
     t.status = Some(View(StatusReadout));
     t
 }

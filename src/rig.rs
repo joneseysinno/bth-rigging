@@ -20,6 +20,7 @@ pub mod component;
 pub mod edit;
 pub mod eval;
 pub mod fixtures;
+pub mod gather;
 pub mod id;
 pub mod layout;
 pub mod member;

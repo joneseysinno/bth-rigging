@@ -3,10 +3,16 @@
 //!
 //! Step: G (graph builder)
 //! Theory: docs/step-g-graph-builder.md.
-//! Inputs: the rig session, canvas layout, shared selection, the armed palette item.
-//! Outputs: topology edits through `on_edit`, dragged block positions through `on_move`.
+//! Inputs: the rig session, canvas layout, shared selection, the armed palette item,
+//! the points ticked for the next gather (step G2).
+//! Outputs: topology edits through `on_edit`, dragged block positions through `on_move`,
+//! gather plans through `on_plan`.
+//!
+//! Open points (step G2) glow; Shift/Ctrl+click ticks one, and a gather bar over
+//! the diagram gathers the ticked points like the Build panel does.
 //! Must not depend on: store.
 
+use std::collections::HashSet;
 use std::rc::Rc;
 
 use dioxus::html::geometry::ClientPoint;
@@ -18,6 +24,7 @@ use uuid::Uuid;
 use crate::ui::selection::{Armed, Selection};
 use bth_rigging::checks::Status;
 use bth_rigging::format::{format_ft_in, format_lbs};
+use bth_rigging::rig::gather::{self, GatherKind, GatherOptions, GatherPlan};
 use bth_rigging::rig::layout::{Block, CanvasLayout, Edge, PlacedBlock, Schematic};
 use bth_rigging::rig::preset::{self, BodyPreset, HardwarePreset, PickPattern, PortKind};
 use bth_rigging::rig::session::RigSession;
@@ -127,9 +134,22 @@ struct Ctx {
     fit: View,
     on_edit: Callback<TopoEdit, bool>,
     on_move: Callback<(Uuid, [f64; 2])>,
+    picked: Signal<Vec<NodeId>>,
 }
 
 impl Ctx {
+    /// Tick or untick an open point for the next gather.
+    fn toggle_pick(self, node: NodeId) {
+        let mut picked = self.picked;
+        let mut now = picked.peek().clone();
+        if let Some(i) = now.iter().position(|n| *n == node) {
+            now.remove(i);
+        } else {
+            now.push(node);
+        }
+        picked.set(now);
+    }
+
     fn view(self) -> View {
         self.view.peek().unwrap_or(self.fit)
     }
@@ -347,6 +367,9 @@ impl Ctx {
             self.arm(None);
         } else if self.menu.peek().is_some() {
             self.close_menu();
+        } else if !self.picked.peek().is_empty() {
+            let mut picked = self.picked;
+            picked.set(Vec::new());
         } else {
             self.select(None);
         }
@@ -362,6 +385,9 @@ pub fn RigCanvas(
     armed: Signal<Option<Armed>>,
     on_edit: Callback<TopoEdit, bool>,
     on_move: Callback<(Uuid, [f64; 2])>,
+    picked: Signal<Vec<NodeId>>,
+    gather_opts: Signal<GatherOptions>,
+    on_plan: Callback<Result<GatherPlan, String>, bool>,
 ) -> Element {
     let gesture = use_signal(|| Gesture::Idle);
     let menu = use_signal(|| None::<Menu>);
@@ -434,7 +460,10 @@ pub fn RigCanvas(
         fit,
         on_edit,
         on_move,
+        picked,
     };
+    let open: HashSet<NodeId> = gather::status(&rig).open.iter().map(|p| p.node).collect();
+    let picks: Vec<NodeId> = picked().into_iter().filter(|n| open.contains(n)).collect();
     let v = view().unwrap_or(fit);
     let a = area();
     let view_box = format!("{} {} {} {}", v.x, v.y, a.w / v.zoom, a.h / v.zoom);
@@ -607,7 +636,7 @@ pub fn RigCanvas(
                     }
                     for block in schematic.blocks.iter() {
                         for port in block.ports.iter() {
-                            {port_el(ctx, &rig, block, port.node, port.edge, port.at, &rated, selected(), hovered(), targets.as_deref(), connect_path.as_deref())}
+                            {port_el(ctx, &rig, block, port.node, port.edge, port.at, &rated, selected(), hovered(), targets.as_deref(), connect_path.as_deref(), PickState { open: open.contains(&port.node), picked: picks.contains(&port.node) })}
                         }
                     }
                     if let Some(pts) = preview {
@@ -621,6 +650,9 @@ pub fn RigCanvas(
                             }
                         }
                     }
+                }
+                if !picks.is_empty() {
+                    GatherBar { rig: rig.clone(), picks: picks.clone(), picked, gather_opts, on_plan }
                 }
                 if let Some((at, actions)) = menu_items {
                     div {
@@ -659,7 +691,13 @@ pub fn RigCanvas(
                     }
                 }
             }
-            p { class: "rc-hint muted", "{hint}" }
+            p { class: "rc-hint muted",
+                if picks.is_empty() {
+                    "{hint}"
+                } else {
+                    "{picks.len()} point(s) ticked for Gather · Shift+click open ports to add or remove · Esc clears"
+                }
+            }
         }
     }
 }
@@ -1404,6 +1442,7 @@ fn port_el(
     hovered: Option<Selection>,
     targets: Option<&[NodeId]>,
     path: Option<&[NodeId]>,
+    pick: PickState,
 ) -> Element {
     let Some(n) = rig.nodes.get(&node) else {
         return rsx! {};
@@ -1430,6 +1469,11 @@ fn port_el(
             " is-dim"
         });
     }
+    if pick.picked {
+        class.push_str(" is-picked");
+    } else if pick.open {
+        class.push_str(" is-open");
+    }
     if selected == Some(Selection::Node(node)) {
         class.push_str(" is-selected");
     } else if hovered == Some(Selection::Node(node)) {
@@ -1442,10 +1486,16 @@ fn port_el(
         _ => y + 18.0,
     };
     let title = format!(
-        "{} ({}) · drag to another port to connect · right-click for more",
+        "{} ({}){} · drag to another port to connect · right-click for more",
         n.label,
-        n.kind.label()
+        n.kind.label(),
+        if pick.open {
+            " · open: Shift+click to tick for Gather"
+        } else {
+            ""
+        }
     );
+    let open = pick.open;
     rsx! {
         g { key: "port-{node}",
             class: "{class}",
@@ -1456,6 +1506,13 @@ fn port_el(
                     return;
                 }
                 e.stop_propagation();
+                if open
+                    && e.modifiers().intersects(Modifiers::SHIFT | Modifiers::CONTROL | Modifiers::META)
+                    && !matches!(ctx.gesture(), Gesture::Connect { .. })
+                {
+                    ctx.toggle_pick(node);
+                    return;
+                }
                 ctx.focus();
                 ctx.close_menu();
                 if !matches!(ctx.gesture(), Gesture::Connect { .. }) {
@@ -1484,6 +1541,62 @@ fn port_el(
                 text { class: "rc-port-label", x: "{x}", y: "{label_y}", text_anchor: "middle", "{text}" }
             }
             title { "{title}" }
+        }
+    }
+}
+
+/// Whether a port is open for gathering, and ticked.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+struct PickState {
+    open: bool,
+    picked: bool,
+}
+
+/// Floating bar over the diagram while points are ticked: gather them here
+/// without going to the Build panel.
+#[component]
+fn GatherBar(
+    rig: Rig,
+    picks: Vec<NodeId>,
+    picked: Signal<Vec<NodeId>>,
+    gather_opts: Signal<GatherOptions>,
+    on_plan: Callback<Result<GatherPlan, String>, bool>,
+) -> Element {
+    let n = picks.len();
+    rsx! {
+        div {
+            class: "rc-gather-bar",
+            onmousedown: move |e| e.stop_propagation(),
+            span { class: "rc-gather-count", "Gather {n} into" }
+            for kind in GatherKind::ALL {
+                {
+                    let verdict = gather::check(&rig, &picks, kind);
+                    let title = match &verdict {
+                        Ok(()) => kind.help().to_owned(),
+                        Err(why) => why.clone(),
+                    };
+                    let ends = picks.clone();
+                    let rig = rig.clone();
+                    rsx! {
+                        button {
+                            key: "{kind.label()}",
+                            class: if kind == GatherKind::Hook { "btn btn-primary sm" } else { "btn btn-ghost sm" },
+                            disabled: verdict.is_err(),
+                            title: "{title}",
+                            onclick: move |_| {
+                                on_plan.call(gather::gather(&rig, &ends, kind, gather_opts()));
+                            },
+                            "{kind.label()}"
+                        }
+                    }
+                }
+            }
+            button {
+                class: "btn btn-ghost sm",
+                title: "Untick all (Esc)",
+                onclick: move |_| picked.set(Vec::new()),
+                "×"
+            }
         }
     }
 }

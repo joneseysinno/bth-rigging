@@ -8,10 +8,11 @@ use crate::app::store;
 use crate::docs::{Registry, root_signal};
 pub use crate::ui::selection::Armed;
 use crate::ui::selection::Selection;
+use bth_rigging::rig::gather::{GatherOptions, GatherPlan};
 use bth_rigging::rig::layout::CanvasLayout;
 use bth_rigging::rig::session::{HeadlineDelta, RigEdit, RigSession, Snapshot};
 use bth_rigging::rig::solve::MemberForce;
-use bth_rigging::rig::{MemberId, Rig, RigError};
+use bth_rigging::rig::{MemberId, NodeId, Rig, RigError};
 
 /// What the viewport shows.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -30,6 +31,10 @@ pub struct RigState {
     pub view_mode: Signal<ViewMode>,
     pub armed: Signal<Option<Armed>>,
     pub layout: Signal<CanvasLayout>,
+    /// Open points ticked for the next gather (Build panel and diagram).
+    pub picked: Signal<Vec<NodeId>>,
+    /// How gathers size what they create.
+    pub gather_opts: Signal<GatherOptions>,
 }
 
 /// What the rig views draw, taken from the session's current snapshot.
@@ -90,6 +95,8 @@ fn load(rig_id: Uuid) -> Result<RigState, String> {
         view_mode: root_signal(mode),
         armed: root_signal(None),
         layout: root_signal(layout),
+        picked: root_signal(Vec::new()),
+        gather_opts: root_signal(GatherOptions::default()),
     })
 }
 
@@ -135,6 +142,34 @@ impl RigState {
                 None
             }
             Err(error) => Some(error.message().to_owned()),
+        }
+    }
+
+    /// Apply a gather plan as one undo step and report it in the status line.
+    /// The points it created become the ticked points (usually the next step).
+    pub fn apply_plan(self, plan: Result<GatherPlan, String>) -> bool {
+        let mut status = self.status_message;
+        let plan = match plan {
+            Ok(plan) => plan,
+            Err(message) => {
+                status.set(message);
+                return false;
+            }
+        };
+        let mut session = self.session;
+        let result = session.write().apply_batch(&plan.edits);
+        match result {
+            Ok(()) => {
+                status.set(plan.summary);
+                let mut picked = self.picked;
+                picked.set(plan.new_points);
+                self.drop_stale_selection();
+                true
+            }
+            Err(error) => {
+                status.set(error.message().to_owned());
+                false
+            }
         }
     }
 

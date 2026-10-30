@@ -101,6 +101,15 @@ impl From<TopoEdit> for RigEdit {
     }
 }
 
+/// Apply one parameter or topology edit to a copy of `rig`.
+#[allow(clippy::result_large_err)]
+pub fn apply_rig_edit(rig: &Rig, edit: &RigEdit) -> Result<Rig, RigEditError> {
+    match edit {
+        RigEdit::Param(edit) => apply(rig, edit).map_err(RigEditError::Param),
+        RigEdit::Topo(edit) => super::topo::apply(rig, edit).map_err(RigEditError::Topo),
+    }
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum RigEditError {
     Param(EditError),
@@ -147,13 +156,21 @@ impl RigSession {
     /// A refused edit changes nothing.
     #[allow(clippy::result_large_err)]
     pub fn apply_edit(&mut self, edit: impl Into<RigEdit>) -> Result<(), RigEditError> {
-        let updated = match edit.into() {
-            RigEdit::Param(edit) => apply(&self.rig, &edit).map_err(RigEditError::Param)?,
-            RigEdit::Topo(edit) => {
-                super::topo::apply(&self.rig, &edit).map_err(RigEditError::Topo)?
-            }
-        };
+        let updated = apply_rig_edit(&self.rig, &edit.into())?;
         self.commit(updated);
+        Ok(())
+    }
+
+    /// Apply several edits in order as **one** undo step (a Gather from the
+    /// load-up builder is many topology edits). If any edit is refused the
+    /// rig is unchanged and that refusal is returned.
+    #[allow(clippy::result_large_err)]
+    pub fn apply_batch(&mut self, edits: &[RigEdit]) -> Result<(), RigEditError> {
+        let mut trial = self.rig.clone();
+        for edit in edits {
+            trial = apply_rig_edit(&trial, edit)?;
+        }
+        self.commit(trial);
         Ok(())
     }
 

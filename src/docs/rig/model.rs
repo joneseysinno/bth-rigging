@@ -80,6 +80,9 @@ pub fn Model() -> Element {
                         armed: st.armed,
                         on_edit: move |edit: TopoEdit| st.edit(edit),
                         on_move: move |(key, at)| st.move_block(rig_id, key, at),
+                        picked: st.picked,
+                        gather_opts: st.gather_opts,
+                        on_plan: move |plan| st.apply_plan(plan),
                     }
                 }
                 if current != ViewMode::Diagram {

@@ -13,12 +13,13 @@ Step 0 reorganized the crate. Steps 1–7 build the rigging graph from the lugs 
 | **2.5** | 🟡 awaiting AJ §8.4 | Expression parser + parameter-table editor | `rig::param::{syntax,print}`, `rig::{edit,session}`, `ui` parameter table | Step 1 D2; Step 2 D2-8 (split out of Step 2) | Typed expressions parse to builder-equivalent ASTs; canonical print round-trips; edits recompute and rate the rig |
 | **D2-1** | 🟡 awaiting AJ check | Screen work: labeled 3D rigging tree in the rig editor | `rig::tree`, `rig::views::orbit`, `ui::components::rig_tree_view`, `ui::pages::rig_editor` | Step 2 D2-1; `docs/rig-model.md` "Rig tree and tags" | Every member tagged `M1…` top-down from the hook with from / via / to and hardware text; rotatable 3D view (Iso / Side / End / Plan) with tags matching a members list grouped by what each member hangs from; rated items carry tags |
 | **G** | ✅ done | Rig graph builder: build and rewire the rig on a node-graph canvas | `rig::{topo,preset,layout}`, `rig::session` (`RigEdit`), `store::rig` (space 13), `ui::components::rig_canvas`, `ui::selection`, `docs::rig::inspector` | `docs/step-g-graph-builder.md`; `docs/rig-model.md` "Topology edits" | A spreader-bar rig built from a blank rig on the canvas solves the same as the equivalent `from_layers` rig; undo/redo covers every topology edit |
+| **G2** | 🟡 awaiting AJ check | Load-up builder: tick open points, gather them into a master link / spreader bar / lifting beam / basket / the hook; one-click recipes | `rig::gather`, `rig::session` (`apply_batch`), `docs::rig::build` (Build panel) | `docs/step-g2-load-up-builder.md` | Every recipe on 2- and 4-point loads validates, converges and hangs level; an offset CG hangs level; each gather is one undo step and Ungather restores the rig exactly |
 | **4** | — | Crane config, chart, reeving | `crane::{config,chart,reeving}` | Readback crane capacity / reeving | Conservative chart lookup + line pull for a sample crane |
 | **5** | — | Pose and clearance | `crane::{pose,clearance}` | Loaded radius → β; boom envelope | Head/hook height; clearance sweep vs graph |
 | **6** | — | Crane statics → mats | `crane::statics` (+ existing `mats`) | Slew sweep; outrigger reactions | Reactions feed mat bearing analysis |
 | **7** | — | Wind + tolerance envelope | `crane::wind`, `rig::solve::envelope` | Side load; tolerance sweep | Worst-case utilization per item |
 
-**Order:** 0 → 1 → 2 → 3 → **2.5** → screen work (Step 2 D2-1) → **G** (graph builder) → 4 → 5 → 6 → 7.
+**Order:** 0 → 1 → 2 → 3 → **2.5** → screen work (Step 2 D2-1) → **G** (graph builder) → **G2** (load-up builder) → 4 → 5 → 6 → 7.
 Step 3 goes before 2.5. Step 2's residual list and taut/slack classification hand straight to the tension-only
 solve, and fixtures plus the builder API are enough to test it. The parameter-table editor matters once a screen
 shows the graph, and D2-1 holds screens until tensions exist. So 2.5 lands just before the first screen that uses the graph.
@@ -30,6 +31,8 @@ shows the graph, and D2-1 holds screens until tensions exist. So 2.5 lands just 
 **Verified 2026-09-30 (Step 2.5 close-out, 2.5.12–2.5.19):** `cargo test --no-default-features` → 173 lib passed + 1 ignored, 10 `eval_geometry`, 3 golden, 11 `param_editor_flow` (§8.4 as code), 8 `solve_layers`, all green; `cargo fmt --check` and `cargo check --features desktop` pass; 10,000 generated expression trees round-trip; no new clippy findings (baseline 7 lib / 9 lib-test warnings remain). Duplo10 edit latency, including `apply`: release 11.2 ms median / 22.6 ms max; debug (`dx serve` profile) worst of 3 runs 14.2 ms median / 29.3 ms max. Recompute is inline (the threaded path is removed). AJ's §8.4 manual checklist remains to be run. As-built notes: `docs/step-2.5-parser-param-table.md` §13.
 
 **Verified 2026-10-15 (screen work D2-1, rig tree):** `cargo test --no-default-features` → 186 lib passed + 1 ignored, 10 `eval_geometry`, 3 golden (unchanged), 11 `param_editor_flow`, 8 `solve_layers`; `cargo fmt --check` and `cargo check --features desktop` pass; clippy baseline unchanged (7 lib / 9 lib-test), no findings in new code. Rendered under `dx serve` on Duplo10 (Iso and Plan); the principal-axis bar fix landed after that screenshot and is covered by `duplo10_top_bar_runs_along_x_in_plan`.
+
+**Verified 2026-10-29 (Step G2, headless):** `cargo test --no-default-features` → 220 lib passed + 1 ignored (12 new in `rig::gather`), 10 `eval_geometry`, 3 golden (unchanged), 11 `param_editor_flow`, 8 `solve_layers`; no new clippy findings in G2 code; `rustfmt --check` clean on changed files. The Build panel still needs a `dx serve` check against the local JoInn shell.
 
 ## Scaffold map
 
